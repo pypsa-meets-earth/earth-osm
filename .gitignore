@@ -1,2 +1,5 @@
 # Internal Data Dir
 earth_osm/data/
+
+# External Data Dir
+earth_data/
