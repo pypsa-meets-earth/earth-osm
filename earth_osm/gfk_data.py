@@ -114,3 +114,13 @@ def get_id_by_code(code):
     except (KeyError, ValueError):
         logger.debug(f'{code} not found')
         return None
+
+def get_code_by_id(id):
+    try:
+        c_dict = get_region_dict(id)
+    except (KeyError, IndexError):
+        logger.debug(f'{id} not found')
+        return None
+
+    code = str(c_dict["short_code"])
+    return code
