@@ -62,3 +62,13 @@ def main():  # pragma: no cover
                 raise KeyError(f'Invalid Feature {" ".join(set(feature_list) - set(primary_feature_element[args.primary]))}, run earth_osm view features to view valid features')
         else:
             feature_list = primary_feature_element[args.primary]
+
+        if args.data_dir:
+            if not os.path.exists(args.data_dir):
+                os.makedirs(args.data_dir, exist_ok=True)
+            if os.path.isdir(args.data_dir):
+                data_dir = args.data_dir
+            else:
+                raise NotADirectoryError(f'Invalid Data Directory {args.data_dir}')
+        else:
+            data_dir = os.path.join(os.getcwd(), 'earth_data')
