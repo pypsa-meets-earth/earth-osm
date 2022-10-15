@@ -41,3 +41,6 @@ def main():  # pragma: no cover
     
     view_parser = subparser.add_parser('view', help='View OSM Data')
     view_parser.add_argument('type', help='View Supported', choices=['regions', 'primary'])
+    
+    args = parser.parse_args()
+
