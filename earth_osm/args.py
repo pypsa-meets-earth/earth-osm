@@ -44,3 +44,6 @@ def main():  # pragma: no cover
     
     args = parser.parse_args()
 
+    if args.command == 'view':
+        print('Viewing OSM Data')
+        view_regions(level=0)
