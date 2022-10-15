@@ -93,3 +93,13 @@ def view_regions(level=0):
                             orient='index')
     view_df.index = pd.MultiIndex.from_tuples(view_df.index, names=['parent', 'id'])
     print(view_df.to_string())
+
+
+def get_region_dict(id):
+    """
+    Takes a region id (eg. germany) and returns a ditctionary consisting of
+    strings 'id', 'name', 'parent', 'short_code' and dictionary of 'urls'
+    Raises error if id is not found
+    """
+    return df.loc[df['id']== id].drop('iso3166-1:alpha2', axis=1).drop('iso3166-2', axis=1).to_dict('records')[0]
+
