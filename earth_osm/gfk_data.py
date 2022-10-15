@@ -24,3 +24,16 @@ logger.setLevel(logging.DEBUG)
 
 pkg_data_dir = os.path.join(os.path.dirname(__file__), 'data')
 sitemap = download_sitemap(False, pkg_data_dir)
+
+with open(sitemap) as f:
+    d = json.load(f)
+
+row_list =[]
+for feature in d['features']:
+    row_list.append(feature['properties'])
+df = pd.DataFrame(row_list)
+# Add short code column
+col1 = df['iso3166-1:alpha2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
+col2 = df['iso3166-2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
+df['short_code'] = col1.combine_first(col2)
+
