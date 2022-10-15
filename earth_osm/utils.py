@@ -73,3 +73,23 @@ def convert_ways_points(df_way, primary_data):
     df_way.insert(0, "Area", area_column)
     df_way.insert(0, "lonlat", lonlat_column)
 
+
+def convert_ways_lines(df_way, primary_data):
+    """
+    Convert Ways to Line Coordinates
+
+    Args:
+    
+    """
+    lonlat_list = lonlat_lookup(df_way, primary_data)
+    lonlat_column = lonlat_list
+    df_way.insert(0, "lonlat", lonlat_column)
+
+    way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
+    length_column = (
+        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+    )
+
+    df_way.insert(0, "Length", length_column)
+
+
