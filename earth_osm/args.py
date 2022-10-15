@@ -45,6 +45,9 @@ def main():  # pragma: no cover
     
     parser.add_argument('-h', '--help', action=_HelpAction,
                         help='earth-osm help')
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s 0.1.0')
+
     subparser = parser.add_subparsers(dest='command', required=True, title='Sub Parser', description='''View Supported Regions or Extract OSM Data''')
 
     extract_parser = subparser.add_parser('extract', help='Extract OSM Data')
