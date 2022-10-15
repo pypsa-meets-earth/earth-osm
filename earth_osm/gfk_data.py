@@ -41,3 +41,9 @@ def get_geom_sitemap():
     geom_sitemap = download_sitemap(True, pkg_data_dir)
     return gpd.read_file(geom_sitemap)
 
+
+def get_root_list():
+    """
+    Returns a list of regions without parents (i.e continents)
+    """
+    return list(df.loc[df['parent'].isna(), 'id'])
