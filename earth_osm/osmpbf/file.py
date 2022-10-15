@@ -1,3 +1,14 @@
+__author__ = "PyPSA meets Earth"
+__copyright__ = "Copyright 2022, The PyPSA meets Earth Initiative"
+__license__ = "MIT"
+
+"""OSMPBF file reader.
+
+This module provides a reader for OpenStreetMap PBF files.
+
+Modified from esy-osm-pbf/file.py
+
+"""
 
 import zlib, struct
 
