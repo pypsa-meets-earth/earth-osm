@@ -69,3 +69,22 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
     df_feature["Country"] = region.name
 
     return df_feature
+
+def get_osm_data(region_list=['germany'], primary_name = "power", feature_list=['tower'], update = False, mp = True, data_dir = os.path.join(os.getcwd(), "earth_data")):
+    """
+    Get OSM Data for a list of regions and features
+    args:
+        region_list: list of regions to get data for
+        primary_name: primary feature to get data for
+        feature_list: list of features to get data for
+        update: update data
+        mp: use multiprocessing
+    returns:
+        dict of dataframes
+    """
+    region_tuple_list = [get_region_tuple(rs) for rs in region_list]
+    
+    for region in region_tuple_list:
+        for feature_name in feature_list:
+            df_feature = process_country(region, primary_name, feature_name, mp, update, data_dir)
+            output_csv_geojson(df_feature, primary_name, feature_name, [region], data_dir)
