@@ -55,6 +55,13 @@ def get_all_valid_list():
     return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
 
 def get_all_regions_dict(level=0):
+    """
+    It takes a level argument, and returns a dictionary of all regions, grouped by their parent region
+    
+    Args:
+        level: 0 = all regions, 1 = world regions, 2 = local regions, defaults to 0
+        A dictionary of dictionaries.
+    """
     by_parent = df.groupby("parent", as_index=False)[["id", "short_code"]]
     parent_dict = by_parent.groups
     root = get_root_list()
