@@ -105,6 +105,10 @@ def get_region_dict(id):
 
 
 def get_id_by_code(code):
+    """
+    Takes a region code (eg. DE) and returns its id (eg. germany)
+    Supresses error if id is not found
+    """
     try:
         return df.loc[df['short_code']== code, 'id'].item()
     except (KeyError, ValueError):
