@@ -103,3 +103,10 @@ def get_region_dict(id):
     """
     return df.loc[df['id']== id].drop('iso3166-1:alpha2', axis=1).drop('iso3166-2', axis=1).to_dict('records')[0]
 
+
+def get_id_by_code(code):
+    try:
+        return df.loc[df['short_code']== code, 'id'].item()
+    except (KeyError, ValueError):
+        logger.debug(f'{code} not found')
+        return None
