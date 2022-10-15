@@ -130,6 +130,10 @@ def get_code_by_id(id):
     return code
 
 def get_id_by_str(region_str):
+    """
+    Takes a region id or code (eg. DE, germany) and returns its id (eg. germany)
+    Raises error if the string is not a valid id or code
+    """
     # if region_str is region code
     id = get_id_by_code(region_str) 
     if id is not None: 
