@@ -47,3 +47,10 @@ def get_root_list():
     Returns a list of regions without parents (i.e continents)
     """
     return list(df.loc[df['parent'].isna(), 'id'])
+
+def get_all_valid_list():
+    """
+    Returns a list of all valid region ids
+    """
+    return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
+
