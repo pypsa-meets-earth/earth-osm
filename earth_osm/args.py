@@ -89,3 +89,8 @@ def main():  # pragma: no cover
             mp = args.mp,
             data_dir = data_dir)
 
+    else:
+        # import inquirer #https://github.com/magmax/python-inquirer
+        raise NotImplementedError('Interactive Mode Not Implemented')
+
+
