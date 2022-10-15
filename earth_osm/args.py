@@ -37,3 +37,6 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
     extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
     extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
+
+    
+    view_parser = subparser.add_parser('view', help='View OSM Data')
