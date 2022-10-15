@@ -47,3 +47,8 @@ def main():  # pragma: no cover
     if args.command == 'view':
         print('Viewing OSM Data')
         view_regions(level=0)
+    elif args.command == 'extract':
+        if args.regions:
+            region_list = list(args.regions)
+            if not set(region_list) <= set(get_all_valid_list()):
+                raise KeyError(f'Invalid Region {" ".join(set(region_list) - set(get_all_valid_list()))} , run earth_osm view regions to view valid regions')
