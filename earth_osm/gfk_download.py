@@ -80,3 +80,50 @@ def download_sitemap(geom, pkg_data_dir):
     sitemap_file = earth_downloader(geofabrik_sitemap_url, pkg_data_dir)
 
     return sitemap_file
+
+
+# def download_pbf(country_code, update, verify):
+    # if verify is True:
+    #     if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
+    #         logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
+    #         if os.path.exists(PBF_inputfile):
+    #             os.remove(PBF_inputfile)
+
+    #         download_pbf(country_code, update=False, verify=False)  # Only try downloading once
+
+    # return PBF_inputfile
+
+
+# verified_pbf = []
+
+
+# def verify_pbf(PBF_inputfile, geofabrik_url, update):
+#     if PBF_inputfile in verified_pbf:
+#         return True
+
+#     geofabrik_md5_url = geofabrik_url + ".md5"
+#     PBF_md5file = PBF_inputfile + ".md5"
+
+#     def calculate_md5(fname):
+#         hash_md5 = hashlib.md5()
+#         with open(fname, "rb") as f:
+#             for chunk in iter(lambda: f.read(4096), b""):
+#                 hash_md5.update(chunk)
+#         return hash_md5.hexdigest()
+
+#     if update is True or not os.path.exists(PBF_md5file):
+#         with requests.get(geofabrik_md5_url, stream=True, verify=False) as r:
+#             with open(PBF_md5file, "wb") as f:
+#                 shutil.copyfileobj(r.raw, f)
+
+#     local_md5 = calculate_md5(PBF_inputfile)
+
+#     with open(PBF_md5file) as f:
+#         contents = f.read()
+#         remote_md5 = contents.split()[0]
+
+#     if local_md5 == remote_md5:
+#         verified_pbf.append(PBF_inputfile)
+#         return True
+#     else:
+#         return False
