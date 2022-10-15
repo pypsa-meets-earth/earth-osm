@@ -36,3 +36,24 @@ def feature_filter(primary_data, filter_tuple = ('power', 'line')):
             if filter_tuple in primary_data[element][id]["tags"].items():
                 feature_data[element][id] = primary_data[element][id]
     return feature_data
+
+
+def run_feature_filter(primary_dict, feature_name):
+    primary_name = primary_dict['Metadata']['primary_feature']
+    filter_tuple = (primary_name, feature_name)
+    primary_data = primary_dict['Data']
+
+    feature_data = feature_filter(primary_data, filter_tuple)
+    
+    metadata = {
+        'filter_date': str(datetime.now().isoformat()),
+        'filter_tuple': json.dumps(filter_tuple),
+    }
+    
+    feature_dict = {
+        'Metadata': metadata,
+        'Data':feature_data
+        }
+    
+    return feature_dict
+        
