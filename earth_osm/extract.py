@@ -1,3 +1,15 @@
+__author__ = "PyPSA meets Earth"
+__copyright__ = "Copyright 2022, The PyPSA meets Earth Initiative"
+__license__ = "MIT"
+
+"""Extract OSM from PBF Files
+
+This module extracts OSM data from PBF files.
+
+Modified from esy-osmfilter/pre_filter.py
+
+"""
+
 from earth_osm.osmpbf import Node, Way, Relation, osmformat_pb2
 from earth_osm.osmpbf.file import iter_blocks, iter_primitive_block, read_blob
 
