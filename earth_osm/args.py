@@ -26,3 +26,9 @@ def main():  # pragma: no cover
         description='Earth-OSM by PyPSA-meets-Earth',
         # epilog='''Example:''',
         add_help=False) # hide default help
+    subparser = parser.add_subparsers(dest='command', required=True, title='Sub Parser', description='''View Supported Regions or Extract OSM Data''')
+
+    extract_parser = subparser.add_parser('extract', help='Extract OSM Data')
+
+    extract_parser.add_argument('primary', choices=primary_feature_element.keys(), type=str, help='Primary Feature')
+
