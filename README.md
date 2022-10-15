@@ -37,3 +37,18 @@ usage: earth_osm extract **primary** **--regions** region1, region2 **--features
   **--data_dir** (*optional*, path to data directory, default './earth_data')
                       
 
+## Advanced Usage
+
+```py
+from earth_osm import eo
+
+eo.get_osm_data(
+  primary_name = 'power',
+  region_list = ['benin', 'monaco'],
+  feature_list = ['substation', 'line'],
+  update = False,
+  mp = True,
+  data_dir = './earth_data',
+)
+```
+
