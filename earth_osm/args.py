@@ -38,6 +38,13 @@ def main():  # pragma: no cover
                     print(subparser.format_help())
 
             parser.exit()
+
+    # Argparser Notes
+    # '+' == 1 or more.
+    # '*' == 0 or more.
+    # '?' == 0 or 1.
+    
+
     parser = argparse.ArgumentParser(
         description='Earth-OSM by PyPSA-meets-Earth',
         # epilog='''Example:''',
@@ -53,6 +60,10 @@ def main():  # pragma: no cover
     extract_parser = subparser.add_parser('extract', help='Extract OSM Data')
 
     extract_parser.add_argument('primary', choices=primary_feature_element.keys(), type=str, help='Primary Feature')
+
+    # region_group = extract_parser.add_mutually_exclusive_group(required=True) # Get regions using ids or coordinates
+    # region_group.add_argument('--regions',nargs="+", type=str, help='Region Identifier')
+    # region_group.add_argument('--coords', nargs='+', type=float, help='Region Bounds') #TODO: Change to >3
 
     extract_parser.add_argument('--regions',nargs="+", type=str, help='Region Identifier') # TODO: replace with region group
     extract_parser.add_argument('--features', nargs="*", type=str, help='Sub-Features')
