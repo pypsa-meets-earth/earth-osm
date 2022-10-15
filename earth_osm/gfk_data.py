@@ -54,3 +54,22 @@ def get_all_valid_list():
     """
     return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
 
+def get_all_regions_dict(level=0):
+    by_parent = df.groupby("parent", as_index=False)[["id", "short_code"]]
+    parent_dict = by_parent.groups
+    root = get_root_list()
+    world_dict = {}
+    local_dict = {}
+    def dict_by_key(key): return by_parent.get_group(key).set_index('id').T.to_dict('records')[0]
+    for key in parent_dict:
+        if key in root:
+            world_dict[key] = dict_by_key(key)
+        else:
+            local_dict[key] = dict_by_key(key)
+    
+    if level == 0:
+        return {**world_dict, **local_dict}
+    if level == 1:
+        return world_dict
+    if level == 2:
+        return local_dict
