@@ -71,6 +71,7 @@ def download_pbf(url, update, data_dir):
 
     return pbf_filepath
 
+# TODO: fix update param
 def download_sitemap(geom, pkg_data_dir):
     geofabrik_geo= f"https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo= f"https://download.geofabrik.de/index-v1-nogeom.json"
