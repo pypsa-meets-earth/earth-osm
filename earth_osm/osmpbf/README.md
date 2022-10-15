@@ -15,3 +15,7 @@ sudo make install
 sudo ldconfig
 
 protoc --version
+
+## Generate fileformat_pb2.py and osmformat_pb2.py
+from root dir (i.e earth_osm)
+protoc -I=./ --python_out=./ ./earth_osm/osmpbf/fileformat.proto ./earth_osm/osmpbf/osmformat.proto
