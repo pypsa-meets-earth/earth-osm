@@ -81,3 +81,11 @@ def main():  # pragma: no cover
             f'Update Data = {args.update}',
             f'Data Directory = {data_dir}']))
 
+        get_osm_data(
+            region_list = region_list, 
+            primary_name = args.primary,
+            feature_list = feature_list,
+            update = args.update,
+            mp = args.mp,
+            data_dir = data_dir)
+
