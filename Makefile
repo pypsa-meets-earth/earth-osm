@@ -61,3 +61,9 @@ virtualenv:       ## Create a virtual environment.
 	@echo
 	@echo "!!! Please run 'source .venv/bin/activate' to enable the environment !!!"
 
+
+.PHONY: docs
+docs:             ## Build the documentation.
+	@echo "building documentation ..."
+	@$(ENV_PREFIX)mkdocs build
+	URL="site/index.html"; xdg-open $$URL || sensible-browser $$URL || x-www-browser $$URL || gnome-open $$URL
