@@ -146,3 +146,17 @@ def get_id_by_str(region_str):
         else:
             logger.error(f'{region_str} not found. check view_region()')
             raise KeyError(f'{region_str} not found. check view_region()')
+
+
+def get_region_tuple(region_str):
+    id = get_id_by_str(region_str)
+    d = get_region_dict(id)
+    d['short'] = d.pop('short_code')
+    if str(d['short']) == 'nan':
+        logger.warning(f'code not found for {id} so using id')
+        d['short'] = d['id']
+
+    Region = namedtuple('Region', d)
+    region_tuple = Region(**d)
+    return region_tuple
+
