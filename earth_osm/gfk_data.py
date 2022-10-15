@@ -116,6 +116,10 @@ def get_id_by_code(code):
         return None
 
 def get_code_by_id(id):
+    """
+    Takes a region id (eg. germany) and returns its code (eg. DE)
+    Supresses error if id is not found
+    """
     try:
         c_dict = get_region_dict(id)
     except (KeyError, IndexError):
