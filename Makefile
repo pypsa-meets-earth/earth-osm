@@ -21,3 +21,9 @@ install:          ## Install the project in dev mode.
 	@echo "Don't forget to run 'make virtualenv' if you got errors."
 	$(ENV_PREFIX)pip install -e .[test]
 
+.PHONY: fmt
+fmt:              ## Format code using black & isort.
+	$(ENV_PREFIX)isort earth_osm/
+	$(ENV_PREFIX)black -l 79 earth_osm/
+	$(ENV_PREFIX)black -l 79 tests/
+
