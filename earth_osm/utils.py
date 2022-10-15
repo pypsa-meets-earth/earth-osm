@@ -110,3 +110,19 @@ def convert_pd_to_gdf_nodes(df_way):
     return gdf
 
 
+def convert_pd_to_gdf_lines(df_way):
+    """
+    Convert Lines Pandas Dataframe to GeoPandas Dataframe
+
+    Args:
+        df_way: Pandas Dataframe
+
+    Returns:
+        GeoPandas Dataframe
+    """
+
+    gdf = gpd.GeoDataFrame(
+        df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326"
+    )
+    gdf.drop(columns=["lonlat"], inplace=True)
+    return gdf
