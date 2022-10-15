@@ -1,0 +1,5 @@
+geopandas
+pandas
+tqdm
+requests
+protobuf
