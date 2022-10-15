@@ -126,3 +126,57 @@ def convert_pd_to_gdf_lines(df_way):
     )
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
+
+def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data_dir):
+    """
+    Output CSV and GeoJSON files for each region
+
+    Args:
+        df_feature: _description_
+        primary_name: _description_
+        feature_name: _description_
+        region_list: _description_
+    """
+    def filenamer(cc_list):
+        if len(cc_list) == 1:
+            return str(cc_list[0].short)
+        else:
+            # TODO: Fix filenamer
+            raise NotImplementedError
+
+    fn_name = filenamer(region_list)
+    outputfile_partial = os.path.join(data_dir, "out", fn_name + "_raw"
+    )  # Output file directory
+
+    if not os.path.exists(outputfile_partial):
+        os.makedirs(
+            os.path.dirname(outputfile_partial), exist_ok=True
+        )  # create raw directory
+
+
+    df_feature.reset_index(drop=True, inplace=True)
+
+    # Generate Files
+
+    if df_feature.empty:
+        logger.warning(f"All feature data frame empty for {feature_name}")
+        return None
+
+    df_feature.to_csv(
+        outputfile_partial + f"_{feature_name}s" + ".csv"
+    )  # Generate CSV
+
+    if primary_feature_element[primary_name][feature_name] == "way":
+        gdf_feature = convert_pd_to_gdf_lines(df_feature)
+    else:
+        gdf_feature = convert_pd_to_gdf_nodes(df_feature)
+
+    try:
+        gdf_feature.drop(columns=["refs"], inplace=True)
+    except:
+        pass
+
+    logger.info("Writing GeoJSON file")
+    gdf_feature.to_file(
+        outputfile_partial + f"_{feature_name}s" + ".geojson", driver="GeoJSON"
+    )  # Generate GeoJson
