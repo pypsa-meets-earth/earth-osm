@@ -82,6 +82,10 @@ def get_all_regions_dict(level=0):
         return local_dict
 
 def view_regions(level=0):                                                                              
+    """
+    Takes the `all_regions` dictionary and returns a new dictionary with the same keys, but with
+    the values being the `region_id`s of the regions
+    """
     all_dict = get_all_regions_dict(level)
     view_df = pd.DataFrame.from_dict({(i,j): all_dict[i][j] 
                             for i in all_dict.keys() 
