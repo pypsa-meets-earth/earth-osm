@@ -33,3 +33,4 @@ def main():  # pragma: no cover
     extract_parser.add_argument('primary', choices=primary_feature_element.keys(), type=str, help='Primary Feature')
 
     extract_parser.add_argument('--regions',nargs="+", type=str, help='Region Identifier') # TODO: replace with region group
+    extract_parser.add_argument('--features', nargs="*", type=str, help='Sub-Features')
