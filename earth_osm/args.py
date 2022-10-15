@@ -44,6 +44,12 @@ def main():  # pragma: no cover
     
     args = parser.parse_args()
 
+    print("\n".join(["",
+        "  _   _   _   _   _   _   _   _   _",
+        " / \ / \ / \ / \ / \ / \ / \ / \ / \ ",
+        "( E | a | r | t | h | - | O | S | M )",
+        " \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ "]))
+
     if args.command == 'view':
         print('Viewing OSM Data')
         view_regions(level=0)
