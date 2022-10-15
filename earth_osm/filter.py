@@ -87,3 +87,30 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     return primary_dict
 
 
+def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir):
+    geofabrik_pbf_url= region.urls['pbf']
+    PBF_inputfile = download_pbf(geofabrik_pbf_url, update, data_dir)
+    country_code = region.short
+
+
+    # ------- primary file -------
+    primary_file_exists = False
+    primary_file = os.path.join(data_dir, primary_name, f"{country_code}_{primary_name}.json"
+        )
+    if os.path.exists(primary_file):
+        primary_file_exists = True
+        with open(primary_file,encoding="utf-8") as f:
+            primary_dict = json.load(f)
+    else:
+        os.makedirs(os.path.dirname(primary_file), exist_ok=True)
+    
+    # TODO: compare update time using metadata in primary_dict
+    if not primary_file_exists or update is True:
+        primary_dict = run_primary_filter(PBF_inputfile, primary_file, primary_name, mp)
+
+    # ------- feature file -------
+    feature_dict = run_feature_filter(primary_dict, feature_name)
+
+    return primary_dict, feature_dict
+
+
