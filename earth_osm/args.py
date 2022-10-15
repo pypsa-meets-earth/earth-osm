@@ -36,3 +36,4 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--features', nargs="*", type=str, help='Sub-Features')
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
     extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
+    extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
