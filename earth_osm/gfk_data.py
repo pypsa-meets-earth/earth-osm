@@ -149,6 +149,13 @@ def get_id_by_str(region_str):
 
 
 def get_region_tuple(region_str):
+    """
+    Takes a region id or code (eg. DE, germany) and returns a named tuple with 
+    'id', 'name', 'short', 'parent', 'short_code' and dictionary of 'urls'
+    The 'short' field is an iso code if found otherwise the id is used.
+    iso3166-1:alpha2 is used for countries, iso3166-2 is used for sub-divisions
+    Raises error if the string is not a valid id or code
+    """
     id = get_id_by_str(region_str)
     d = get_region_dict(id)
     d['short'] = d.pop('short_code')
