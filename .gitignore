@@ -4,6 +4,9 @@ earth_osm/data/
 # External Data Dir
 earth_data/
 
+# Protobuf Files
+*.proto
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
