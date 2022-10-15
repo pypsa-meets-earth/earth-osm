@@ -1,0 +1,23 @@
+.ONESHELL:
+ENV_PREFIX=$(shell python -c "if __import__('pathlib').Path('.venv/bin/pip').exists(): print('.venv/bin/')")
+
+.PHONY: help
+help:             ## Show the help.
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Targets:"
+	@fgrep "##" Makefile | fgrep -v fgrep
+
+
+.PHONY: show
+show:             ## Show the current environment.
+	@echo "Current environment:"
+	@echo "Running using $(ENV_PREFIX)"
+	@$(ENV_PREFIX)python -V
+	@$(ENV_PREFIX)python -m site
+
+.PHONY: install
+install:          ## Install the project in dev mode.
+	@echo "Don't forget to run 'make virtualenv' if you got errors."
+	$(ENV_PREFIX)pip install -e .[test]
+
