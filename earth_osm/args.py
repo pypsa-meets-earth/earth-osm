@@ -52,3 +52,6 @@ def main():  # pragma: no cover
             region_list = list(args.regions)
             if not set(region_list) <= set(get_all_valid_list()):
                 raise KeyError(f'Invalid Region {" ".join(set(region_list) - set(get_all_valid_list()))} , run earth_osm view regions to view valid regions')
+        # elif args.coords:
+        #     # TODO: change coords to shapely polygon, implement geom=True, get regions that way
+        #     raise NotImplementedError('Bounding Box Region Identifier Not Implemented')
