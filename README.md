@@ -1,3 +1,5 @@
+# Earth OSM (by PyPSA meets Earth)
+
 ## Getting Started
 Install earth-osm
 ```bash
