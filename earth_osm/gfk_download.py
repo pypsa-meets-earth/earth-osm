@@ -24,6 +24,16 @@ logger.setLevel(logging.INFO)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def earth_downloader(url, dir):
+    """
+    Download file from url to dir
+
+    Args:
+        url (str): url to download
+        dir (str): directory to download to
+
+    Returns:
+        str: filepath of downloaded file
+    """
     filename = os.path.basename(url)
     filepath = os.path.join(dir, filename)
     logger.info(f"{filename} downloading to {filepath}")
