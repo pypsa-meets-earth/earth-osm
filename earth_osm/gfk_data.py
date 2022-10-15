@@ -37,3 +37,7 @@ col1 = df['iso3166-1:alpha2'].apply(lambda x: '-'.join(x) if type(x) == list els
 col2 = df['iso3166-2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
 df['short_code'] = col1.combine_first(col2)
 
+def get_geom_sitemap():
+    geom_sitemap = download_sitemap(True, pkg_data_dir)
+    return gpd.read_file(geom_sitemap)
+
