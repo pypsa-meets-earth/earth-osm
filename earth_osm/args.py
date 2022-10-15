@@ -22,10 +22,29 @@ def main():  # pragma: no cover
     It parses the command line and executes the appropriate function.
     """
 
+    class _HelpAction(argparse._HelpAction):
+        def __call__(self, parser, namespace, values, option_string=None):
+            parser.print_help()
+
+            # retrieve subparsers from parser
+            subparsers_actions = [
+                action for action in parser._actions
+                if isinstance(action, argparse._SubParsersAction)]
+            
+            for subparsers_action in subparsers_actions:
+                # get all subparsers and print help
+                for choice, subparser in subparsers_action.choices.items():
+                    print("Subparser '{}'".format(choice))
+                    print(subparser.format_help())
+
+            parser.exit()
     parser = argparse.ArgumentParser(
         description='Earth-OSM by PyPSA-meets-Earth',
         # epilog='''Example:''',
         add_help=False) # hide default help
+    
+    parser.add_argument('-h', '--help', action=_HelpAction,
+                        help='earth-osm help')
     subparser = parser.add_subparsers(dest='command', required=True, title='Sub Parser', description='''View Supported Regions or Extract OSM Data''')
 
     extract_parser = subparser.add_parser('extract', help='Extract OSM Data')
