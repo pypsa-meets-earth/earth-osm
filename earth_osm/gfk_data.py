@@ -128,3 +128,17 @@ def get_code_by_id(id):
 
     code = str(c_dict["short_code"])
     return code
+
+def get_id_by_str(region_str):
+    # if region_str is region code
+    id = get_id_by_code(region_str) 
+    if id is not None: 
+        return id
+    else:
+    # if region_str is region id
+        code = get_code_by_id(region_str)
+        if code is not None:
+            return region_str
+        else:
+            logger.error(f'{region_str} not found. check view_region()')
+            raise KeyError(f'{region_str} not found. check view_region()')
