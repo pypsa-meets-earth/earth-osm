@@ -18,7 +18,7 @@ from earth_osm.config import primary_feature_element
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
 
-
+# TODO: Rename to process_region
 def process_country(region, primary_name, feature_name, mp, update, data_dir):
     """
     Process Country
