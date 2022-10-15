@@ -72,3 +72,12 @@ def main():  # pragma: no cover
                 raise NotADirectoryError(f'Invalid Data Directory {args.data_dir}')
         else:
             data_dir = os.path.join(os.getcwd(), 'earth_data')
+
+        print('\n'.join(['',
+            f'Primary Feature: {args.primary}',
+            f'Sub Features: {" - ".join(feature_list)}', 
+            f'Regions: {" - ".join(region_list)}',
+            f'Multiprocessing = {args.mp}',
+            f'Update Data = {args.update}',
+            f'Data Directory = {data_dir}']))
+
