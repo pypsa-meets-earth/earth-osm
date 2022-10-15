@@ -54,3 +54,20 @@ def earth_downloader(url, dir):
             filepath = None
     return filepath
 
+
+def download_pbf(url, update, data_dir):
+    
+    dir = os.path.join(data_dir, "pbf")
+    pbf_filename = os.path.basename(url)
+    pbf_filepath = os.path.join(dir, pbf_filename)
+
+    # TODO: multi-part download each file for parallel downloading... (pip install pySmartDL)
+    if not os.path.exists(pbf_filepath):
+        # download file
+        d_filepath = earth_downloader(url, dir)
+        assert(d_filepath == pbf_filepath)
+    else:
+        logger.debug(f"{pbf_filename} already exists in {pbf_filepath}")
+
+    return pbf_filepath
+
