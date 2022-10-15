@@ -80,3 +80,12 @@ def get_all_regions_dict(level=0):
         return world_dict
     if level == 2:
         return local_dict
+
+def view_regions(level=0):                                                                              
+    all_dict = get_all_regions_dict(level)
+    view_df = pd.DataFrame.from_dict({(i,j): all_dict[i][j] 
+                            for i in all_dict.keys() 
+                            for j in all_dict[i].keys()},
+                            orient='index')
+    view_df.index = pd.MultiIndex.from_tuples(view_df.index, names=['parent', 'id'])
+    print(view_df.to_string())
