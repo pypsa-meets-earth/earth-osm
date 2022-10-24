@@ -12,7 +12,7 @@ For Windows users, we recommend to use the [Windows Subsystem for Linux](https:/
 - On github interface click on `Fork` button.
 - Clone your fork of this repo. `git clone git@github.com:YOUR_GIT_USERNAME/earth-osm.git`
 - Enter the directory `cd earth-osm`
-- Add upstream repo `git remote add upstream https://github.com/pypsa-meets-africa/earth-osm`
+- Add upstream repo `git remote add upstream https://github.com/pypsa-meets-earth/earth-osm`
 
 ## Setting up your own virtual environment
 
