@@ -1,4 +1,5 @@
-# Earth OSM (by PyPSA meets Earth)
+# Earth OSM 
+#### (*by PyPSA meets Earth*)
 
 ## Getting Started
 Install earth-osm
@@ -42,7 +43,7 @@ usage: earth_osm extract **primary** **--regions** region1, region2 **--features
 ## Advanced Usage
 
 ```py
-from earth_osm import eo
+import earth_osm as eo
 
 eo.get_osm_data(
   primary_name = 'power',
