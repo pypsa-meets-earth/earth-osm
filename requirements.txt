@@ -2,4 +2,4 @@ geopandas
 pandas
 tqdm
 requests
-protobuf
+protobuf>=4.21.1
