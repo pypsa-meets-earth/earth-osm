@@ -11,14 +11,15 @@ This module provides a CLI interface for the earth_osm project.
 import argparse
 import os
 
-from earth_osm.gfk_data import get_all_valid_list, view_regions
-from earth_osm.eo import get_osm_data
 from earth_osm.config import primary_feature_element
+from earth_osm.eo import get_osm_data
+from earth_osm.gfk_data import get_all_valid_list, view_regions
+
 
 def main():  # pragma: no cover
     """
     The main function executes on commands:
-    `python -m earth_osm` and `$ earth_osm `. 
+    `python -m earth_osm` and `$ earth_osm `.
     It parses the command line and executes the appropriate function.
     """
 
@@ -28,9 +29,11 @@ def main():  # pragma: no cover
 
             # retrieve subparsers from parser
             subparsers_actions = [
-                action for action in parser._actions
-                if isinstance(action, argparse._SubParsersAction)]
-            
+                action
+                for action in parser._actions
+                if isinstance(action, argparse._SubParsersAction)
+            ]
+
             for subparsers_action in subparsers_actions:
                 # get all subparsers and print help
                 for choice, subparser in subparsers_action.choices.items():
@@ -43,13 +46,12 @@ def main():  # pragma: no cover
     # '+' == 1 or more.
     # '*' == 0 or more.
     # '?' == 0 or 1.
-    
 
     parser = argparse.ArgumentParser(
         description='Earth-OSM by PyPSA-meets-Earth',
         # epilog='''Example:''',
         add_help=False) # hide default help
-    
+
     parser.add_argument('-h', '--help', action=_HelpAction,
                         help='earth-osm help')
     parser.add_argument('-v', '--version', action='version',
@@ -74,7 +76,7 @@ def main():  # pragma: no cover
     
     view_parser = subparser.add_parser('view', help='View OSM Data')
     view_parser.add_argument('type', help='View Supported', choices=['regions', 'primary'])
-    
+
     args = parser.parse_args()
 
     print("\n".join(["",
@@ -114,19 +116,20 @@ def main():  # pragma: no cover
 
         print('\n'.join(['',
             f'Primary Feature: {args.primary}',
-            f'Sub Features: {" - ".join(feature_list)}', 
-            f'Regions: {" - ".join(region_list)}',
+                    f'Sub Features: {" - ".join(feature_list)}',
+                    f'Regions: {" - ".join(region_list)}',
             f'Multiprocessing = {args.mp}',
             f'Update Data = {args.update}',
             f'Data Directory = {data_dir}']))
 
         get_osm_data(
-            region_list = region_list, 
-            primary_name = args.primary,
-            feature_list = feature_list,
-            update = args.update,
-            mp = args.mp,
-            data_dir = data_dir)
+            region_list=region_list,
+            primary_name=args.primary,
+            feature_list=feature_list,
+            update=args.update,
+            mp=args.mp,
+            data_dir=data_dir,
+        )
 
     else:
         # import inquirer #https://github.com/magmax/python-inquirer

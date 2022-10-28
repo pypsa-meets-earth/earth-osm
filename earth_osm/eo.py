@@ -6,14 +6,15 @@ __license__ = "MIT"
 This is the principal module of the earth_osm project.
 """
 
-import os
-import pandas as pd
 import logging
+import os
 
+import pandas as pd
+
+from earth_osm.config import primary_feature_element
+from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.utils import convert_ways_lines, convert_ways_points, output_csv_geojson
-from earth_osm.filter import get_filtered_data
-from earth_osm.config import primary_feature_element
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -22,7 +23,7 @@ logger.setLevel(logging.INFO)
 def process_country(region, primary_name, feature_name, mp, update, data_dir):
     """
     Process Country
-    
+
     Args:
         region: Region object
         primary_name: Primary Feature Name
@@ -34,7 +35,7 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
         None
     """
     primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir)
-    
+
     primary_data = primary_dict['Data']
     feature_data = feature_dict['Data']
 
@@ -42,7 +43,7 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
     df_way = pd.json_normalize(feature_data["Way"].values())
 
     element_type = primary_feature_element[primary_name][feature_name]
-   
+
     if element_type == "way":
         convert_ways_lines(
             df_way, primary_data
@@ -70,7 +71,15 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
 
     return df_feature
 
-def get_osm_data(region_list=['germany'], primary_name = "power", feature_list=['tower'], update = False, mp = True, data_dir = os.path.join(os.getcwd(), "earth_data")):
+
+def get_osm_data(
+    region_list=['germany'],
+    primary_name='power',
+    feature_list=['tower'],
+    update=False,
+    mp=True,
+    data_dir=os.path.join(os.getcwd(), 'earth_data'),
+):
     """
     Get OSM Data for a list of regions and features
     args:
@@ -83,7 +92,7 @@ def get_osm_data(region_list=['germany'], primary_name = "power", feature_list=[
         dict of dataframes
     """
     region_tuple_list = [get_region_tuple(rs) for rs in region_list]
-    
+
     for region in region_tuple_list:
         for feature_name in feature_list:
             df_feature = process_country(region, primary_name, feature_name, mp, update, data_dir)

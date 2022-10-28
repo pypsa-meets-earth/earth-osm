@@ -18,7 +18,7 @@ primary_feature_element = {
         "generator": "node",
         "line": "way",
         "tower": "node",
-        "cable": "way"
+        "cable": "way",
     }
     # add more primary features here
 }
@@ -39,14 +39,7 @@ primary_feature_element = {
 # ========================
 # A list of tags that are relevant for most OSM keys
 
-columns_basic = [
-    "id",
-    "lonlat",
-    "tags.power",
-    "Type",
-    "Country",
-    "refs"
-]
+columns_basic = ["id", "lonlat", "tags.power", "Type", "Country", "refs"]
 
 # ========================
 # SUBSTATION TAGS
@@ -58,11 +51,10 @@ columns_substation = [
     "Area",
     "tags.substation",
     "tags.voltage",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
-    ]
+]
 
 # ========================
 # GENERATOR TAGS
@@ -96,7 +88,6 @@ columns_line = [
     "tags.voltage",
     "tags.circuits",
     "tags.frequency",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -116,7 +107,6 @@ columns_cable = [
     "tags.circuits",
     "tags.frequency",
     "tags.location",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",
@@ -139,7 +129,6 @@ columns_tower = [
     "tags.line_management",
     "tags.ref",
     "tags.height",
-
     # Other tags which are not kept by default
     # =====================================
     # "TODO:ADD Tags not kept here",

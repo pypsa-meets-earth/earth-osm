@@ -10,12 +10,12 @@ Modified from esy-osmfilter/pre_filter.py
 
 """
 
-from earth_osm.osmpbf import Node, Way, Relation, osmformat_pb2
-from earth_osm.osmpbf.file import iter_blocks, iter_primitive_block, read_blob
-
-import multiprocessing as mp
 import itertools
 import logging
+import multiprocessing as mp
+
+from earth_osm.osmpbf import Node, Relation, Way, osmformat_pb2
+from earth_osm.osmpbf.file import iter_blocks, iter_primitive_block, read_blob
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -23,16 +23,22 @@ logger.setLevel(logging.INFO)
 
 
 def primary_entry_filter(entry, pre_filter):
-    filtermap = pre_filter[type(entry)] # {"power": ['line', 'tower]}
-    for primary_name in filtermap.keys(): #power
-        if primary_name in entry.tags.keys(): #tags a dict with keys (...'power')
+    filtermap = pre_filter[type(entry)]  # {"power": ['line', 'tower]}
+    for primary_name in filtermap.keys():  # power
+        if (primary_name in entry.tags.keys()):  # tags a dict with keys (...'power')
             # for filtermap.get(key) is ['line', 'tower']
             #  is the value for power in tags
             # feature_name == True gets all things tagged with power
-            return any(feature_name == True or feature_name in entry.tags.get(primary_name) for feature_name in filtermap.get(primary_name))
+            return any(
+                feature_name == True
+                or feature_name in entry.tags.get(primary_name)
+                for feature_name in filtermap.get(primary_name)
+            )
+
 
 def id_filter(entry, idset):
     return entry.id in idset
+
 
 def way_filter(entry, way_relation_members):
     return type(entry) is Way and entry.id in way_relation_members
@@ -58,7 +64,8 @@ def pool_file_query(filename, pool):
 
     def query_func(filter_func, *args, **kwargs):
         entry_lists = pool.starmap(
-            filter_file_block, [block + (filter_func, args, kwargs) for block in blocks]
+            filter_file_block,
+            [block + (filter_func, args, kwargs) for block in blocks],
         )
         
         return itertools.chain(*(entries for entries in entry_lists))
@@ -67,7 +74,8 @@ def pool_file_query(filename, pool):
 
 
 def filter_pbf(filename, pre_filter, multiprocess=True):
-    with mp.Pool(processes= 1 if not multiprocess else mp.cpu_count()- 1 or 1) as pool:
+
+    with mp.Pool(processes=1 if not multiprocess else mp.cpu_count() - 1 or 1) as pool:
         file_query = pool_file_query(filename, pool)    
         primary_entries = list(file_query(primary_entry_filter, pre_filter)) #list of named  tuples eg. Node(id,tags, lonlat)
         
@@ -94,14 +102,20 @@ def filter_pbf(filename, pre_filter, multiprocess=True):
             relation_way_node_members.update(entry.refs)
 
         primary_entries.extend(
-            file_query(id_filter,set.union(node_relation_members, way_refs, way_relation_members, relation_way_node_members)
+            file_query(
+                id_filter,
+                set.union(
+                    node_relation_members,
+                    way_refs,
+                    way_relation_members,
+                    relation_way_node_members,
+                ),
             )
         )
 
         primary_entries.sort(key=lambda entry: entry.id)
         
-    
-        primary_data = {"Node":{}, "Way":{}, "Relation":{}}
+        primary_data = {"Node": {}, "Way": {}, "Relation": {}}
         for entry in primary_entries:
             primary_data[type(entry).__name__][str(entry.id)] = dict(entry._asdict())
     

@@ -9,26 +9,27 @@ This module contains functions to set config for Geofabrik data.
 """
 
 
+import json
+import logging
 import os
+from collections import namedtuple
+
 import geopandas as gpd
 import pandas as pd
-import json
-from collections import namedtuple
 
 from earth_osm.gfk_download import download_sitemap
 
-import logging
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.DEBUG)
 
 
-pkg_data_dir = os.path.join(os.path.dirname(__file__), 'data')
+pkg_data_dir = os.path.join(os.path.dirname(__file__), "data")
 sitemap = download_sitemap(False, pkg_data_dir)
 
 with open(sitemap) as f:
     d = json.load(f)
 
-row_list =[]
+row_list = []
 for feature in d['features']:
     row_list.append(feature['properties'])
 df = pd.DataFrame(row_list)
@@ -81,16 +82,21 @@ def get_all_regions_dict(level=0):
     if level == 2:
         return local_dict
 
+
 def view_regions(level=0):                                                                              
     """
     Takes the `all_regions` dictionary and returns a new dictionary with the same keys, but with
     the values being the `region_id`s of the regions
     """
     all_dict = get_all_regions_dict(level)
-    view_df = pd.DataFrame.from_dict({(i,j): all_dict[i][j] 
+    view_df = pd.DataFrame.from_dict(
+        {
+            (i, j): all_dict[i][j]
                             for i in all_dict.keys() 
-                            for j in all_dict[i].keys()},
-                            orient='index')
+            for j in all_dict[i].keys()
+        },
+        orient='index',
+    )
     view_df.index = pd.MultiIndex.from_tuples(view_df.index, names=['parent', 'id'])
     print(view_df.to_string())
 
@@ -101,7 +107,12 @@ def get_region_dict(id):
     strings 'id', 'name', 'parent', 'short_code' and dictionary of 'urls'
     Raises error if id is not found
     """
-    return df.loc[df['id']== id].drop('iso3166-1:alpha2', axis=1).drop('iso3166-2', axis=1).to_dict('records')[0]
+    return (
+        df.loc[df['id'] == id]
+        .drop('iso3166-1:alpha2', axis=1)
+        .drop('iso3166-2', axis=1)
+        .to_dict('records')[0]
+    )
 
 
 def get_id_by_code(code):

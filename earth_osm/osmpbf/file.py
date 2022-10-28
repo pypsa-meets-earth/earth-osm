@@ -10,13 +10,11 @@ Modified from esy-osm-pbf/file.py
 
 """
 
-import zlib, struct
-
+import struct
+import zlib
 from itertools import accumulate
 
-from . import Node, Relation, Way
-from . import osmformat_pb2, fileformat_pb2
-
+from . import Node, Relation, Way, fileformat_pb2, osmformat_pb2
 
 
 def decode_strmap(primitive_block):
@@ -85,7 +83,7 @@ def iter_primitive_block(primitive_block):
     """
     Iterate over the elements in a primitive block.
     """
-    
+
     strmap = decode_strmap(primitive_block)
     for group in primitive_block.primitivegroup:
         for id, tags, lonlat in iter_nodes(primitive_block, strmap, group):
@@ -118,10 +116,7 @@ def iter_nodes(block, strmap, group):
 
 def iter_ways(block, strmap, group):
     for way in group.ways:
-        tags = {
-            strmap[k]: strmap[v]
-            for k, v in zip(way.keys, way.vals)
-        }
+        tags = {strmap[k]: strmap[v] for k, v in zip(way.keys, way.vals)}
         refs = tuple(accumulate(way.refs))
         yield way.id, refs, tags
 
@@ -130,19 +125,20 @@ def iter_relations(block, strmap, group):
     namemap = {}
     for relation in group.relations:
         tags = {
-            strmap[k]: strmap[v]
-            for k, v in zip(relation.keys, relation.vals)
+            strmap[k]: strmap[v] for k, v in zip(relation.keys, relation.vals)
         }
         refs = tuple(accumulate(relation.memids))
         members = [
             (
                 ref,
                 namemap.setdefault(
-                    rel_type, osmformat_pb2.Relation.MemberType.Name(rel_type)),
-                strmap[sid]
+                    rel_type, osmformat_pb2.Relation.MemberType.Name(rel_type)
+                ),
+                strmap[sid],
             )
             for ref, rel_type, sid in zip(
-                    refs, relation.types, relation.roles_sid)
+                refs, relation.types, relation.roles_sid
+            )
         ]
 
         yield relation.id, members, tags

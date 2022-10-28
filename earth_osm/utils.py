@@ -14,8 +14,8 @@ import os
 
 import geopandas as gpd
 from shapely.geometry import LineString, Point, Polygon
-from earth_osm.config import primary_feature_element
 
+from earth_osm.config import primary_feature_element
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -35,6 +35,7 @@ def lonlat_lookup(df_way, primary_data):
     lonlat_list = df_way["refs"].apply(look)
 
     return lonlat_list
+
 
 def convert_ways_points(df_way, primary_data):
     """
@@ -79,7 +80,7 @@ def convert_ways_lines(df_way, primary_data):
     Convert Ways to Line Coordinates
 
     Args:
-    
+
     """
     lonlat_list = lonlat_lookup(df_way, primary_data)
     lonlat_column = lonlat_list
@@ -87,7 +88,10 @@ def convert_ways_lines(df_way, primary_data):
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
     length_column = (
-        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
+        gpd.GeoSeries(way_linestring)
+        .set_crs("EPSG:4326")
+        .to_crs("EPSG:3857")
+        .length
     )
 
     df_way.insert(0, "Length", length_column)
@@ -99,7 +103,7 @@ def convert_pd_to_gdf_nodes(df_way):
 
     Args:
         df_way: Pandas Dataframe
-    
+
     Returns:
         GeoPandas Dataframe
     """
@@ -137,6 +141,7 @@ def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data
         feature_name: _description_
         region_list: _description_
     """
+
     def filenamer(cc_list):
         if len(cc_list) == 1:
             return str(cc_list[0].short)
@@ -152,7 +157,6 @@ def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data
         os.makedirs(
             os.path.dirname(outputfile_partial), exist_ok=True
         )  # create raw directory
-
 
     df_feature.reset_index(drop=True, inplace=True)
 
