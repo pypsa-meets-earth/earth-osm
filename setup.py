@@ -32,11 +32,11 @@ def read_requirements(path):
 setup(
     name="earth_osm",
     version=read("earth_osm", "VERSION"),
-    description="Awesome earth_osm created by pypsa-meets-africa",
-    url="https://github.com/pypsa-meets-africa/earth-osm/",
+    description="Awesome earth_osm created by pypsa-meets-earth",
+    url="https://github.com/pypsa-meets-earth/earth-osm/",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    author="pypsa-meets-africa",
+    author="pypsa-meets-earth",
     packages=find_packages(exclude=["tests", ".github"]),
     install_requires=read_requirements("requirements.txt"),
     entry_points={
