@@ -20,6 +20,9 @@ from earth_osm.config import primary_feature_element
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
 
+# geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
+# distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
+# area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
 def lonlat_lookup(df_way, primary_data):
     """
@@ -54,7 +57,7 @@ def convert_ways_points(df_way, primary_data):
             round(
                 gpd.GeoSeries(way_polygon)
                 .set_crs("EPSG:4326")
-                .to_crs("EPSG:3857")
+                .to_crs("ESRI:54009")
                 .area,
                 -1,
             ),
