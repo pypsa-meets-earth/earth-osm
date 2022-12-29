@@ -99,7 +99,7 @@ def main():  # pragma: no cover
         #     raise NotImplementedError('Bounding Box Region Identifier Not Implemented')
         if args.out_format:
             out_format = set(args.out_format)
-            if not out_format.issubset('csv', 'geojson'):
+            if not out_format.issubset(['csv', 'geojson']):
                 raise KeyError(f'Contains invalid format. Valid formats are: csv, geojson')
 
         if args.features:
@@ -138,7 +138,7 @@ def main():  # pragma: no cover
             mp=args.mp,
             data_dir=data_dir,
             out_format=out_format,
-            out_aggregate=out_aggregate,
+            out_aggregate=args.out_aggregate,
         )
 
     else:

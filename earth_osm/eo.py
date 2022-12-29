@@ -11,10 +11,11 @@ import os
 
 import pandas as pd
 
-from earth_osm.config import primary_feature_element
+from earth_osm.config import primary_feature_element, feature_columns
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.utils import convert_ways_lines, convert_ways_points, output_creation
+
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -67,7 +68,7 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
 
     # Add Country Column
     # TODO: rename Country to Region
-    df_feature["Country"] = region.name
+    df_feature["Country"] = region.short
 
     return df_feature
 
@@ -98,4 +99,5 @@ def get_osm_data(
     for region in region_tuple_list:
         for feature_name in feature_list:
             df_feature = process_country(region, primary_name, feature_name, mp, update, data_dir)
+            df_feature = df_feature.reindex(columns=feature_columns[feature_name])
             output_creation(df_feature, primary_name, feature_name, [region], data_dir, out_format, out_aggregate)

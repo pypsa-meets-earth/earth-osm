@@ -135,13 +135,15 @@ def convert_pd_to_gdf_lines(df_way):
 def write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
     """Create csv file. Optimized for large files as write on disk in chunks"""
     if out_aggregate:
-        output_path = os.path.join(outputfile_partial, f"_{feature_name}s" + ".csv")
+        output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".csv")
         df_feature.to_csv(
-            output_path, index=False, header= not os.exists(output_path), mode="a"
+            output_path, index=False, header= not os.path.exists(output_path), mode="a",
         )  # Generate CSV
     else:
         output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".csv")
-        df_feature.to_csv(output_path)  # Generate CSV
+        df_feature.to_csv(
+            output_path,
+        )  # Generate CSV
 
 
 def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
@@ -149,7 +151,7 @@ def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, 
     if out_aggregate:
         output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".geojson")
         gdf_feature.to_file(
-            output_path, driver="GeoJSON", index=False, mode="a"
+            output_path, driver="GeoJSON", index=False, mode="a" if os.path.exists(output_path) else "w"
         )  # Generate GeoJson
     else:
         output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".geojson")
