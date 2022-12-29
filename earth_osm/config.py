@@ -4,9 +4,10 @@ __license__ = "MIT"
 
 """
 This module contains the config for osm features.
+
 """
 
-# The feature category represents the final representation of the feature
+# The primary_feature_element represents the final representation of the feature
 # For node features: ways are converted to nodes
 # For way features: only ways are used
 
@@ -39,7 +40,14 @@ primary_feature_element = {
 # ========================
 # A list of tags that are relevant for most OSM keys
 
-columns_basic = ["id", "lonlat", "tags.power", "Type", "Country", "refs"]
+columns_basic = [
+    "id",
+    "lonlat",
+    "tags.power",
+    "Type",
+    "Country",
+    #"refs"
+]
 
 # ========================
 # SUBSTATION TAGS
@@ -135,7 +143,6 @@ columns_tower = [
 ]
 
 ## FINAL DICTIONARY
-
 feature_columns = {
     "substation": columns_basic + columns_substation,
     "generator": columns_basic + columns_generator,

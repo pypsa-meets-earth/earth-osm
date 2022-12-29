@@ -72,7 +72,8 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
     extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
     extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
-
+    extract_parser.add_argument('--out_format', nargs="+", type=str, help='Export options')
+    extract_parser.add_argument('--out_aggregate', action='store_true', default=False, help='Aggregate Outputs')
     
     view_parser = subparser.add_parser('view', help='View OSM Data')
     view_parser.add_argument('type', help='View Supported', choices=['regions', 'primary'])
@@ -96,6 +97,10 @@ def main():  # pragma: no cover
         # elif args.coords:
         #     # TODO: change coords to shapely polygon, implement geom=True, get regions that way
         #     raise NotImplementedError('Bounding Box Region Identifier Not Implemented')
+        if args.out_format:
+            out_format = set(args.out_format)
+            if not out_format.issubset(['csv', 'geojson']):
+                raise KeyError(f'Contains invalid format. Valid formats are: csv, geojson')
 
         if args.features:
             feature_list = list(args.features)
@@ -116,11 +121,14 @@ def main():  # pragma: no cover
 
         print('\n'.join(['',
             f'Primary Feature: {args.primary}',
-                    f'Sub Features: {" - ".join(feature_list)}',
-                    f'Regions: {" - ".join(region_list)}',
+            f'Sub Features: {" - ".join(feature_list)}',
+            f'Regions: {" - ".join(region_list)}',
             f'Multiprocessing = {args.mp}',
             f'Update Data = {args.update}',
-            f'Data Directory = {data_dir}']))
+            f'Data Directory = {data_dir}',
+            f'Output Format = {" - ".join(out_format)}',
+            f'Aggregate Outputs = {args.out_aggregate}',
+            ]))
 
         get_osm_data(
             region_list=region_list,
@@ -129,6 +137,8 @@ def main():  # pragma: no cover
             update=args.update,
             mp=args.mp,
             data_dir=data_dir,
+            out_format=out_format,
+            out_aggregate=args.out_aggregate,
         )
 
     else:

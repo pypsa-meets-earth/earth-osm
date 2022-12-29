@@ -126,6 +126,7 @@ def get_id_by_code(code):
         logger.debug(f'{code} not found')
         return None
 
+
 def get_code_by_id(id):
     """
     Takes a region id (eg. germany) and returns its code (eg. DE)
@@ -139,6 +140,7 @@ def get_code_by_id(id):
 
     code = str(c_dict["short_code"])
     return code
+
 
 def get_id_by_str(region_str):
     """
