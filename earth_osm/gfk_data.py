@@ -26,7 +26,7 @@ logger.setLevel(logging.DEBUG)
 pkg_data_dir = os.path.join(os.path.dirname(__file__), "data")
 sitemap = download_sitemap(False, pkg_data_dir)
 
-with open(sitemap) as f:
+with open(sitemap, encoding='utf8') as f:
     d = json.load(f)
 
 row_list = []
