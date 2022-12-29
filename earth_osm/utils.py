@@ -11,7 +11,7 @@ This module contains utilities functions for handling OSM data.
 
 import logging
 import os
-
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString, Point, Polygon
 
@@ -131,7 +131,34 @@ def convert_pd_to_gdf_lines(df_way):
     gdf.drop(columns=["lonlat"], inplace=True)
     return gdf
 
-def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data_dir):
+
+def write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
+    """Create csv file. Optimized for large files as write on disk in chunks"""
+    if out_aggregate:
+        output_path = os.path.join(outputfile_partial, f"_{feature_name}s" + ".csv")
+        df_feature.to_csv(
+            output_path, index=False, header= not os.exists(output_path), mode="a"
+        )  # Generate CSV
+    else:
+        output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".csv")
+        df_feature.to_csv(output_path)  # Generate CSV
+
+
+def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
+    """Create geojson file. Optimized for large files as write on disk in chunks"""
+    if out_aggregate:
+        output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".geojson")
+        gdf_feature.to_file(
+            output_path, driver="GeoJSON", index=False, mode="a"
+        )  # Generate GeoJson
+    else:
+        output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".geojson")
+        gdf_feature.to_file(
+            output_path, driver="GeoJSON"
+        )  # Generate GeoJson
+
+
+def output_creation(df_feature, primary_name, feature_name, region_list, data_dir, out_format, out_aggregate):
     """
     Output CSV and GeoJSON files for each region
 
@@ -141,7 +168,6 @@ def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data
         feature_name: _description_
         region_list: _description_
     """
-
     def filenamer(cc_list):
         if len(cc_list) == 1:
             return str(cc_list[0].short)
@@ -149,13 +175,12 @@ def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data
             # TODO: Fix filenamer
             raise NotImplementedError
 
-    fn_name = filenamer(region_list)
-    outputfile_partial = os.path.join(data_dir, "out", fn_name + "_raw"
-    )  # Output file directory
+    outputfile_partial = os.path.join(data_dir, "out")  # Output file directory
+    fn_name = filenamer(region_list) # country code e.g. BJ
 
     if not os.path.exists(outputfile_partial):
         os.makedirs(
-            os.path.dirname(outputfile_partial), exist_ok=True
+            outputfile_partial, exist_ok=True
         )  # create raw directory
 
     df_feature.reset_index(drop=True, inplace=True)
@@ -166,21 +191,20 @@ def output_csv_geojson(df_feature, primary_name, feature_name, region_list, data
         logger.warning(f"All feature data frame empty for {feature_name}")
         return None
 
-    df_feature.to_csv(
-        outputfile_partial + f"_{feature_name}s" + ".csv"
-    )  # Generate CSV
+    if "csv" in out_format:
+        write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
 
-    if primary_feature_element[primary_name][feature_name] == "way":
-        gdf_feature = convert_pd_to_gdf_lines(df_feature)
-    else:
-        gdf_feature = convert_pd_to_gdf_nodes(df_feature)
+    if "geojson" in out_format:
+        if primary_feature_element[primary_name][feature_name] == "way":
+            gdf_feature = convert_pd_to_gdf_lines(df_feature)
+        else:
+            gdf_feature = convert_pd_to_gdf_nodes(df_feature)
 
-    try:
-        gdf_feature.drop(columns=["refs"], inplace=True)
-    except:
-        pass
+        try:
+            gdf_feature.drop(columns=["refs"], inplace=True)
+        except:
+            pass
 
-    logger.info("Writing GeoJSON file")
-    gdf_feature.to_file(
-        outputfile_partial + f"_{feature_name}s" + ".geojson", driver="GeoJSON"
-    )  # Generate GeoJson
+        logger.info("Writing GeoJSON file")
+        write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
+
