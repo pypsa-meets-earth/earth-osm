@@ -75,8 +75,8 @@ def download_pbf(url, update, data_dir):
 
 # TODO: fix update param
 def download_sitemap(geom, pkg_data_dir):
-    geofabrik_geo = f"https://download.geofabrik.de/index-v1.json"
-    geofabrik_nogeo = f"https://download.geofabrik.de/index-v1-nogeom.json"
+    geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
+    geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
     logger.info('Downloading Sitemap')
     sitemap_file = earth_downloader(geofabrik_sitemap_url, pkg_data_dir)
