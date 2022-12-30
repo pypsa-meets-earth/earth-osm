@@ -1,7 +1,16 @@
 # Earth OSM 
-#### (*by PyPSA meets Earth*)
+<p align="left"> 
+by
+<a href="https://pypsa-meets-earth.github.io">
+    <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" width="150">
+<a/>
+</p>
 
+[![PyPI version](https://img.shields.io/pypi/v/earth-osm.svg)](https://pypi.org/project/earth-osm/)
 [![CI](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg)](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml)
+![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/earth-osm)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)(LICENSE.txt)
+[![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 
 ## Getting Started
 Install earth-osm
