@@ -55,3 +55,21 @@ eo.get_osm_data(
 )
 ```
 
+## Development
+
+(Optional) Intstall a specific version of earth_osm
+```
+pip install git+https://github.com/pypsa-meets-earth/earth-osm.git@<required-commit-hash>
+```
+
+(Optional) Create a virtual environment for python>=3.10 
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+```bash
+pip install git+https://github.com/pypsa-meets-earth/earth-osm.git
+pip install -r requirements-test.txt 
+```
