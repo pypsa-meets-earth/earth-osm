@@ -25,13 +25,12 @@ logger.setLevel(logging.INFO)
 def primary_entry_filter(entry, pre_filter):
     filtermap = pre_filter[type(entry)]  # {"power": ['line', 'tower]}
     for primary_name in filtermap.keys():  # power
-        if (primary_name in entry.tags.keys()):  # tags a dict with keys (...'power')
+        if primary_name in entry.tags.keys():  # tags a dict with keys (...'power')
             # for filtermap.get(key) is ['line', 'tower']
             #  is the value for power in tags
             # feature_name == True gets all things tagged with power
             return any(
-                feature_name == True
-                or feature_name in entry.tags.get(primary_name)
+                feature_name == True or feature_name in entry.tags.get(primary_name)
                 for feature_name in filtermap.get(primary_name)
             )
 
@@ -67,7 +66,7 @@ def pool_file_query(filename, pool):
             filter_file_block,
             [block + (filter_func, args, kwargs) for block in blocks],
         )
-        
+
         return itertools.chain(*(entries for entries in entry_lists))
 
     return query_func
@@ -76,23 +75,25 @@ def pool_file_query(filename, pool):
 def filter_pbf(filename, pre_filter, multiprocess=True):
 
     with mp.Pool(processes=1 if not multiprocess else mp.cpu_count() - 1 or 1) as pool:
-        file_query = pool_file_query(filename, pool)    
-        primary_entries = list(file_query(primary_entry_filter, pre_filter)) #list of named  tuples eg. Node(id,tags, lonlat)
-        
+        file_query = pool_file_query(filename, pool)
+        primary_entries = list(
+            file_query(primary_entry_filter, pre_filter)
+        )  # list of named  tuples eg. Node(id,tags, lonlat)
+
         node_relation_members = set()
         way_relation_members = set()
         way_refs = set()
         relation_way_node_members = set()
-        
+
         for entry in primary_entries:
-    
+
             if type(entry) is Relation:
                 for id, typename, role in entry.members:
                     if typename == "NODE":
                         node_relation_members.add(id)
                     elif typename == "WAY":
                         way_relation_members.add(id)
-            
+
             if type(entry) is Way:
                 way_refs.update(entry.refs)
 
@@ -114,9 +115,9 @@ def filter_pbf(filename, pre_filter, multiprocess=True):
         )
 
         primary_entries.sort(key=lambda entry: entry.id)
-        
+
         primary_data = {"Node": {}, "Way": {}, "Relation": {}}
         for entry in primary_entries:
             primary_data[type(entry).__name__][str(entry.id)] = dict(entry._asdict())
-    
+
     return primary_data

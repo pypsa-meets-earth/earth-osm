@@ -11,8 +11,9 @@ This module contains utilities functions for handling OSM data.
 
 import logging
 import os
-import pandas as pd
+
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import LineString, Point, Polygon
 
 from earth_osm.config import primary_feature_element
@@ -23,6 +24,7 @@ logger.setLevel(logging.INFO)
 # geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
 # distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
 # area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+
 
 def lonlat_lookup(df_way, primary_data):
     """
@@ -55,10 +57,7 @@ def convert_ways_points(df_way, primary_data):
         map(
             int,
             round(
-                gpd.GeoSeries(way_polygon)
-                .set_crs("EPSG:4326")
-                .to_crs("ESRI:54009")
-                .area,
+                gpd.GeoSeries(way_polygon).set_crs("EPSG:4326").to_crs("ESRI:54009").area,
                 -1,
             ),
         )
@@ -91,10 +90,7 @@ def convert_ways_lines(df_way, primary_data):
 
     way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
     length_column = (
-        gpd.GeoSeries(way_linestring)
-        .set_crs("EPSG:4326")
-        .to_crs("EPSG:3857")
-        .length
+        gpd.GeoSeries(way_linestring).set_crs("EPSG:4326").to_crs("EPSG:3857").length
     )
 
     df_way.insert(0, "Length", length_column)
@@ -140,7 +136,10 @@ def write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_na
     if out_aggregate:
         output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".csv")
         df_feature.to_csv(
-            output_path, index=False, header= not os.path.exists(output_path), mode="a",
+            output_path,
+            index=False,
+            header=not os.path.exists(output_path),
+            mode="a",
         )  # Generate CSV
     else:
         output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".csv")
@@ -154,16 +153,21 @@ def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, 
     if out_aggregate:
         output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".geojson")
         gdf_feature.to_file(
-            output_path, driver="GeoJSON", index=False, mode="a" if os.path.exists(output_path) else "w"
+            output_path,
+            driver="GeoJSON",
+            index=False,
+            mode="a" if os.path.exists(output_path) else "w",
         )  # Generate GeoJson
     else:
-        output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".geojson")
-        gdf_feature.to_file(
-            output_path, driver="GeoJSON"
-        )  # Generate GeoJson
+        output_path = os.path.join(
+            outputfile_partial, f"{fn_name}_{feature_name}s" + ".geojson"
+        )
+        gdf_feature.to_file(output_path, driver="GeoJSON")  # Generate GeoJson
 
 
-def output_creation(df_feature, primary_name, feature_name, region_list, data_dir, out_format, out_aggregate):
+def output_creation(
+    df_feature, primary_name, feature_name, region_list, data_dir, out_format, out_aggregate
+):
     """
     Output CSV and GeoJSON files for each region
 
@@ -173,6 +177,7 @@ def output_creation(df_feature, primary_name, feature_name, region_list, data_di
         feature_name: _description_
         region_list: _description_
     """
+
     def filenamer(cc_list):
         if len(cc_list) == 1:
             return str(cc_list[0].short)
@@ -181,12 +186,10 @@ def output_creation(df_feature, primary_name, feature_name, region_list, data_di
             raise NotImplementedError
 
     outputfile_partial = os.path.join(data_dir, "out")  # Output file directory
-    fn_name = filenamer(region_list) # country code e.g. BJ
+    fn_name = filenamer(region_list)  # country code e.g. BJ
 
     if not os.path.exists(outputfile_partial):
-        os.makedirs(
-            outputfile_partial, exist_ok=True
-        )  # create raw directory
+        os.makedirs(outputfile_partial, exist_ok=True)  # create raw directory
 
     df_feature.reset_index(drop=True, inplace=True)
 
@@ -212,4 +215,3 @@ def output_creation(df_feature, primary_name, feature_name, region_list, data_di
 
         logger.info("Writing GeoJSON file")
         write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
-

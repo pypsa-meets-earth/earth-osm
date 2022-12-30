@@ -11,11 +11,10 @@ import os
 
 import pandas as pd
 
-from earth_osm.config import primary_feature_element, feature_columns
+from earth_osm.config import feature_columns, primary_feature_element
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.utils import convert_ways_lines, convert_ways_points, output_creation
-
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -35,10 +34,12 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
     Returns:
         None
     """
-    primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir)
+    primary_dict, feature_dict = get_filtered_data(
+        region, primary_name, feature_name, mp, update, data_dir
+    )
 
-    primary_data = primary_dict['Data']
-    feature_data = feature_dict['Data']
+    primary_data = primary_dict["Data"]
+    feature_data = feature_dict["Data"]
 
     df_node = pd.json_normalize(feature_data["Node"].values())
     df_way = pd.json_normalize(feature_data["Way"].values())
@@ -46,15 +47,11 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
     element_type = primary_feature_element[primary_name][feature_name]
 
     if element_type == "way":
-        convert_ways_lines(
-            df_way, primary_data
-        ) if not df_way.empty else logger.warning(
+        convert_ways_lines(df_way, primary_data) if not df_way.empty else logger.warning(
             f"Empty Way Dataframe for {feature_name} in {region.short}"
         )
         if not df_node.empty:
-            logger.warning(
-                f"Node dataframe not empty for {feature_name} in {region.short}"
-            )
+            logger.warning(f"Node dataframe not empty for {feature_name} in {region.short}")
 
     if element_type == "node":
         convert_ways_points(df_way, primary_data) if not df_way.empty else None
@@ -74,12 +71,12 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
 
 
 def get_osm_data(
-    region_list=['germany'],
-    primary_name='power',
-    feature_list=['tower'],
+    region_list=["germany"],
+    primary_name="power",
+    feature_list=["tower"],
     update=False,
     mp=True,
-    data_dir=os.path.join(os.getcwd(), 'earth_data'),
+    data_dir=os.path.join(os.getcwd(), "earth_data"),
     out_format="csv",
     out_aggregate=False,
 ):
@@ -98,6 +95,16 @@ def get_osm_data(
 
     for region in region_tuple_list:
         for feature_name in feature_list:
-            df_feature = process_country(region, primary_name, feature_name, mp, update, data_dir)
+            df_feature = process_country(
+                region, primary_name, feature_name, mp, update, data_dir
+            )
             df_feature = df_feature.reindex(columns=feature_columns[feature_name])
-            output_creation(df_feature, primary_name, feature_name, [region], data_dir, out_format, out_aggregate)
+            output_creation(
+                df_feature,
+                primary_name,
+                feature_name,
+                [region],
+                data_dir,
+                out_format,
+                out_aggregate,
+            )

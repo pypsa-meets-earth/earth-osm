@@ -42,7 +42,7 @@ def earth_downloader(url, dir):
     with requests.get(url, stream=True, verify=False) as r:
         if r.status_code == 200:
             # url properly found, thus execute as expected
-            file_size = int(r.headers.get('Content-Length', 0))
+            file_size = int(r.headers.get("Content-Length", 0))
             desc = "(Unknown total file size)" if file_size == 0 else ""
             with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc, leave=False) as raw:
                 with open(filepath, "wb") as f:
@@ -78,7 +78,7 @@ def download_sitemap(geom, pkg_data_dir):
     geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
-    logger.info('Downloading Sitemap')
+    logger.info("Downloading Sitemap")
     sitemap_file = earth_downloader(geofabrik_sitemap_url, pkg_data_dir)
 
     return sitemap_file
