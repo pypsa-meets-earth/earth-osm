@@ -112,3 +112,18 @@ To trigger a new release all you need to do is.
 the `make release` will ask you the version number to create the tag, ex: type `0.1.1` when you are asked.
 
 > **CAUTION**:  The make release will change local changelog files and commit all the unstaged changes you have.
+
+
+### Update Docs
+```bash
+lazydocs \
+    --output-path="./docs/api-docs" \
+    --overview-file="README.md" \
+    --src-base-url="https://github.com/pypsa-meets-earth/earth-osm/blob/main/" \
+    --ignored-modules osmpbf.fileformat_pb2 \
+    --ignored-modules osmpbf.osmformat_pb2 \
+    --no-watermark \
+    earth_osm
+```
+
+We also generate [codecov](https://about.codecov.io/sign-up/) Reports
