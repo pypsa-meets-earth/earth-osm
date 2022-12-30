@@ -9,7 +9,7 @@ by
 [![PyPI version](https://img.shields.io/pypi/v/earth-osm.svg)](https://pypi.org/project/earth-osm/)
 [![CI](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg)](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/earth-osm)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)(LICENSE.txt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 
 ## Getting Started
