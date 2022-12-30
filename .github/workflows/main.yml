@@ -44,12 +44,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install project
         run: make install
-      # - name: Run tests
-      #   run: make test
-      # - name: "Upload coverage to Codecov"
-      #   uses: codecov/codecov-action@v1
-        # with:
-        #   fail_ci_if_error: true
+      - name: Run tests
+        run: make test
+      - name: "Upload coverage to Codecov"
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
 
   tests_mac:
     needs: linter
@@ -66,8 +66,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install project
         run: make install
-      # - name: Run tests
-      #   run: make test
+      - name: Run tests
+        run: make test
 
   tests_win:
     needs: linter
