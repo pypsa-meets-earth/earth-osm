@@ -32,7 +32,7 @@ def read_requirements(path):
 setup(
     name="earth_osm",
     version=read("earth_osm", "VERSION"),
-    description="Awesome earth_osm created by pypsa-meets-earth",
+    description="Python tool to extract large-amounts of OpenStreetMap data",
     url="https://github.com/pypsa-meets-earth/earth-osm/",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
