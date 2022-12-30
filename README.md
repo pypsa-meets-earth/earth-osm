@@ -1,6 +1,8 @@
 # Earth OSM 
 #### (*by PyPSA meets Earth*)
 
+[![CI](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg)](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml)
+
 ## Getting Started
 Install earth-osm
 ```bash
