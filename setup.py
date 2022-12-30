@@ -37,10 +37,18 @@ setup(
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="pypsa-meets-earth",
-    packages=find_packages(exclude=["tests", ".github"]),
+    packages=find_packages(exclude=["docs", "tests"]),
     install_requires=read_requirements("requirements.txt"),
     entry_points={
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
     extras_require={"test": read_requirements("requirements-test.txt")},
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+    ],
 )
