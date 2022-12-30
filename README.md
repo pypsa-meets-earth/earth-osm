@@ -1,4 +1,4 @@
-# Earth OSM 
+# earth-osm 
 <p align="left"> 
 by
 <a href="https://pypsa-meets-earth.github.io">
