@@ -12,6 +12,8 @@ by
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 
+earth-osm is a free software tool that can extract large-amounts of OpenStreetMap data. It implements filters and multi-processing for fast and memory-efficient computations. You can extract e.g. power lines for the whole Africa on your laptop. It builds on esy-osmfilter and improves its package design, usability and performance.
+
 ## Getting Started
 Install earth-osm
 ```bash
