@@ -4,6 +4,30 @@ Changelog
 
 (unreleased)
 ------------
+- Lint code. [Max Parzen]
+- Add docs and classifiers to setup. [Max Parzen]
+- Update README.md. [Max Parzen]
+- Update setup.py. [Max Parzen]
+- Merge branch 'main' of https://github.com/pypsa-meets-africa/earth-osm
+  into main. [mnm-matin]
+- Update README.md. [Max Parzen]
+- Add badges (#21) [Max Parzen]
+
+  * add badges
+
+  * rename header
+- Pin mypy version. [mnm-matin]
+- Contrib add docs update. [mnm-matin]
+- Add codecov badge. [mnm-matin]
+- Add test tot makefile. [mnm-matin]
+- Add test. [mnm-matin]
+- Enable tests and code cov. [mnm-matin]
+- Add CI badge. [mnm-matin]
+- Add development notes to README. [mnm-matin]
+- Remove f string. [mnm-matin]
+- Add make release to make file. [mnm-matin]
+- Add release instruction. [mnm-matin]
+- Release: version 0.0.1 🚀 [mnm-matin]
 - Merge pull request #20 from pz-max/cat. [Matin Mahmood]
 
   add aggregate option and output format choice
