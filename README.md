@@ -1,6 +1,7 @@
 # Earth OSM 
 #### (*by PyPSA meets Earth*)
 
+[![codecov](https://codecov.io/gh/pypsa-meets-earth/earth-osm/branch/main/graph/badge.svg?token=ZS4PC5T4S8)](https://codecov.io/gh/pypsa-meets-earth/earth-osm)
 [![CI](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg)](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml)
 
 ## Getting Started
@@ -8,7 +9,6 @@ Install earth-osm
 ```bash
 pip install git+https://github.com/pypsa-meets-earth/earth-osm.git
 ```
-
 Extract osm data
 ```bash
 # Example CLI command
