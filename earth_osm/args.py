@@ -67,7 +67,7 @@ def main():  # pragma: no cover
     # region_group.add_argument('--regions',nargs="+", type=str, help='Region Identifier')
     # region_group.add_argument('--coords', nargs='+', type=float, help='Region Bounds') #TODO: Change to >3
 
-    extract_parser.add_argument('--regions',nargs="+", type=str, help='Region Identifier') # TODO: replace with region group
+    extract_parser.add_argument('--regions', nargs="+", type=str, help='Region Identifier') # TODO: replace with region group
     extract_parser.add_argument('--features', nargs="*", type=str, help='Sub-Features')
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
     extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
