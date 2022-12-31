@@ -36,23 +36,23 @@ setup(
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
     install_requires=[
-        "geopandas"
-        "pandas"
-        "tqdm"
-        "requests"
-        "protobuf>=4.21.1"
+        "geopandas",
+        "pandas",
+        "tqdm",
+        "requests",
+        "protobuf>=4.21.1",
     ],
     extras_require={"test": [
-        "pytest"
-        "coverage"
-        "flake8"
-        "black"
-        "isort"
-        "pytest-cov"
-        "codecov"
-        "mypy>=0.9"
-        "gitchangelog"
-        "mkdocs"
+        "pytest",
+        "coverage",
+        "flake8",
+        "black",
+        "isort",
+        "pytest-cov",
+        "codecov",
+        "mypy>=0.9",
+        "gitchangelog",
+        "mkdocs",
         ],
     },
     classifiers=[
