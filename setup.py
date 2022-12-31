@@ -21,15 +21,6 @@ def read(*paths, **kwargs):
     return content
 
 
-def read_requirements(path):
-    path = os.path.abspath(path)
-    return [
-        line.strip()
-        for line in read(path).split("\n")
-        if not line.startswith(('"', "#", "-", "git+"))
-    ]
-
-
 setup(
     name="earth_osm",
     version=read("earth_osm", "VERSION"),
@@ -39,11 +30,31 @@ setup(
     long_description_content_type="text/markdown",
     author="pypsa-meets-earth",
     packages=find_packages(exclude=["docs", "tests"]),
-    install_requires=read_requirements("requirements.txt"),
-    entry_points={
+    include_package_data=True,
+    python_requires=">=3.6",
+        entry_points={
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
-    extras_require={"test": read_requirements("requirements-test.txt")},
+    install_requires=[
+        "geopandas"
+        "pandas"
+        "tqdm"
+        "requests"
+        "protobuf>=4.21.1"
+    ],
+    extras_require={"test": [
+        "pytest"
+        "coverage"
+        "flake8"
+        "black"
+        "isort"
+        "pytest-cov"
+        "codecov"
+        "mypy>=0.9"
+        "gitchangelog"
+        "mkdocs"
+        ],
+    },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
