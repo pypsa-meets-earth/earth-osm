@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Make packages explicit in setup. [Max Parzen]
+
+
+0.0.4 (2022-12-31)
+------------------
+- Release: version 0.0.4 🚀 [Max Parzen]
 - Add requirements to manifest. [Max Parzen]
 
 
