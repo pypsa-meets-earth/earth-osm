@@ -19,17 +19,17 @@ from earth_osm.gfk_download import download_pbf
 from earth_osm.osmpbf import Node, Relation, Way
 
 logging.basicConfig()
-logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
+logger=logging.getLogger(__name__)
+#logger.setLevel(logging.INFO)
 logger.setLevel(logging.WARNING)
 
 
-def feature_filter(primary_data, filter_tuple=("power", "line")):
+def feature_filter(primary_data, filter_tuple = ('power', 'line')):
 
-    if set(primary_data.keys()) != set(["Node", "Way", "Relation"]):
-        logger.error("malformed primary_data")
+    if set(primary_data.keys()) != set(['Node', 'Way', 'Relation']):
+        logger.error('malformed primary_data')
 
-    feature_data = {"Node": {}, "Way": {}, "Relation": {}}
+    feature_data = {'Node': {}, 'Way': {}, 'Relation': {}}
     for element in list(feature_data.keys()):
         for id in primary_data[element]:
             if filter_tuple in primary_data[element][id]["tags"].items():
@@ -38,25 +38,27 @@ def feature_filter(primary_data, filter_tuple=("power", "line")):
 
 
 def run_feature_filter(primary_dict, feature_name):
-    primary_name = primary_dict["Metadata"]["primary_feature"]
+    primary_name = primary_dict['Metadata']['primary_feature']
     filter_tuple = (primary_name, feature_name)
-    primary_data = primary_dict["Data"]
+    primary_data = primary_dict['Data']
 
     feature_data = feature_filter(primary_data, filter_tuple)
 
     metadata = {
-        "filter_date": str(datetime.now().isoformat()),
-        "filter_tuple": json.dumps(filter_tuple),
+        'filter_date': str(datetime.now().isoformat()),
+        'filter_tuple': json.dumps(filter_tuple),
     }
 
-    feature_dict = {"Metadata": metadata, "Data": feature_data}
+    feature_dict = {
+        'Metadata': metadata,
+        'Data':feature_data
+        }
 
     return feature_dict
 
-
 def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
-    logger.info("New Pre-Filter Data")
-    logger.info("Load OSM data from " + PBF_inputfile + "\n")
+    logger.info('New Pre-Filter Data')
+    logger.info('Load OSM data from '+ PBF_inputfile+'\n')
 
     feature_list = list(primary_feature_element[primary_name].keys())
     pre_filter = {
@@ -68,10 +70,13 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     primary_data = filter_pbf(PBF_inputfile, pre_filter, multiprocess)
 
     metadata = {
-        "filter_date": str(datetime.now().isoformat()),
-        "primary_feature": primary_name,
+        'filter_date': str(datetime.now().isoformat()),
+        'primary_feature': primary_name,
     }
-    primary_dict = {"Metadata": metadata, "Data": primary_data}
+    primary_dict = {
+        'Metadata': metadata,
+        'Data': primary_data
+    }
     # Save primary_dict
     with open(primary_file, "w", encoding="utf-8") as target:
         json.dump(
@@ -86,13 +91,14 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
 
 
 def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir):
-    geofabrik_pbf_url = region.urls["pbf"]
+    geofabrik_pbf_url = region.urls['pbf']
     PBF_inputfile = download_pbf(geofabrik_pbf_url, update, data_dir)
     country_code = region.short
 
     # ------- primary file -------
     primary_file_exists = False
-    primary_file = os.path.join(data_dir, primary_name, f"{country_code}_{primary_name}.json")
+    primary_file = os.path.join(data_dir, primary_name, f"{country_code}_{primary_name}.json"
+    )
     if os.path.exists(primary_file):
         primary_file_exists = True
         with open(primary_file, encoding="utf-8") as f:
@@ -108,3 +114,5 @@ def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir):
     feature_dict = run_feature_filter(primary_dict, feature_name)
 
     return primary_dict, feature_dict
+
+

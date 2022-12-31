@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-Node = namedtuple("Node", ("id", "tags", "lonlat"))
+Node = namedtuple('Node', ('id', 'tags', 'lonlat'))
 """
 A OpenStreetMap `node <https://wiki.openstreetmap.org/wiki/Node>
 
@@ -9,7 +9,7 @@ tags: dict (tag names -> tag values)
 lonlat: tuple (lon, lat)
 """
 
-Way = namedtuple("Way", ("id", "tags", "refs"))
+Way = namedtuple('Way', ('id', 'tags', 'refs'))
 """
 A OpenStreetMap `way <https://wiki.openstreetmap.org/wiki/Way>
 
@@ -18,7 +18,7 @@ tags: dict (tag names -> tag values)
 refs: list (node ids)
 """
 
-Relation = namedtuple("Relation", ("id", "tags", "members"))
+Relation = namedtuple('Relation', ('id', 'tags', 'members'))
 """
 A OpenStreetMap `relation <https://wiki.openstreetmap.org/wiki/Relation>
 

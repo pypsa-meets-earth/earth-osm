@@ -26,18 +26,17 @@ logger.setLevel(logging.DEBUG)
 pkg_data_dir = os.path.join(os.path.dirname(__file__), "data")
 sitemap = download_sitemap(False, pkg_data_dir)
 
-with open(sitemap, encoding="utf8") as f:
+with open(sitemap, encoding='utf8') as f:
     d = json.load(f)
 
 row_list = []
-for feature in d["features"]:
-    row_list.append(feature["properties"])
+for feature in d['features']:
+    row_list.append(feature['properties'])
 df = pd.DataFrame(row_list)
 # Add short code column
-col1 = df["iso3166-1:alpha2"].apply(lambda x: "-".join(x) if type(x) == list else x)
-col2 = df["iso3166-2"].apply(lambda x: "-".join(x) if type(x) == list else x)
-df["short_code"] = col1.combine_first(col2)
-
+col1 = df['iso3166-1:alpha2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
+col2 = df['iso3166-2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
+df['short_code'] = col1.combine_first(col2)
 
 def get_geom_sitemap():
     geom_sitemap = download_sitemap(True, pkg_data_dir)
@@ -48,20 +47,18 @@ def get_root_list():
     """
     Returns a list of regions without parents (i.e continents)
     """
-    return list(df.loc[df["parent"].isna(), "id"])
-
+    return list(df.loc[df['parent'].isna(), 'id'])
 
 def get_all_valid_list():
     """
     Returns a list of all valid region ids
     """
-    return list(df.loc[~df["short_code"].isna(), "short_code"]) + list(df["id"])
-
+    return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
 
 def get_all_regions_dict(level=0):
     """
     It takes a level argument, and returns a dictionary of all regions, grouped by their parent region
-
+    
     Args:
         level: 0 = all regions, 1 = world regions, 2 = local regions, defaults to 0
         A dictionary of dictionaries.
@@ -71,16 +68,13 @@ def get_all_regions_dict(level=0):
     root = get_root_list()
     world_dict = {}
     local_dict = {}
-
-    def dict_by_key(key):
-        return by_parent.get_group(key).set_index("id").T.to_dict("records")[0]
-
+    def dict_by_key(key): return by_parent.get_group(key).set_index('id').T.to_dict('records')[0]
     for key in parent_dict:
         if key in root:
             world_dict[key] = dict_by_key(key)
         else:
             local_dict[key] = dict_by_key(key)
-
+    
     if level == 0:
         return {**world_dict, **local_dict}
     if level == 1:
@@ -89,17 +83,21 @@ def get_all_regions_dict(level=0):
         return local_dict
 
 
-def view_regions(level=0):
+def view_regions(level=0):                                                                              
     """
     Takes the `all_regions` dictionary and returns a new dictionary with the same keys, but with
     the values being the `region_id`s of the regions
     """
     all_dict = get_all_regions_dict(level)
     view_df = pd.DataFrame.from_dict(
-        {(i, j): all_dict[i][j] for i in all_dict.keys() for j in all_dict[i].keys()},
-        orient="index",
+        {
+            (i, j): all_dict[i][j]
+                            for i in all_dict.keys() 
+            for j in all_dict[i].keys()
+        },
+        orient='index',
     )
-    view_df.index = pd.MultiIndex.from_tuples(view_df.index, names=["parent", "id"])
+    view_df.index = pd.MultiIndex.from_tuples(view_df.index, names=['parent', 'id'])
     print(view_df.to_string())
 
 
@@ -110,10 +108,10 @@ def get_region_dict(id):
     Raises error if id is not found
     """
     return (
-        df.loc[df["id"] == id]
-        .drop("iso3166-1:alpha2", axis=1)
-        .drop("iso3166-2", axis=1)
-        .to_dict("records")[0]
+        df.loc[df['id'] == id]
+        .drop('iso3166-1:alpha2', axis=1)
+        .drop('iso3166-2', axis=1)
+        .to_dict('records')[0]
     )
 
 
@@ -123,9 +121,9 @@ def get_id_by_code(code):
     Supresses error if id is not found
     """
     try:
-        return df.loc[df["short_code"] == code, "id"].item()
+        return df.loc[df['short_code']== code, 'id'].item()
     except (KeyError, ValueError):
-        logger.debug(f"{code} not found")
+        logger.debug(f'{code} not found')
         return None
 
 
@@ -137,7 +135,7 @@ def get_code_by_id(id):
     try:
         c_dict = get_region_dict(id)
     except (KeyError, IndexError):
-        logger.debug(f"{id} not found")
+        logger.debug(f'{id} not found')
         return None
 
     code = str(c_dict["short_code"])
@@ -150,22 +148,22 @@ def get_id_by_str(region_str):
     Raises error if the string is not a valid id or code
     """
     # if region_str is region code
-    id = get_id_by_code(region_str)
-    if id is not None:
+    id = get_id_by_code(region_str) 
+    if id is not None: 
         return id
     else:
-        # if region_str is region id
+    # if region_str is region id
         code = get_code_by_id(region_str)
         if code is not None:
             return region_str
         else:
-            logger.error(f"{region_str} not found. check view_region()")
-            raise KeyError(f"{region_str} not found. check view_region()")
+            logger.error(f'{region_str} not found. check view_region()')
+            raise KeyError(f'{region_str} not found. check view_region()')
 
 
 def get_region_tuple(region_str):
     """
-    Takes a region id or code (eg. DE, germany) and returns a named tuple with
+    Takes a region id or code (eg. DE, germany) and returns a named tuple with 
     'id', 'name', 'short', 'parent', 'short_code' and dictionary of 'urls'
     The 'short' field is an iso code if found otherwise the id is used.
     iso3166-1:alpha2 is used for countries, iso3166-2 is used for sub-divisions
@@ -173,11 +171,12 @@ def get_region_tuple(region_str):
     """
     id = get_id_by_str(region_str)
     d = get_region_dict(id)
-    d["short"] = d.pop("short_code")
-    if str(d["short"]) == "nan":
-        logger.warning(f"code not found for {id} so using id")
-        d["short"] = d["id"]
+    d['short'] = d.pop('short_code')
+    if str(d['short']) == 'nan':
+        logger.warning(f'code not found for {id} so using id')
+        d['short'] = d['id']
 
-    Region = namedtuple("Region", d)
+    Region = namedtuple('Region', d)
     region_tuple = Region(**d)
     return region_tuple
+
