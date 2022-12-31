@@ -4,6 +4,50 @@ Changelog
 
 (unreleased)
 ------------
+- Remove for now docker file (#24) [Max Parzen]
+- Small path fix. [mnm-matin]
+- Add whitespace. [mnm-matin]
+- Disable CI for mac and windows. [mnm-matin]
+- Add docstrings for filter_pbf. [mnm-matin]
+- Revert "lint code (#22)" [mnm-matin]
+
+  This reverts commit 0c5388e8cd0d82c185a44aa4a50fba76a9419c14.
+- Revert "release 0.0.2 (#23)" [mnm-matin]
+
+  This reverts commit 8a1ee61c4a6f39770d24b7f9b2d60c96e617bc45.
+
+
+0.0.2 (2022-12-30)
+------------------
+- Release 0.0.2 (#23) [Max Parzen]
+- Lint code (#22) [Max Parzen]
+- Add docs and classifiers to setup. [Max Parzen]
+- Update README.md. [Max Parzen]
+- Update setup.py. [Max Parzen]
+- Merge branch 'main' of https://github.com/pypsa-meets-africa/earth-osm
+  into main. [mnm-matin]
+- Update README.md. [Max Parzen]
+- Add badges (#21) [Max Parzen]
+
+  * add badges
+
+  * rename header
+- Pin mypy version. [mnm-matin]
+- Contrib add docs update. [mnm-matin]
+- Add codecov badge. [mnm-matin]
+- Add test tot makefile. [mnm-matin]
+- Add test. [mnm-matin]
+- Enable tests and code cov. [mnm-matin]
+- Add CI badge. [mnm-matin]
+- Add development notes to README. [mnm-matin]
+- Remove f string. [mnm-matin]
+- Add make release to make file. [mnm-matin]
+- Add release instruction. [mnm-matin]
+
+
+0.0.1 (2022-12-30)
+------------------
+- Release: version 0.0.1 🚀 [mnm-matin]
 - Merge pull request #20 from pz-max/cat. [Matin Mahmood]
 
   add aggregate option and output format choice
