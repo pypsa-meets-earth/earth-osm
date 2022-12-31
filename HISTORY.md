@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Add missing comma. [Max Parzen]
+
+
+0.0.5 (2022-12-31)
+------------------
+- Release: version 0.0.5 🚀 [Max Parzen]
 - Make packages explicit in setup. [Max Parzen]
 
 
