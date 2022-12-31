@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Add requirements to manifest. [Max Parzen]
+
+
+0.0.3 (2022-12-31)
+------------------
+- Release: version 0.0.3 🚀 [Max Parzen]
 - Release: version 0.0.2 🚀 [Max Parzen]
 - Remove for now docker file (#24) [Max Parzen]
 - Small path fix. [mnm-matin]
