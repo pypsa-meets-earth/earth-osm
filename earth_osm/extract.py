@@ -74,6 +74,19 @@ def pool_file_query(filename, pool):
 
 
 def filter_pbf(filename, pre_filter, multiprocess=True):
+    """
+    Parallized pre-Filtering of OSM file by a pre_filter
+
+    Args:
+        filename:   PBF file
+        pre_filter: dict of dicts in the following format: {
+                Node: {primary_name: feature_list}, 
+                Way: {primary_name: feature_list},
+                Relation: {primary_name: feature_list}}
+
+    Returns:
+        targetname: JSON-file
+    """
 
     with mp.Pool(processes=1 if not multiprocess else mp.cpu_count() - 1 or 1) as pool:
         file_query = pool_file_query(filename, pool)    
