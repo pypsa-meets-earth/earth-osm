@@ -4,6 +4,7 @@ Changelog
 
 (unreleased)
 ------------
+- Release: version 0.0.2 🚀 [Max Parzen]
 - Remove for now docker file (#24) [Max Parzen]
 - Small path fix. [mnm-matin]
 - Add whitespace. [mnm-matin]
