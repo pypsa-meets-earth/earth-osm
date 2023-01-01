@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Revert changes. [Max Parzen]
+
+
+0.0.7 (2023-01-01)
+------------------
+- Release: version 0.0.7 🚀 [Max Parzen]
 - Read automatically requirements. [Max Parzen]
 
 
