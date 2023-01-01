@@ -11,7 +11,6 @@ def read(*paths, **kwargs):
     >>> read("README.md")
     ...
     """
-
     content = ""
     with io.open(
         os.path.join(os.path.dirname(__file__), *paths),
@@ -21,39 +20,27 @@ def read(*paths, **kwargs):
     return content
 
 
+def read_reqs(name):
+    return [line for line in read(name).split('\n') if line and not line.strip().startswith('#')]
+
+
 setup(
     name="earth_osm",
     version=read("earth_osm", "VERSION"),
     description="Python tool to extract large-amounts of OpenStreetMap data",
-    url="https://github.com/pypsa-meets-earth/earth-osm/",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="pypsa-meets-earth",
+    url="https://github.com/pypsa-meets-earth/earth-osm/",
     packages=find_packages(exclude=["docs", "tests"]),
     include_package_data=True,
     python_requires=">=3.6",
-        entry_points={
+    entry_points={
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
-    install_requires=[
-        "geopandas",
-        "pandas",
-        "tqdm",
-        "requests",
-        "protobuf>=4.21.1",
-    ],
-    extras_require={"test": [
-        "pytest",
-        "coverage",
-        "flake8",
-        "black",
-        "isort",
-        "pytest-cov",
-        "codecov",
-        "mypy>=0.9",
-        "gitchangelog",
-        "mkdocs",
-        ],
+    install_requires=read_reqs("requirements.txt"),
+    extras_require={
+    'test': read_reqs('requirements-test.txt'),
     },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
