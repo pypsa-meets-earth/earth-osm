@@ -20,10 +20,6 @@ def read(*paths, **kwargs):
     return content
 
 
-def read_reqs(name):
-    return [line for line in read(name).split('\n') if line and not line.strip().startswith('#')]
-
-
 setup(
     name="earth_osm",
     version=read("earth_osm", "VERSION"),
@@ -38,9 +34,25 @@ setup(
     entry_points={
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
-    install_requires=read_reqs("requirements.txt"),
-    extras_require={
-    'test': read_reqs('requirements-test.txt'),
+    install_requires=[
+        "geopandas",
+        "pandas",
+        "tqdm",
+        "requests",
+        "protobuf>=4.21.1",
+    ],
+    extras_require={"test": [
+        "pytest",
+        "coverage",
+        "flake8",
+        "black",
+        "isort",
+        "pytest-cov",
+        "codecov",
+        "mypy>=0.9",
+        "gitchangelog",
+        "mkdocs",
+        ],
     },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
