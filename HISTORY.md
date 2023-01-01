@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Read automatically requirements. [Max Parzen]
+
+
+0.0.6 (2022-12-31)
+------------------
+- Release: version 0.0.6 🚀 [Max Parzen]
 - Add missing comma. [Max Parzen]
 
 
