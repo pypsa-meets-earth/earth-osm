@@ -7,7 +7,7 @@ by
 </p>
 
 [![PyPI version](https://img.shields.io/pypi/v/earth-osm.svg)](https://pypi.org/project/earth-osm/)
-[![Conda version](https://img.shields.io/conda/vn/conda-forge/pypsa.svg)](https://anaconda.org/conda-forge/earth-osm)
+[![Conda version](https://img.shields.io/conda/vn/conda-forge/earth-osm.svg)](https://anaconda.org/conda-forge/earth-osm)
 [![CI](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg)](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml)
 ![Size](https://img.shields.io/github/repo-size/pypsa-meets-earth/earth-osm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
