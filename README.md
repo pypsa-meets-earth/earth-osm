@@ -18,7 +18,7 @@ earth-osm is a free software tool that can extract large-amounts of OpenStreetMa
 ## Getting Started
 Install earth-osm with pip:
 ```bash
-pip install git+https://github.com/pypsa-meets-earth/earth-osm.git
+pip install earth-osm
 ```
 Or with conda:
 ```bash
