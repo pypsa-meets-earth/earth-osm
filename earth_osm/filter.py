@@ -7,7 +7,7 @@ __license__ = "MIT"
 This module filters the extracted OSM data.
 
 """
-
+#%%
 import json
 import logging
 import os
@@ -26,14 +26,21 @@ logger.setLevel(logging.WARNING)
 
 def feature_filter(primary_data, filter_tuple = ('power', 'line')):
 
+
+    match_primary_only = filter_tuple[1] == 'ALL'
+
     if set(primary_data.keys()) != set(['Node', 'Way', 'Relation']):
         logger.error('malformed primary_data')
 
     feature_data = {'Node': {}, 'Way': {}, 'Relation': {}}
     for element in list(feature_data.keys()):
         for id in primary_data[element]:
-            if filter_tuple in primary_data[element][id]["tags"].items():
-                feature_data[element][id] = primary_data[element][id]
+            if match_primary_only:
+                if filter_tuple[0] in [tag_tuple[0] for tag_tuple in primary_data[element][id]["tags"].items()]:
+                    feature_data[element][id] = primary_data[element][id]
+            else:
+                if filter_tuple in primary_data[element][id]["tags"].items():
+                    feature_data[element][id] = primary_data[element][id]
     return feature_data
 
 
@@ -116,3 +123,9 @@ def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir):
     return primary_dict, feature_dict
 
 
+#%%
+
+# with open('/home/matin/earth-osm/earth_data/building/SL_building.json', encoding="utf-8") as f:
+#         primary_dict = json.load(f)
+
+# primary_dict

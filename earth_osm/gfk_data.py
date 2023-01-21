@@ -92,7 +92,7 @@ def view_regions(level=0):
     view_df = pd.DataFrame.from_dict(
         {
             (i, j): all_dict[i][j]
-                            for i in all_dict.keys() 
+            for i in all_dict.keys() 
             for j in all_dict[i].keys()
         },
         orient='index',
