@@ -8,4 +8,5 @@ codecov
 mypy>=0.9
 gitchangelog
 mkdocs
+pprint
 
