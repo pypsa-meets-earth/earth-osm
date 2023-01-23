@@ -50,12 +50,15 @@ usage: earth_osm extract **primary** **--regions** region1, region2 **--features
 
   **--features** feature1 feature2 ... (*optional*, use sub-features of primary feature, e.g. substation, line, etc)
 
-  **--update** (*optional*, update existing data, dafult False)
+  **--update** (*optional*, update existing data, default False)
 
   **--mp** (*optional*, use multiprocessing, default True)
   
   **--data_dir** (*optional*, path to data directory, default './earth_data')
-                      
+  
+  **--out_format** (*optional*, export format options csv or geojson, default csv)
+  
+  **--out_aggregate** (*options*, combine outputs per feature, default False)
 
 ## Advanced Usage
 
@@ -69,6 +72,8 @@ eo.get_osm_data(
   update = False,
   mp = True,
   data_dir = './earth_data',
+  out_format = ['csv', 'geojson'],
+  out_aggregate = False,
 )
 ```
 
