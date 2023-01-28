@@ -12,15 +12,62 @@ This module contains the config for osm features.
 # For way features: only ways are used
 
 # TODO: Add 'keep' to keep the original feature representation
+#%%
+# import json
+from pprint import pprint
+import pandas as pd
+# Node (Towers)
+# Way (Lines and Cables)
+# Area (Substations and Generators)
+
+#%%
+# TODO: Add taginfo.json to package data
+# TODO: Can be used to get the primary keys and values
+# TODO: Implement view features simialr to gfk_data
+# taginfo_url='https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/taginfo.min.json'
+# taginfo = '/home/matin/earth-osm/taginfo.min.json'
+# with open(taginfo, encoding='utf8') as f:
+#     d = json.load(f)
+# tag_dict = d['tags']
+# pprint(tag_dict)
+# tag_df = pd.DataFrame(tag_dict)
+
+# #%%
+# power_df = tag_df.loc[tag_df['key'] == 'power']
+
+# #%%
+# power_df.to_dict('records')
+
+# #%%
+# by_parent = tag_df.groupby("key")[["value"]].count()
+
+# #%%
+# tag_df.drop(['object_types', 'icon_url'], axis=1).value_counts()
+# by_parent
+# parent_dict = by_parent.groups
+
+
+#%%
+# primary_feature_element = {
+#     "power": {
+#         "substation": "node", #(node, area)
+#         "generator": "node", # (node, way, area)
+#         "line": "way", #(way)
+#         "tower": "node", #(node)
+#         "cable": "way", #(way)
+#     }
+#     # add more primary features here
+# }
+
 
 primary_feature_element = {
     "power": {
-        "substation": "node",
-        "generator": "node",
-        "line": "way",
-        "tower": "node",
-        "cable": "way",
-    }
+        "substation": ("node", "area"), 
+        "generator": ("node", "way", "area"),
+        "line": ("way"),
+        "tower": ("node"),
+        "cable": ("way"),
+        }
     # add more primary features here
 }
 

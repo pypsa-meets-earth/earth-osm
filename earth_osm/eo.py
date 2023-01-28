@@ -5,7 +5,7 @@ __license__ = "MIT"
 """
 This is the principal module of the earth_osm project.
 """
-
+#%%
 import logging
 import os
 
@@ -20,6 +20,7 @@ from earth_osm.utils import convert_ways_lines, convert_ways_points, output_crea
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
 
+#%%
 # TODO: Rename to process_region
 def process_country(region, primary_name, feature_name, mp, update, data_dir):
     """
@@ -43,32 +44,42 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
     df_node = pd.json_normalize(feature_data["Node"].values())
     df_way = pd.json_normalize(feature_data["Way"].values())
 
-    element_type = primary_feature_element[primary_name][feature_name]
+    element_set = set(primary_feature_element[primary_name][feature_name])
+    assert element_set <= set(['node', 'way', 'area'])
 
-    if element_type == "way":
-        convert_ways_lines(
-            df_way, primary_data
-        ) if not df_way.empty else logger.warning(
-            f"Empty Way Dataframe for {feature_name} in {region.short}"
-        )
-        if not df_node.empty:
-            logger.warning(
-                f"Node dataframe not empty for {feature_name} in {region.short}"
-            )
+    if "node" in element_set:
+        df_node["Type"] = "Node"
+    
+    if set(['way', 'area']) <= element_set:
+        
+    
+    # element_type = primary_feature_element[primary_name][feature_name]
 
-    if element_type == "node":
-        convert_ways_points(df_way, primary_data) if not df_way.empty else None
+    # if element_type == "way":
+    #     convert_ways_lines(
+    #         df_way, primary_data
+    #     ) if not df_way.empty else logger.warning(
+    #         f"Empty Way Dataframe for {feature_name} in {region.short}"
+    #     )
+    #     if not df_node.empty:
+    #         logger.warning(
+    #             f"Node dataframe not empty for {feature_name} in {region.short}"
+    #         )
+
+    # if element_type == "node":
+    #     convert_ways_points(df_way, primary_data) if not df_way.empty else None
 
     # Add Original Type Column
-    df_node["Type"] = "Node"
+    
     df_way["Type"] = "Way"
+
 
     # Concatinate Nodes and Ways
     df_feature = pd.concat([df_node, df_way], axis=0)
 
     # Add Country Column
     # TODO: rename Country to Region
-    df_feature["Country"] = region.short
+    # df_feature["Country"] = region.short
 
     return df_feature
 
@@ -99,5 +110,6 @@ def get_osm_data(
     for region in region_tuple_list:
         for feature_name in feature_list:
             df_feature = process_country(region, primary_name, feature_name, mp, update, data_dir)
-            df_feature = df_feature.reindex(columns=feature_columns[feature_name])
+            # df_feature = df_feature.reindex(columns=feature_columns[feature_name])
+            
             output_creation(df_feature, primary_name, feature_name, [region], data_dir, out_format, out_aggregate)
