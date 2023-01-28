@@ -23,8 +23,7 @@ logger.setLevel(logging.INFO)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
-def earth_downloader(url, dir):
+def earth_downloader(url, dir, exists_ok=False):
     """
     Download file from url to dir
 
@@ -37,6 +36,9 @@ def earth_downloader(url, dir):
     """
     filename = os.path.basename(url)
     filepath = os.path.join(dir, filename)
+    if os.path.exists(filepath) and exists_ok:
+        logger.debug(f'{filepath} already exists')
+        return filepath
     logger.info(f"{filename} downloading to {filepath}")
     os.makedirs(os.path.dirname(filepath), exist_ok=True)  #  create download dir
     with requests.get(url, stream=True, verify=False) as r:
@@ -55,17 +57,17 @@ def earth_downloader(url, dir):
             filepath = None
     return filepath
 
-
+# TODO: fix update param
 def download_pbf(url, update, data_dir):
 
-    dir = os.path.join(data_dir, "pbf")
+    pbf_dir = os.path.join(data_dir, "pbf")
     pbf_filename = os.path.basename(url)
-    pbf_filepath = os.path.join(dir, pbf_filename)
+    pbf_filepath = os.path.join(pbf_dir, pbf_filename)
 
     # TODO: multi-part download each file for parallel downloading... (pip install pySmartDL)
     if not os.path.exists(pbf_filepath):
         # download file
-        d_filepath = earth_downloader(url, dir)
+        d_filepath = earth_downloader(url, pbf_dir)
         assert d_filepath == pbf_filepath
     else:
         logger.debug(f"{pbf_filename} already exists in {pbf_filepath}")
@@ -73,13 +75,13 @@ def download_pbf(url, update, data_dir):
     return pbf_filepath
 
 
-# TODO: fix update param
+
 def download_sitemap(geom, pkg_data_dir):
     geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
-    logger.info('Downloading Sitemap')
-    sitemap_file = earth_downloader(geofabrik_sitemap_url, pkg_data_dir)
+
+    sitemap_file = earth_downloader(geofabrik_sitemap_url, pkg_data_dir, exists_ok=True)
 
     return sitemap_file
 
