@@ -72,8 +72,8 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
     extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
     extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
-    extract_parser.add_argument('--out_format', nargs="+", type=str, help='Export options')
-    extract_parser.add_argument('--out_aggregate', action='store_true', default=False, help='Aggregate Outputs')
+    extract_parser.add_argument('--out_format', nargs="*", type=str, help='Export options')
+    extract_parser.add_argument('--out_aggregate', action='store_true', default=False, help='Aggregate Outputs by feature')
     
     view_parser = subparser.add_parser('view', help='View OSM Data')
     view_parser.add_argument('type', help='View Supported', choices=['regions', 'primary'])
@@ -97,10 +97,6 @@ def main():  # pragma: no cover
         # elif args.coords:
         #     # TODO: change coords to shapely polygon, implement geom=True, get regions that way
         #     raise NotImplementedError('Bounding Box Region Identifier Not Implemented')
-        if args.out_format:
-            out_format = set(args.out_format)
-            if not out_format.issubset(['csv', 'geojson']):
-                raise KeyError(f'Contains invalid format. Valid formats are: csv, geojson')
 
         if args.features:
             feature_list = list(args.features)
@@ -118,6 +114,13 @@ def main():  # pragma: no cover
                 raise NotADirectoryError(f'Invalid Data Directory {args.data_dir}')
         else:
             data_dir = os.path.join(os.getcwd(), 'earth_data')
+        
+        if args.out_format:
+            out_format = set(args.out_format)
+            if not out_format.issubset(['csv', 'geojson']):
+                raise KeyError(f'Contains invalid format. Valid formats are: csv, geojson')
+        else:
+            out_format = ['csv', 'geojson']
 
         print('\n'.join(['',
             f'Primary Feature: {args.primary}',
