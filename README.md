@@ -13,7 +13,18 @@ by
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 
-earth-osm is a free software tool that can extract large-amounts of OpenStreetMap data. It implements filters and multi-processing for fast and memory-efficient computations. You can extract e.g. power lines for Africa on your laptop. It builds on esy-osmfilter and improves its package design, usability and performance.
+earth-osm is a python package that provides an end-to-end solution to extract & standardize **power infrastructure** data from OpenStreetmap (OSM).
+
+## Features
+* Extracts power infrastructure data from OSM
+* Cleans and Standardizes the data *(coming soon)*
+* No API rate limits (data served from GeoFabrik)
+* Provides a Python API
+* Supports multiprocessing
+* Outputs .csv and .geojson files
+* Aggregate data per feature or per region
+* Easy to use CLI interface
+
 
 ## Getting Started
 Install earth-osm with pip:
@@ -80,7 +91,7 @@ eo.get_osm_data(
 ## Development
 
 (Optional) Intstall a specific version of earth_osm
-```
+```bash
 pip install git+https://github.com/pypsa-meets-earth/earth-osm.git@<required-commit-hash>
 ```
 

@@ -109,7 +109,8 @@ def convert_ways_polygons(df_way, primary_data):
     )
 
 
-    df_way.insert(0, "Area", area_column)
+    # df_way.insert(0, "Area", way_polygon)
+    return way_polygon
 
 def convert_ways_lines(df_way, primary_data):
     """
@@ -149,15 +150,7 @@ def convert_pd_to_gdf_nodes(df):
     return gdf
 
 def convert_pd_to_gdf_lines(df_way):
-    """
-    Convert Lines Pandas Dataframe to GeoPandas Dataframe
 
-    Args:
-        df_way: Pandas Dataframe
-
-    Returns:
-        GeoPandas Dataframe
-    """
 
     df_way = df_way.drop(df_way[df_way.Type != "Way"].index).reset_index(drop=True)
     
@@ -211,16 +204,36 @@ def output_creation(df_feature, region_list, feature_name, data_dir, out_format)
         df_feature.to_csv(out_slug + '.csv')
 
     if "geojson" in out_format:
-        logger.debug("Writing GeoJSON file")
-        # if primary_feature_element[primary_name][feature_name] == "way":
-        #     gdf_feature = convert_pd_to_gdf_lines(df_feature)
-        # else:
-        #     gdf_feature = convert_pd_to_gdf_nodes(df_feature)
+        raise NotImplementedError
+        # logger.debug("Writing GeoJSON file")
+        # # if primary_feature_element[primary_name][feature_name] == "way":
+        # #     gdf_feature = convert_pd_to_gdf_lines(df_feature)
+        # # else:
+        # #     gdf_feature = convert_pd_to_gdf_nodes(df_feature)
 
-        # try:
-        #     gdf_feature.drop(columns=["refs"], inplace=True)
-        # except:
-        #     pass
+        # # try:
+        # #     gdf_feature.drop(columns=["refs"], inplace=True)
+        # # except:
+        # #     pass
 
-        gdf_feature.to_file(out_slug + '.geojson', driver='GeoJSON')
+        # gdf_feature.to_file(out_slug + '.geojson', driver='GeoJSON')
+
+
+if __name__ == "__main__":
+    from earth_osm.filter import get_filtered_data
+    from earth_osm.gfk_data import get_region_tuple
+    region = "DE"
+    primary_name = "power"
+    feature_name = "substation"
+    mp = True
+    update = False
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "earth_data")
+
+    primary_dict, feature_dict = get_filtered_data(get_region_tuple(region), primary_name, feature_name, mp, update, data_dir)
+
+    primary_data = primary_dict['Data']
+    feature_data = feature_dict['Data']
+
+    df_node = pd.json_normalize(feature_data["Node"].values())
+    df_way = pd.json_normalize(feature_data["Way"].values())
 

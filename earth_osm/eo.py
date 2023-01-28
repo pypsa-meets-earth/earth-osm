@@ -5,7 +5,7 @@ __license__ = "MIT"
 """
 This is the principal module of the earth_osm project.
 """
-#%%
+#%%#%%
 import logging
 import os
 
@@ -13,13 +13,14 @@ import pandas as pd
 
 from earth_osm.config import primary_feature_element, feature_columns
 from earth_osm.filter import get_filtered_data
-from earth_osm.gfk_data import get_region_tuple, view_regions
-from earth_osm.utils import convert_ways_lines, convert_ways_points, output_creation
+from earth_osm.gfk_data import get_region_tuple
+from earth_osm.utils import convert_ways_lines, convert_ways_points, output_creation, way_or_area
 
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
 
+#%%
 #%%
 # TODO: Rename to process_region
 def process_country(region, primary_name, feature_name, mp, update, data_dir):
@@ -51,7 +52,14 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
         df_node["Type"] = "Node"
     
     if set(['way', 'area']) <= element_set:
-        
+        df_way["Type"] = way_or_area(df_way)
+        # get ways that are areas
+        df_way_area = df_way[df_way["Type"] == "area"]
+        # get ways that are lines
+        df_way_line = df_way[df_way["Type"] == "way"]
+        # convert ways that are areas
+        convert_ways_lines(df_way_line, primary_data)
+
     
     # element_type = primary_feature_element[primary_name][feature_name]
 
@@ -79,7 +87,7 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
 
     # Add Country Column
     # TODO: rename Country to Region
-    # df_feature["Country"] = region.short
+    df_feature["Country"] = region.short
 
     return df_feature
 
