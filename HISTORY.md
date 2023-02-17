@@ -4,6 +4,23 @@ Changelog
 
 (unreleased)
 ------------
+- Add current work in progress. [mnm-matin]
+- Fix sitemap download everytime. [mnm-matin]
+- Fix out format. [mnm-matin]
+- Add new args decription to readme. [Max Parzen]
+- Update contributing. [mnm-matin]
+- Add gfk_data test. [mnm-matin]
+- Update code cov workflow. [mnm-matin]
+- Add codecov again, remove size. [Matin Mahmood]
+- Update README.md. [Matin Mahmood]
+- Update README.md. [Max Parzen]
+- Fix badge version. [Max Parzen]
+- Add conda badge. [Max Parzen]
+
+
+0.0.8 (2023-01-01)
+------------------
+- Release: version 0.0.8 🚀 [Max Parzen]
 - Revert changes. [Max Parzen]
 
 
