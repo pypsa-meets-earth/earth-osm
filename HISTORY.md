@@ -4,6 +4,14 @@ Changelog
 
 (unreleased)
 ------------
+- Update utils.py (#30) [Davide Fioriti]
+
+  Drop non-way elements in way entries
+
+
+0.0.9 (2023-02-17)
+------------------
+- Release: version 0.0.9 🚀 [Matin Mahmood]
 - Add current work in progress. [mnm-matin]
 - Fix sitemap download everytime. [mnm-matin]
 - Fix out format. [mnm-matin]
