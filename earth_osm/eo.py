@@ -13,7 +13,7 @@ import pandas as pd
 
 from earth_osm.config import primary_feature_element, feature_columns
 from earth_osm.filter import get_filtered_data
-from earth_osm.gfk_data import get_region_tuple
+from earth_osm.gfk_data import get_region_tuple, view_regions
 from earth_osm.utils import convert_ways_lines, convert_ways_points, output_creation
 
 

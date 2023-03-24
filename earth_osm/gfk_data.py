@@ -157,8 +157,8 @@ def get_id_by_str(region_str):
         if code is not None:
             return region_str
         else:
-            logger.error(f'{region_str} not found. check view_region()')
-            raise KeyError(f'{region_str} not found. check view_region()')
+            logger.error(f"{region_str} not found. Check eo.view_regions() or run 'earth_osm view regions'")
+            raise KeyError(f"{region_str} not found. Check eo.view_regions() or run 'earth_osm view regions'")
 
 
 def get_region_tuple(region_str):
