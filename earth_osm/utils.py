@@ -95,6 +95,22 @@ def convert_ways_points(df_way, primary_data):
     df_way.insert(0, "lonlat", lonlat_column)
 
 
+def convert_ways_polygons(df_way, primary_data):
+    """
+    Convert Ways to Polygon and Point Coordinates
+    """
+    lonlat_list = lonlat_lookup(df_way, primary_data)
+    way_polygon = list(
+        map(
+            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
+            lonlat_list,
+        )
+    )
+
+
+    # df_way.insert(0, "Area", way_polygon)
+    return way_polygon
+
 def convert_ways_lines(df_way, primary_data):
     """
     Convert Ways to Line Coordinates
