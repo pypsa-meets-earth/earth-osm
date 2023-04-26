@@ -39,6 +39,23 @@ def lonlat_lookup(df_way, primary_data):
 
     return lonlat_list
 
+def way_or_area(df_way):
+    if "refs" not in df_way.columns:
+        raise IndexError("refs column not found")
+    
+    def check_closed(refs):
+        if (refs[0] == refs[-1]) and (len(refs) >= 3):
+            return "area"
+        elif len(refs) >= 3:
+            return "way"
+        else:
+            # TODO: improve error handling
+            logger.debug(f"Way with less than 3 refs: {refs}")
+            return None
+
+    type_list = df_way["refs"].apply(check_closed)
+
+    return type_list
 
 def convert_ways_points(df_way, primary_data):
     """
