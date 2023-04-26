@@ -133,30 +133,45 @@ def convert_ways_lines(df_way, primary_data):
     df_way.insert(0, "Length", length_column)
     return df_way
 
+def tags_melt(df_exp, nan_threshold=0.75):
+    # Find columns with high percentage of NaN values
+    high_nan_cols = df_exp.columns[df_exp.isnull().mean() > nan_threshold]
+    df_high_nan = df_exp[high_nan_cols]
 
-def convert_pd_to_gdf_nodes(df_way):
-    """
-    Convert Nodes Pandas Dataframe to GeoPandas Dataframe
+    df_exp['other_tags'] = df_high_nan.apply(lambda x: x.dropna().to_dict(), axis=1)
+    df_exp.drop(columns=high_nan_cols, inplace=True)
+    return df_exp
 
-    Args:
-        df_way: Pandas Dataframe
+def columns_melt(df_exp, columns_to_move):
+    # Check if other_tags already exists, create it if it doesn't
+    if 'other_tags' not in df_exp.columns:
+        df_exp['other_tags'] = df_exp.apply(lambda x: {}, axis=1)
 
-    Returns:
-        GeoPandas Dataframe
-    """
-    gdf = gpd.GeoDataFrame(
-        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
-    )
-    gdf.drop(columns=["lonlat"], inplace=True)
-    return gdf
+    # Move specified columns to other_tags
+    for col in columns_to_move:
+        if col in df_exp.columns:
+            df_exp['other_tags'] = df_exp.apply(lambda x: {**x['other_tags'], col: x[col]}, axis=1)
+            df_exp.drop(columns=col, inplace=True)
+        else:
+            logger.warning(f"Column '{col}' not found in dataframe.")
 
+    return df_exp
 
-def convert_pd_to_gdf_lines(df_way):
-    """
-    Convert Lines Pandas Dataframe to GeoPandas Dataframe
+def tags_explode(df_melt):
+    for index, row in df_melt.iterrows():
+        other_tags = row['other_tags']
+        if not other_tags:
+            continue
+        # check if other tags is dict
+        if not isinstance(other_tags, dict):
+            logger.warning(f"other_tags is not dict: {other_tags}")
+            continue
+        for col, val in other_tags.items():
+            df_melt.at[index, col] = val
+        df_melt.at[index, 'other_tags'] = ''
+    df_melt.drop(columns=['other_tags'], inplace=True)
+    return df_melt
 
-    Args:
-        df_way: Pandas Dataframe
 
     Returns:
         GeoPandas Dataframe
