@@ -19,8 +19,7 @@ from earth_osm.utils import columns_melt,convert_ways_lines, convert_ways_points
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
 
-# TODO: Rename to process_region
-def process_country(region, primary_name, feature_name, mp, update, data_dir):
+def process_region(region, primary_name, feature_name, mp, update, data_dir):
     """
     Process Country
 
@@ -65,10 +64,7 @@ def process_country(region, primary_name, feature_name, mp, update, data_dir):
     # Concatinate Nodes and Ways
     df_feature = pd.concat([df_node, df_way], axis=0)
 
-    # Add Country Column
-    # TODO: rename Country to Region
-    df_feature["Country"] = region.short
-
+        df_feature.insert(3, 'Region', region.short)
     return df_feature
 
 
