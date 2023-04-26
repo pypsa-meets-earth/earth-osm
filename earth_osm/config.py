@@ -7,20 +7,14 @@ This module contains the config for osm features.
 
 """
 
-# The primary_feature_element represents the final representation of the feature
-# For node features: ways are converted to nodes
-# For way features: only ways are used
-
-# TODO: Add 'keep' to keep the original feature representation
-
 primary_feature_element = {
     "power": {
-        "substation": "node",
-        "generator": "node",
-        "line": "way",
-        "tower": "node",
-        "cable": "way",
-    }
+        "substation": ("node", "area"), 
+        "generator": ("node", "way", "area"),
+        "line": ("way"),
+        "tower": ("node"),
+        "cable": ("way"),
+        }
     # add more primary features here
 }
 
