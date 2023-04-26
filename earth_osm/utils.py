@@ -131,6 +131,7 @@ def convert_ways_lines(df_way, primary_data):
     )
 
     df_way.insert(0, "Length", length_column)
+    return df_way
 
 
 def convert_pd_to_gdf_nodes(df_way):
