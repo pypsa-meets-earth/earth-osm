@@ -266,12 +266,48 @@ def output_creation(df_feature, primary_name, feature_name, region_list, data_di
         gdf_feature = convert_pd_to_gdf(df_feature)
         gdf_feature.to_file(out_slug + '.geojson', driver="GeoJSON")
 
+if __name__ == "__main__":
 
-        try:
-            gdf_feature.drop(columns=["refs"], inplace=True)
-        except:
-            pass
+    from earth_osm.filter import get_filtered_data
+    from earth_osm.gfk_data import get_region_tuple
+    region = "DE"
+    primary_name = "power"
+    feature_name = "line"
+    mp = True
+    update = False
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "earth_data")
 
-        logger.info("Writing GeoJSON file")
-        write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
+    primary_dict, feature_dict = get_filtered_data(get_region_tuple(region), primary_name, feature_name, mp, update, data_dir)
 
+    primary_data = primary_dict['Data']
+    feature_data = feature_dict['Data']
+
+    df_node = pd.json_normalize(feature_data["Node"].values())
+    df_way = pd.json_normalize(feature_data["Way"].values())
+
+#%%
+# sort columns by percentage of nan missing values
+# df_feature.isna().mean().sort_values(ascending=True)
+# move geometry column to second place
+# cols = df_feature.columns.tolist()
+# cols.insert(1, cols.pop(cols.index('geometry')))
+# df_feature = df_feature.reindex(columns= cols)
+
+
+#%%
+# df_feature.isna().mean()*100
+# df_feature.info(memory_usage='deep')
+# df_feature['Type'].value_counts(dropna=False)
+
+# drop columns thar are all nan, count them before dropping
+# logger.debug(f"Dropping {df_way.isna().all().sum()} columns with all NaN (percentage of columns: {df_way.isna().all().sum()/len(df_way.columns):.2%})")
+# df_way.dropna(axis=1, how="all", inplace=True)
+
+# drop columns that have 99% nan values
+# logger.debug(f"Dropping {df_way.isna().sum().gt(len(df_way)*0.99).sum()} columns out of {len(df_way.columns)} with more than 99% NaN (percentage of columns: {df_way.isna().sum().gt(len(df_way)*0.99).sum()/len(df_way.columns):.2%})")
+# df_way.dropna(axis=1, thresh=len(df_way)*0.01, inplace=True)
+
+# element_set = set(primary_feature_element[primary_name][feature_name])
+# print(element_set)
+# assert element_set <= set(['node', 'way', 'area']), f"Currenly only supports node, way and area. Got {element_set}"
+# if set(['way', 'area']) <= element_set:
