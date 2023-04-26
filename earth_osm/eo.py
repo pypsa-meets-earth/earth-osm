@@ -41,30 +41,46 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir):
     df_node = pd.json_normalize(feature_data["Node"].values())
     df_way = pd.json_normalize(feature_data["Way"].values())
 
-    element_type = primary_feature_element[primary_name][feature_name]
+    if df_way.empty:
+        logger.debug(f"df_way is empty for {region.short}, {primary_name}, {feature_name}")
+        # for df_way, check if way or area
+    else:
+        type_col = way_or_area(df_way)
+        df_way.insert(1, "Type", type_col)
+        logger.debug(df_way['Type'].value_counts(dropna=False))
 
-    if element_type == "way":
-        convert_ways_lines(
-            df_way, primary_data
-        ) if not df_way.empty else logger.warning(
-            f"Empty Way Dataframe for {feature_name} in {region.short}"
-        )
-        if not df_node.empty:
-            logger.warning(
-                f"Node dataframe not empty for {feature_name} in {region.short}"
-            )
+        # Drop rows with None in Type
+        logger.debug(f"Dropping {df_way['Type'].isna().sum()} rows with None in Type")
+        df_way.dropna(subset=["Type"], inplace=True)
 
-    if element_type == "node":
-        convert_ways_points(df_way, primary_data) if not df_way.empty else None
+        # convert refs to lonlat
+        lonlat_column = lonlat_lookup(df_way, primary_data)
+        df_way.insert(1, "lonlat", lonlat_column)
 
-    # Add Original Type Column
-    df_node["Type"] = "Node"
-    df_way["Type"] = "Way"
+    # check if df_node is empty
+    if df_node.empty:
+        logger.debug(f"df_node is empty for {region.short}, {primary_name}, {feature_name}")
+    else:
+        # df node has lonlat as [lon, lat] it should be [(lon, lat)]
+        df_node["lonlat"] = df_node["lonlat"].apply(lambda x: [tuple(x)])
+        
+        # set type to node
+        df_node["Type"] = "node"
+    
+    # concat ways and nodes
+    df_feature = pd.concat([df_way, df_node], ignore_index=True)
 
-    # Concatinate Nodes and Ways
-    df_feature = pd.concat([df_node, df_way], axis=0)
+    if df_feature.empty:
+        logger.debug(f"df_feature is empty for {region.short}, {primary_name}, {feature_name}")
+    else:
+        # melt 85% nan tags
+        df_feature = tags_melt(df_feature, 0.95)
+
+        # move refs column to other_tags
+        df_feature = columns_melt(df_feature,   ['refs'])
 
         df_feature.insert(3, 'Region', region.short)
+        
     return df_feature
 
 
