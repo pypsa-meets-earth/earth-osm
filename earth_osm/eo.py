@@ -105,10 +105,20 @@ def get_osm_data(
     returns:
         dict of dataframes
     """
-    region_tuple_list = [get_region_tuple(rs) for rs in region_list]
+    region_tuple_list = [get_region_tuple(r) for r in region_list]
 
     for region in region_tuple_list:
         for feature_name in feature_list:
-            df_feature = process_country(region, primary_name, feature_name, mp, update, data_dir)
-            df_feature = df_feature.reindex(columns=feature_columns[feature_name])
-            output_creation(df_feature, primary_name, feature_name, [region], data_dir, out_format, out_aggregate)
+            df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+
+            output_creation(df_feature, primary_name, feature_name, [region], data_dir, out_format)
+            # TODO: add out_aggregate
+
+
+    # combinations = ((region, feature_name) for region in region_tuple_list for feature_name in feature_list)
+
+    # processed_data = map(lambda combo: process_region(combo[0], primary_name, combo[1], mp, update, data_dir), combinations)
+
+    # for i, combo in enumerate(combinations):
+    #     output_creation(processed_data[i], primary_name, combo[1], [combo[0]], data_dir, out_format, out_aggregate)
+
