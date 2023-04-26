@@ -219,47 +219,53 @@ def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, 
         )  # Generate GeoJson
 
 
-def output_creation(df_feature, primary_name, feature_name, region_list, data_dir, out_format, out_aggregate):
+def get_region_slug(region_list):
+    if len(region_list) == 1:
+        region_slug = str(region_list[0].short)
+    else:
+        # TODO: Implement filenamer for multiple regions
+        raise NotImplementedError
+
+    return region_slug
+
+
+def output_creation(df_feature, primary_name, feature_name, region_list, data_dir, out_format):
     """
-    Output CSV and GeoJSON files for each region
+    Save Dataframe to disk
+    Currently supports 
+        CSV: Comma Separated Values
+        GeoJSON: GeoJSON format (including geometry)
 
     Args:
-        df_feature: _description_
-        primary_name: _description_
-        feature_name: _description_
-        region_list: _description_
+        df_feature
     """
-    def filenamer(cc_list):
-        if len(cc_list) == 1:
-            return str(cc_list[0].short)
-        else:
-            # TODO: Fix filenamer
-            raise NotImplementedError
 
-    outputfile_partial = os.path.join(data_dir, "out")  # Output file directory
-    fn_name = filenamer(region_list) # country code e.g. BJ
+    region_slug = get_region_slug(region_list) # country code e.g. BJ
+    out_dir = os.path.join(data_dir, "out")  # Output file directory
+    out_slug = os.path.join(out_dir, f"{region_slug}_{feature_name}")
+    
 
-    if not os.path.exists(outputfile_partial):
+    if not os.path.exists(out_dir):
         os.makedirs(
-            outputfile_partial, exist_ok=True
+            out_dir, exist_ok=True
         )  # create raw directory
 
-    df_feature.reset_index(drop=True, inplace=True)
+    # df_feature.reset_index(drop=True, inplace=True)
 
     # Generate Files
-
     if df_feature.empty:
-        logger.warning(f"All feature data frame empty for {feature_name}")
+        logger.warning(f"feature data frame empty for {feature_name}")
         return None
 
     if "csv" in out_format:
-        write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
+        logger.debug("Writing CSV file")
+        df_feature.to_csv(out_slug + '.csv')
 
     if "geojson" in out_format:
-        if primary_feature_element[primary_name][feature_name] == "way":
-            gdf_feature = convert_pd_to_gdf_lines(df_feature)
-        else:
-            gdf_feature = convert_pd_to_gdf_nodes(df_feature)
+        logger.debug("Writing GeoJSON file")
+        gdf_feature = convert_pd_to_gdf(df_feature)
+        gdf_feature.to_file(out_slug + '.geojson', driver="GeoJSON")
+
 
         try:
             gdf_feature.drop(columns=["refs"], inplace=True)
