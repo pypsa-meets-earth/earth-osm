@@ -173,19 +173,24 @@ def tags_explode(df_melt):
     return df_melt
 
 
-    Returns:
-        GeoPandas Dataframe
-    """
-
-    df_way = df_way.drop(df_way[df_way.Type != "Way"].index).reset_index(drop=True)
+def convert_pd_to_gdf(pd_df):
+    def create_geometry(lonlat_list, geom_type):
+        if geom_type == 'node':
+            return Point(lonlat_list[0])
+        elif geom_type == 'way':
+            return LineString(lonlat_list)
+        elif geom_type == 'area':
+            return Polygon(lonlat_list)
     
-    gdf = gpd.GeoDataFrame(
-        df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326"
-    )
-    gdf.drop(columns=["lonlat"], inplace=True)
+    geometry_col = pd_df.apply(lambda row: create_geometry(row['lonlat'], row['Type']), axis=1)
+    lonlat_index = pd_df.columns.get_loc('lonlat')
+    pd_df.insert(lonlat_index, "geometry", geometry_col)
+    gdf = gpd.GeoDataFrame(pd_df, geometry='geometry')
+    gdf.drop(columns=['lonlat'], inplace=True)
+    pd_df.drop(columns=['geometry'], inplace=True)
+
     return gdf
-
-
+    
 def write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
     """Create csv file. Optimized for large files as write on disk in chunks"""
     if out_aggregate:
