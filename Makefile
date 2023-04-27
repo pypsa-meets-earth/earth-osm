@@ -35,7 +35,7 @@ lint:             ## Run pep8, black, mypy linters.
 	$(ENV_PREFIX)mypy --ignore-missing-imports earth_osm/ --exclude \_pb2 --install-types --non-interactive
 
 .PHONY: test
-test: lint        ## Run tests and generate coverage report.
+test:      ## Run tests and generate coverage report.
 	$(ENV_PREFIX)pytest -v --cov-config .coveragerc --cov=earth_osm -l --tb=short --maxfail=1 tests/
 	$(ENV_PREFIX)coverage xml
 	$(ENV_PREFIX)coverage html

@@ -15,7 +15,7 @@ def test_view():
     from pprint import pprint
     print(get_root_list())
     pprint(get_all_regions_dict(level=2))
-    view_regions()  # TODO: replace Nan with blank
+    view_regions()
 
 def test_regions():
     # pprint(get_region_dict('germany')) #Raises KeyError

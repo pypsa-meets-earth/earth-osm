@@ -1,13 +1,15 @@
 from earth_osm.eo import get_osm_data
 
-
 def test_base():
     get_osm_data(
-        region_list=["benin"],
+        region_list=["germany", "benin", "gcc-states", "SN-GM", "slovenia"],
         primary_name="power",
-        feature_list=["tower"],
-        update=True,
+        feature_list=["substation", "generator", "line", "tower", "cable"],
+        update=False,
         mp=True,
         out_format=["csv", "geojson"],
         out_aggregate=False,
     )
+
+if __name__ == '__main__':
+    test_base()

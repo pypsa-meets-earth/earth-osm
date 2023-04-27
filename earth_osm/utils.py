@@ -20,6 +20,14 @@ from earth_osm.config import primary_feature_element
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
 
+# Notes: Types
+# Three main types returned by extraction: Node, Way, Relation
+# Node: Point
+# Way: LineString or Polygon
+# Relation: MultiLineString or MultiPolygon
+# So really it is Node, Way, Area, Relation
+
+# Notes: CRS
 # geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
 # distance_crs: EPSG:3857  # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
 # area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
@@ -39,6 +47,23 @@ def lonlat_lookup(df_way, primary_data):
 
     return lonlat_list
 
+def way_or_area(df_way):
+    if "refs" not in df_way.columns:
+        raise IndexError("refs column not found")
+    
+    def check_closed(refs):
+        if (refs[0] == refs[-1]) and (len(refs) >= 3):
+            return "area"
+        elif len(refs) >= 3:
+            return "way"
+        else:
+            # TODO: improve error handling
+            logger.debug(f"Way with less than 3 refs: {refs}")
+            return None
+
+    type_list = df_way["refs"].apply(check_closed)
+
+    return type_list
 
 def convert_ways_points(df_way, primary_data):
     """
@@ -78,6 +103,22 @@ def convert_ways_points(df_way, primary_data):
     df_way.insert(0, "lonlat", lonlat_column)
 
 
+def convert_ways_polygons(df_way, primary_data):
+    """
+    Convert Ways to Polygon and Point Coordinates
+    """
+    lonlat_list = lonlat_lookup(df_way, primary_data)
+    way_polygon = list(
+        map(
+            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
+            lonlat_list,
+        )
+    )
+
+
+    # df_way.insert(0, "Area", way_polygon)
+    return way_polygon
+
 def convert_ways_lines(df_way, primary_data):
     """
     Convert Ways to Line Coordinates
@@ -98,45 +139,66 @@ def convert_ways_lines(df_way, primary_data):
     )
 
     df_way.insert(0, "Length", length_column)
+    return df_way
+
+def tags_melt(df_exp, nan_threshold=0.75):
+    # Find columns with high percentage of NaN values
+    high_nan_cols = df_exp.columns[df_exp.isnull().mean() > nan_threshold]
+    df_high_nan = df_exp[high_nan_cols]
+
+    df_exp['other_tags'] = df_high_nan.apply(lambda x: x.dropna().to_dict(), axis=1)
+    df_exp.drop(columns=high_nan_cols, inplace=True)
+    return df_exp
+
+def columns_melt(df_exp, columns_to_move):
+    # Check if other_tags already exists, create it if it doesn't
+    if 'other_tags' not in df_exp.columns:
+        df_exp['other_tags'] = df_exp.apply(lambda x: {}, axis=1)
+
+    # Move specified columns to other_tags
+    for col in columns_to_move:
+        if col in df_exp.columns:
+            df_exp['other_tags'] = df_exp.apply(lambda x: {**x['other_tags'], col: x[col]}, axis=1)
+            df_exp.drop(columns=col, inplace=True)
+        else:
+            logger.warning(f"Column '{col}' not found in dataframe.")
+
+    return df_exp
+
+def tags_explode(df_melt):
+    for index, row in df_melt.iterrows():
+        other_tags = row['other_tags']
+        if not other_tags:
+            continue
+        # check if other tags is dict
+        if not isinstance(other_tags, dict):
+            logger.warning(f"other_tags is not dict: {other_tags}")
+            continue
+        for col, val in other_tags.items():
+            df_melt.at[index, col] = val
+        df_melt.at[index, 'other_tags'] = ''
+    df_melt.drop(columns=['other_tags'], inplace=True)
+    return df_melt
 
 
-def convert_pd_to_gdf_nodes(df_way):
-    """
-    Convert Nodes Pandas Dataframe to GeoPandas Dataframe
-
-    Args:
-        df_way: Pandas Dataframe
-
-    Returns:
-        GeoPandas Dataframe
-    """
-    gdf = gpd.GeoDataFrame(
-        df_way, geometry=[Point(x, y) for x, y in df_way.lonlat], crs="EPSG:4326"
-    )
-    gdf.drop(columns=["lonlat"], inplace=True)
-    return gdf
-
-
-def convert_pd_to_gdf_lines(df_way):
-    """
-    Convert Lines Pandas Dataframe to GeoPandas Dataframe
-
-    Args:
-        df_way: Pandas Dataframe
-
-    Returns:
-        GeoPandas Dataframe
-    """
-
-    df_way = df_way.drop(df_way[df_way.Type != "Way"].index).reset_index(drop=True)
+def convert_pd_to_gdf(pd_df):
+    def create_geometry(lonlat_list, geom_type):
+        if geom_type == 'node':
+            return Point(lonlat_list[0])
+        elif geom_type == 'way':
+            return LineString(lonlat_list)
+        elif geom_type == 'area':
+            return Polygon(lonlat_list)
     
-    gdf = gpd.GeoDataFrame(
-        df_way, geometry=[LineString(x) for x in df_way.lonlat], crs="EPSG:4326"
-    )
-    gdf.drop(columns=["lonlat"], inplace=True)
+    geometry_col = pd_df.apply(lambda row: create_geometry(row['lonlat'], row['Type']), axis=1)
+    lonlat_index = pd_df.columns.get_loc('lonlat')
+    pd_df.insert(lonlat_index, "geometry", geometry_col)
+    gdf = gpd.GeoDataFrame(pd_df, geometry='geometry')
+    gdf.drop(columns=['lonlat'], inplace=True)
+    pd_df.drop(columns=['geometry'], inplace=True)
+
     return gdf
-
-
+    
 def write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
     """Create csv file. Optimized for large files as write on disk in chunks"""
     if out_aggregate:
@@ -165,53 +227,95 @@ def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, 
         )  # Generate GeoJson
 
 
-def output_creation(df_feature, primary_name, feature_name, region_list, data_dir, out_format, out_aggregate):
+def get_region_slug(region_list):
+    if len(region_list) == 1:
+        region_slug = str(region_list[0].short)
+    else:
+        # TODO: Implement filenamer for multiple regions
+        raise NotImplementedError
+
+    return region_slug
+
+
+def output_creation(df_feature, primary_name, feature_name, region_list, data_dir, out_format):
     """
-    Output CSV and GeoJSON files for each region
+    Save Dataframe to disk
+    Currently supports 
+        CSV: Comma Separated Values
+        GeoJSON: GeoJSON format (including geometry)
 
     Args:
-        df_feature: _description_
-        primary_name: _description_
-        feature_name: _description_
-        region_list: _description_
+        df_feature
     """
-    def filenamer(cc_list):
-        if len(cc_list) == 1:
-            return str(cc_list[0].short)
-        else:
-            # TODO: Fix filenamer
-            raise NotImplementedError
 
-    outputfile_partial = os.path.join(data_dir, "out")  # Output file directory
-    fn_name = filenamer(region_list) # country code e.g. BJ
+    region_slug = get_region_slug(region_list) # country code e.g. BJ
+    out_dir = os.path.join(data_dir, "out")  # Output file directory
+    out_slug = os.path.join(out_dir, f"{region_slug}_{feature_name}")
+    
 
-    if not os.path.exists(outputfile_partial):
+    if not os.path.exists(out_dir):
         os.makedirs(
-            outputfile_partial, exist_ok=True
+            out_dir, exist_ok=True
         )  # create raw directory
 
-    df_feature.reset_index(drop=True, inplace=True)
+    # df_feature.reset_index(drop=True, inplace=True)
 
     # Generate Files
-
     if df_feature.empty:
-        logger.warning(f"All feature data frame empty for {feature_name}")
+        logger.warning(f"feature data frame empty for {feature_name}")
         return None
 
     if "csv" in out_format:
-        write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
+        logger.debug("Writing CSV file")
+        df_feature.to_csv(out_slug + '.csv')
 
     if "geojson" in out_format:
-        if primary_feature_element[primary_name][feature_name] == "way":
-            gdf_feature = convert_pd_to_gdf_lines(df_feature)
-        else:
-            gdf_feature = convert_pd_to_gdf_nodes(df_feature)
+        logger.debug("Writing GeoJSON file")
+        gdf_feature = convert_pd_to_gdf(df_feature)
+        gdf_feature.to_file(out_slug + '.geojson', driver="GeoJSON")
 
-        try:
-            gdf_feature.drop(columns=["refs"], inplace=True)
-        except:
-            pass
+if __name__ == "__main__":
 
-        logger.info("Writing GeoJSON file")
-        write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
+    from earth_osm.filter import get_filtered_data
+    from earth_osm.gfk_data import get_region_tuple
+    region = "DE"
+    primary_name = "power"
+    feature_name = "line"
+    mp = True
+    update = False
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "earth_data")
 
+    primary_dict, feature_dict = get_filtered_data(get_region_tuple(region), primary_name, feature_name, mp, update, data_dir)
+
+    primary_data = primary_dict['Data']
+    feature_data = feature_dict['Data']
+
+    df_node = pd.json_normalize(feature_data["Node"].values())
+    df_way = pd.json_normalize(feature_data["Way"].values())
+
+#%%
+# sort columns by percentage of nan missing values
+# df_feature.isna().mean().sort_values(ascending=True)
+# move geometry column to second place
+# cols = df_feature.columns.tolist()
+# cols.insert(1, cols.pop(cols.index('geometry')))
+# df_feature = df_feature.reindex(columns= cols)
+
+
+#%%
+# df_feature.isna().mean()*100
+# df_feature.info(memory_usage='deep')
+# df_feature['Type'].value_counts(dropna=False)
+
+# drop columns thar are all nan, count them before dropping
+# logger.debug(f"Dropping {df_way.isna().all().sum()} columns with all NaN (percentage of columns: {df_way.isna().all().sum()/len(df_way.columns):.2%})")
+# df_way.dropna(axis=1, how="all", inplace=True)
+
+# drop columns that have 99% nan values
+# logger.debug(f"Dropping {df_way.isna().sum().gt(len(df_way)*0.99).sum()} columns out of {len(df_way.columns)} with more than 99% NaN (percentage of columns: {df_way.isna().sum().gt(len(df_way)*0.99).sum()/len(df_way.columns):.2%})")
+# df_way.dropna(axis=1, thresh=len(df_way)*0.01, inplace=True)
+
+# element_set = set(primary_feature_element[primary_name][feature_name])
+# print(element_set)
+# assert element_set <= set(['node', 'way', 'area']), f"Currenly only supports node, way and area. Got {element_set}"
+# if set(['way', 'area']) <= element_set:
