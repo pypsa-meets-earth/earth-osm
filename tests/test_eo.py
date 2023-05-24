@@ -1,7 +1,7 @@
-from earth_osm.eo import get_osm_data
+from earth_osm.eo import save_osm_data
 
 def test_base():
-    get_osm_data(
+    save_osm_data(
         region_list=["germany", "benin", "gcc-states", "SN-GM", "slovenia"],
         primary_name="power",
         feature_list=["substation", "generator", "line", "tower", "cable"],

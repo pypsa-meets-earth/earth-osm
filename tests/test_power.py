@@ -1,8 +1,8 @@
-from earth_osm.eo import get_osm_data
+from earth_osm.eo import save_osm_data
 
 
 def test_tower():
-    get_osm_data(
+    save_osm_data(
         region_list=["germany"],
         primary_name="power",
         feature_list=["tower"],
@@ -13,7 +13,7 @@ def test_tower():
     )
 
 def test_substation():
-    get_osm_data(
+    save_osm_data(
         region_list=["germany"],
         primary_name="power",
         feature_list=["substation"],
@@ -24,7 +24,7 @@ def test_substation():
     )
 
 def test_generator():
-    get_osm_data(
+    save_osm_data(
         region_list=["germany"],
         primary_name="power",
         feature_list=["generator"],
@@ -35,7 +35,7 @@ def test_generator():
     )
 
 def test_line():
-    get_osm_data(
+    save_osm_data(
         region_list=["germany"],
         primary_name="power",
         feature_list=["line"],
@@ -46,7 +46,7 @@ def test_line():
     )
 
 def test_empty_cable():
-    get_osm_data(
+    save_osm_data(
         region_list=["benin"],
         primary_name="power",
         feature_list=["cable"],

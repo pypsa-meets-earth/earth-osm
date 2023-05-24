@@ -12,7 +12,7 @@ import argparse
 import os
 
 from earth_osm.config import primary_feature_element
-from earth_osm.eo import get_osm_data
+from earth_osm.eo import save_osm_data
 from earth_osm.gfk_data import get_all_valid_list, view_regions
 
 
@@ -136,7 +136,7 @@ def main():  # pragma: no cover
             f'Aggregate Outputs = {args.out_aggregate}',
             ]))
 
-        get_osm_data(
+        save_osm_data(
             region_list=region_list,
             primary_name=args.primary,
             feature_list=feature_list,

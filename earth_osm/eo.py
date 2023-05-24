@@ -84,7 +84,7 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir):
     return df_feature
 
 
-def get_osm_data(
+def save_osm_data(
     region_list=['germany'],
     primary_name='power',
     feature_list=['tower'],

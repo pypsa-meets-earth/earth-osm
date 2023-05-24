@@ -24,7 +24,7 @@
 ## Functions
 
 - [`args.main`](./args.md#function-main): The main function executes on commands:
-- [`eo.get_osm_data`](./eo.md#function-get_osm_data): Get OSM Data for a list of regions and features
+- [`eo.save_osm_data`](./eo.md#function-save_osm_data): Get OSM Data for a list of regions and features
 - [`eo.process_country`](./eo.md#function-process_country): Process Country
 - [`extract.filter_file_block`](./extract.md#function-filter_file_block)
 - [`extract.filter_pbf`](./extract.md#function-filter_pbf): Parallized pre-Filtering of OSM file by a pre_filter

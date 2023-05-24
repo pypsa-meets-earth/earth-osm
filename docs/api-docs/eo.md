@@ -43,10 +43,10 @@ Process Country
 
 <a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L73"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `get_osm_data`
+## <kbd>function</kbd> `save_osm_data`
 
 ```python
-get_osm_data(
+save_osm_data(
     region_list=['germany'],
     primary_name='power',
     feature_list=['tower'],
