@@ -1,3 +1,5 @@
+import pytest
+
 from earth_osm.gfk_data import (
     get_root_list,
     get_all_regions_dict,
@@ -33,13 +35,14 @@ def test_regions():
     assert get_id_by_str("germany") == "germany"
     assert get_id_by_str("DE") == "germany"
     assert get_id_by_str("DE") == "germany"
-    try:
+
+
+def test_get_id_by_str_keyerror():
+    with pytest.raises(KeyError):
         get_id_by_str("unknown country")
-    except KeyError:
-        assert True
+
 
 def test_region_tuple():
-    # print(get_region_tuple('germany'))
     print(get_region_tuple("germany"))
     print(get_region_tuple("germany").short)
     print(get_all_valid_list())
