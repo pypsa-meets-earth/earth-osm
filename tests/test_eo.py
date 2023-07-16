@@ -1,3 +1,4 @@
+import os
 from earth_osm.eo import save_osm_data
 
 def test_base():
@@ -7,6 +8,7 @@ def test_base():
         feature_list=["substation", "generator", "line", "tower", "cable"],
         update=False,
         mp=True,
+        data_dir=os.path.join(os.getcwd(), "earth_data_test"),
         out_format=["csv", "geojson"],
         out_aggregate=False,
     )

@@ -153,6 +153,8 @@ def main():  # pragma: no cover
             region_list=region_list,
             primary_name=args.primary,
             feature_list=feature_list,
+            data_dir=data_dir,
+            # move to kwargs
             update=args.update,
             mp=args.no_mp,
             out_format=out_format,
