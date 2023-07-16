@@ -73,7 +73,8 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
     extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
     extract_parser.add_argument('--out_format', nargs="*", type=str, help='Export options')
-    extract_parser.add_argument('--out_aggregate', action='store_true', default=False, help='Aggregate Outputs by feature')
+    extract_parser.add_argument('--agg_feature', action='store_true', default=False, help='Aggregate Outputs by feature')
+    extract_parser.add_argument('--agg_region', action='store_true', default=False, help='Aggregate Outputs by region')
     
     view_parser = subparser.add_parser('view', help='View OSM Data')
     view_parser.add_argument('type', help='View Supported', choices=['regions', 'primary'])
@@ -125,6 +126,17 @@ def main():  # pragma: no cover
         else:
             out_format = ['csv', 'geojson']
 
+        if args.agg_feature and args.agg_region:
+            raise KeyError(f'Cannot aggregate by both feature and region')
+        elif args.agg_feature:
+            out_aggregate = 'feature'
+        elif args.agg_region:
+            out_aggregate = 'region'
+        else:
+            out_aggregate = False
+
+
+
         print('\n'.join(['',
             f'Primary Feature: {args.primary}',
             f'Sub Features: {" - ".join(feature_list)}',
@@ -133,7 +145,7 @@ def main():  # pragma: no cover
             f'Update Data = {args.update}',
             f'Data Directory = {data_dir}',
             f'Output Format = {" - ".join(out_format)}',
-            f'Aggregate Outputs = {args.out_aggregate}',
+            f'Aggregate Outputs = {out_aggregate}',
             ]))
 
         save_osm_data(
@@ -144,7 +156,7 @@ def main():  # pragma: no cover
             mp=args.mp,
             data_dir=data_dir,
             out_format=out_format,
-            out_aggregate=args.out_aggregate,
+            out_aggregate=out_aggregate,
         )
 
     else:

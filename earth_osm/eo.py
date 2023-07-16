@@ -11,10 +11,15 @@ import os
 
 import pandas as pd
 
+# suppress pandas warning about fragmented dataframes
+# TODO: do not suppress warnings
+import warnings
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
+
 # from earth_osm.config import primary_feature_element, feature_columns
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple, view_regions
-from earth_osm.utils import columns_melt,convert_ways_lines, convert_ways_points, lonlat_lookup, output_creation, tags_melt, way_or_area
+from earth_osm.utils import OutFileWriter, lonlat_lookup, way_or_area
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -70,18 +75,48 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir):
     # concat ways and nodes
     df_feature = pd.concat([df_way, df_node], ignore_index=True)
 
+    # remove columns that are all nan
+    df_feature.dropna(axis=1, how="all", inplace=True)
+
     if df_feature.empty:
         logger.debug(f"df_feature is empty for {region.short}, {primary_name}, {feature_name}")
     else:
-        # melt 85% nan tags
-        df_feature = tags_melt(df_feature, 0.95)
-
-        # move refs column to other_tags
-        df_feature = columns_melt(df_feature,   ['refs'])
-
         df_feature.insert(3, 'Region', region.short)
         
     return df_feature
+
+def get_osm_data(
+        region_str,
+        primary_name,
+        feature_name,
+        cached,
+):
+    region_tuple = get_region_tuple(region_str)
+    mp = True
+    update = cached
+    data_dir=os.path.join(os.getcwd(), 'earth_data')
+    
+    df = process_region(
+        region_tuple,
+        primary_name,
+        feature_name,
+        mp,
+        update,
+        data_dir
+    )
+
+    # TODO: improve get_osm_data funciton with post processing
+    return df
+    
+
+
+# TODO: Plan
+# Use an intermediary super efficient file format such as parquet
+# save a region,feauture pair in temp files
+# implement planetary file from osm (https://planet.openstreetmap.org/)
+# read keys, values, tags and their frequencies from taginfo api (https://taginfo.openstreetmap.org/taginfo/apidoc)
+# use **kwargs and allow for dropping of refs column
+# implement post processing functions: i) create_geojson 2) filter_by_bbox
 
 
 def save_osm_data(
@@ -91,8 +126,8 @@ def save_osm_data(
     update=False,
     mp=True,
     data_dir=os.path.join(os.getcwd(), 'earth_data'),
-    out_format="csv",
-    out_aggregate=False,
+    out_format="csv", # TODO: rename out_format -> format
+    out_aggregate=True, # TODO: rename out_aggregate -> aggregate
 ):
     """
     Get OSM Data for a list of regions and features
@@ -106,13 +141,32 @@ def save_osm_data(
         dict of dataframes
     """
     region_tuple_list = [get_region_tuple(r) for r in region_list]
+    region_short_list = [r.short for r in region_tuple_list]
 
-    for region in region_tuple_list:
+    if out_aggregate == 'region' or out_aggregate is True:
+        # for each feature, aggregate all regions
         for feature_name in feature_list:
-            df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+            with OutFileWriter(region_short_list, [feature_name], data_dir, out_format) as writer:
+                for region in region_tuple_list:
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+                    writer(df_feature)
+                    # output_creation(df_feature, primary_name, [feature_name], region_short_list, data_dir, out_format)
 
-            output_creation(df_feature, primary_name, feature_name, [region], data_dir, out_format)
-            # TODO: add out_aggregate
+    elif out_aggregate == 'feature':
+        # for each region, aggreagate all features
+        for region in region_tuple_list:
+            with OutFileWriter([region.short], feature_list, data_dir, out_format) as writer:
+                for feature_name in feature_list:
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+                    writer(df_feature)
+    
+    elif out_aggregate is False:
+        # no aggregation, one file per region per feature
+        for region in region_tuple_list:
+                for feature_name in feature_list:
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+                    with OutFileWriter([region.short], [feature_name], data_dir, out_format) as writer:
+                        writer(df_feature)
 
 
     # combinations = ((region, feature_name) for region in region_tuple_list for feature_name in feature_list)
