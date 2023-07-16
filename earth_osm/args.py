@@ -70,7 +70,7 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--regions', nargs="+", type=str, help='Region Identifier') # TODO: replace with region group
     extract_parser.add_argument('--features', nargs="*", type=str, help='Sub-Features')
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
-    extract_parser.add_argument('--mp',  action='store_true', default=True, help='Use Multiprocessing')
+    extract_parser.add_argument('--no_mp',  action='store_false', default=True, help='No Multiprocessing')
     extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
     extract_parser.add_argument('--out_format', nargs="*", type=str, help='Export options')
     extract_parser.add_argument('--agg_feature', action='store_true', default=False, help='Aggregate Outputs by feature')
@@ -141,7 +141,7 @@ def main():  # pragma: no cover
             f'Primary Feature: {args.primary}',
             f'Sub Features: {" - ".join(feature_list)}',
             f'Regions: {" - ".join(region_list)}',
-            f'Multiprocessing = {args.mp}',
+            f'Multiprocessing = {args.no_mp}',
             f'Update Data = {args.update}',
             f'Data Directory = {data_dir}',
             f'Output Format = {" - ".join(out_format)}',
@@ -153,8 +153,7 @@ def main():  # pragma: no cover
             primary_name=args.primary,
             feature_list=feature_list,
             update=args.update,
-            mp=args.mp,
-            data_dir=data_dir,
+            mp=args.no_mp,
             out_format=out_format,
             out_aggregate=out_aggregate,
         )

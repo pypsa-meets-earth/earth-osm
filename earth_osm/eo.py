@@ -124,7 +124,7 @@ def save_osm_data(
     primary_name='power',
     feature_list=['tower'],
     update=False,
-    mp=True,
+    mp=True, # TODO: remove mp arg
     data_dir=os.path.join(os.getcwd(), 'earth_data'),
     out_format="csv", # TODO: rename out_format -> format
     out_aggregate=True, # TODO: rename out_aggregate -> aggregate
