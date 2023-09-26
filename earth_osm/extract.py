@@ -41,7 +41,7 @@ def id_filter(entry, idset):
 
 
 def way_filter(entry, way_relation_members):
-    return type(entry) is Way and entry.id in way_relation_members
+    return isinstance(entry, Way) and entry.id in way_relation_members
 
 
 def filter_file_block(filename, ofs, header, filter_func, args, kwargs):
@@ -98,15 +98,14 @@ def filter_pbf(filename, pre_filter, multiprocess=True):
         relation_way_node_members = set()
         
         for entry in primary_entries:
-    
-            if type(entry) is Relation:
+            if isinstance(entry, Relation):
                 for id, typename, role in entry.members:
                     if typename == "NODE":
                         node_relation_members.add(id)
                     elif typename == "WAY":
                         way_relation_members.add(id)
             
-            if type(entry) is Way:
+            if isinstance(entry, Way):
                 way_refs.update(entry.refs)
 
         way_entries = list(file_query(way_filter, way_relation_members))
