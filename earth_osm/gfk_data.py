@@ -29,13 +29,11 @@ sitemap = download_sitemap(False, pkg_data_dir)
 with open(sitemap, encoding='utf8') as f:
     d = json.load(f)
 
-row_list = []
-for feature in d['features']:
-    row_list.append(feature['properties'])
-df = pd.DataFrame(row_list)
+df = pd.DataFrame(feature['properties'] for feature in d['features'])
 # Add short code column
-col1 = df['iso3166-1:alpha2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
-col2 = df['iso3166-2'].apply(lambda x: '-'.join(x) if type(x) == list else x)
+join_func = lambda x: '-'.join(x) if isinstance(x, list) else x
+col1 = df['iso3166-1:alpha2'].apply(join_func)
+col2 = df['iso3166-2'].apply(join_func)
 df['short_code'] = col1.combine_first(col2)
 
 def get_geom_sitemap():
