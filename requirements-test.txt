@@ -6,8 +6,5 @@ isort
 pytest-cov
 mypy>=0.9
 gitchangelog
-mkdocs
-mkdocs-material
-mkdocs-awesome-pages-plugin
 pprint
 

@@ -86,5 +86,13 @@ release:          ## Create a new tag for release.
 .PHONY: docs
 docs:             ## Build the documentation.
 	@echo "building documentation ..."
+	@$(ENV_PREFIX)pip install -r requirements-docs.txt
 	@$(ENV_PREFIX)mkdocs build
 	URL="site/index.html"; xdg-open $$URL || sensible-browser $$URL || x-www-browser $$URL || gnome-open $$URL
+
+.PHONY: docs-gh-deploy
+docs-serve:       ## Serve the documentation.
+	@echo "deplyin documentation on github ..."
+	@$(ENV_PREFIX)pip install -r requirements-docs.txt
+	@$(ENV_PREFIX)mkdocs gh-deploy --force
+	URL="https://earth-osm.github.io/earth-osm/"; xdg-open $$URL || sensible-browser $$URL || x-www-browser $$URL || gnome-open $$URL
