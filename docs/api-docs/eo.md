@@ -7,18 +7,15 @@
 
 
 
-**Global Variables**
----------------
-- **primary_feature_element**
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L27"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `process_country`
+## <kbd>function</kbd> `process_region`
 
 ```python
-process_country(region, primary_name, feature_name, mp, update, data_dir)
+process_region(region, primary_name, feature_name, mp, update, data_dir)
 ```
 
 Process Country 
@@ -41,7 +38,22 @@ Process Country
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L73"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L88"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `get_osm_data`
+
+```python
+get_osm_data(region_str, primary_name, feature_name, cached)
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L122"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `save_osm_data`
 
@@ -52,7 +64,9 @@ save_osm_data(
     feature_list=['tower'],
     update=False,
     mp=True,
-    data_dir='/home/matin/earth-osm/earth_data'
+    data_dir='/home/matin/Projects/earth-osm/earth_data',
+    out_format='csv',
+    out_aggregate=True
 )
 ```
 

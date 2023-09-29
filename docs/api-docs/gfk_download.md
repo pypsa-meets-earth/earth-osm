@@ -15,7 +15,7 @@
 ## <kbd>function</kbd> `earth_downloader`
 
 ```python
-earth_downloader(url, dir)
+earth_downloader(url, dir, exists_ok=False)
 ```
 
 Download file from url to dir 
@@ -36,7 +36,7 @@ Download file from url to dir
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/gfk_download.py#L58"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/gfk_download.py#L61"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `download_pbf`
 
@@ -51,7 +51,7 @@ download_pbf(url, update, data_dir)
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/gfk_download.py#L75"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/gfk_download.py#L79"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `download_sitemap`
 

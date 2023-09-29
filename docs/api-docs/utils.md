@@ -13,7 +13,7 @@
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L24"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L35"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `lonlat_lookup`
 
@@ -26,7 +26,22 @@ Lookup refs and convert to list of longlats
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L39"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L50"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `way_or_area`
+
+```python
+way_or_area(df_way)
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L69"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `convert_ways_points`
 
@@ -39,7 +54,20 @@ Convert Ways to Point Coordinates
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L77"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L107"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `convert_ways_polygons`
+
+```python
+convert_ways_polygons(df_way, primary_data)
+```
+
+Convert Ways to Polygon and Point Coordinates 
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L124"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `convert_ways_lines`
 
@@ -57,77 +85,158 @@ Convert Ways to Line Coordinates
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L96"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L146"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `convert_pd_to_gdf_nodes`
+## <kbd>function</kbd> `tags_melt`
 
 ```python
-convert_pd_to_gdf_nodes(df_way)
+tags_melt(df_exp, nan_threshold=0.75)
 ```
 
-Convert Nodes Pandas Dataframe to GeoPandas Dataframe 
 
 
 
-**Args:**
- 
- - <b>`df_way`</b>:  Pandas Dataframe 
-
-
-
-**Returns:**
- GeoPandas Dataframe 
 
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L113"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L155"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `convert_pd_to_gdf_lines`
+## <kbd>function</kbd> `columns_melt`
 
 ```python
-convert_pd_to_gdf_lines(df_way)
+columns_melt(df_exp, columns_to_move)
 ```
 
-Convert Lines Pandas Dataframe to GeoPandas Dataframe 
 
 
 
-**Args:**
- 
- - <b>`df_way`</b>:  Pandas Dataframe 
-
-
-
-**Returns:**
- GeoPandas Dataframe 
 
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L130"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L184"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `output_csv_geojson`
+## <kbd>function</kbd> `tags_explode`
 
 ```python
-output_csv_geojson(
-    df_feature,
-    primary_name,
+tags_explode(df_melt)
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L243"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `convert_pd_to_gdf`
+
+```python
+convert_pd_to_gdf(pd_df)
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L270"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `write_csv`
+
+```python
+write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name)
+```
+
+Create csv file. Optimized for large files as write on disk in chunks 
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L284"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `write_geojson`
+
+```python
+write_geojson(
+    gdf_feature,
+    outputfile_partial,
     feature_name,
-    region_list,
-    data_dir
+    out_aggregate,
+    fn_name
 )
 ```
 
-Output CSV and GeoJSON files for each region 
+Create geojson file. Optimized for large files as write on disk in chunks 
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L298"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `get_list_slug`
+
+```python
+get_list_slug(str_list)
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L406"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>function</kbd> `output_creation`
+
+```python
+output_creation(
+    df_feature,
+    primary_name,
+    feature_list,
+    region_list,
+    data_dir,
+    out_format
+)
+```
+
+Save Dataframe to disk Currently supports   CSV: Comma Separated Values  GeoJSON: GeoJSON format (including geometry) 
 
 
 
 **Args:**
- 
- - <b>`df_feature`</b>:  _description_ 
- - <b>`primary_name`</b>:  _description_ 
- - <b>`feature_name`</b>:  _description_ 
- - <b>`region_list`</b>:  _description_ 
+  df_feature 
+
+
+---
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L311"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+## <kbd>class</kbd> `OutFileWriter`
+
+
+
+
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/utils.py#L313"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(region_list, feature_list, data_dir, out_format)
+```
+
+
+
+
+
+
+
 
 

@@ -25,7 +25,7 @@ primary_entry_filter(entry, pre_filter)
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L34"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L39"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `id_filter`
 
@@ -40,7 +40,7 @@ id_filter(entry, idset)
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L37"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L43"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `way_filter`
 
@@ -55,7 +55,7 @@ way_filter(entry, way_relation_members)
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L41"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L47"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `filter_file_block`
 
@@ -70,7 +70,7 @@ filter_file_block(filename, ofs, header, filter_func, args, kwargs)
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L52"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L58"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `pool_file_query`
 
@@ -83,7 +83,7 @@ returns query function that accepts a filter function and returns a list of filt
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L69"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/extract.py#L76"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `filter_pbf`
 
@@ -97,7 +97,11 @@ Parallized pre-Filtering of OSM file by a pre_filter
 
 **Args:**
  
- - <b>`filename`</b>:    PBF file pre_filter: 
+ - <b>`filename`</b>:    PBF file 
+ - <b>`pre_filter`</b>:  dict of dicts in the following format: { 
+ - <b>`Node`</b>:  {primary_name: feature_list},  
+ - <b>`Way`</b>:  {primary_name: feature_list}, 
+ - <b>`Relation`</b>:  {primary_name: feature_list}} 
 
 
 

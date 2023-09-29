@@ -10,12 +10,5 @@
 **Global Variables**
 ---------------
 - **primary_feature_element**
-- **columns_basic**
-- **columns_substation**
-- **columns_generator**
-- **columns_line**
-- **columns_cable**
-- **columns_tower**
-- **feature_columns**
 
 
