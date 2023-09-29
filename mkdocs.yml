@@ -1,4 +1,9 @@
-site_name: earth_osm
+site_name: Earth-OSM
+repo_url: https://github.com/pypsa-meets-earth/earth-osm
+repo_name: earth-osm
+site_description: OpenStreetMap data extraction
+site_author: Matin Mahmood
+
 theme: material
 plugins:
   - search

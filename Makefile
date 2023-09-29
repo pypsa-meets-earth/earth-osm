@@ -86,7 +86,7 @@ release:		## Create a new tag for release.
 .PHONY: api-docs
 api-docs:		## Generate the API documentation.
 	@if ! git diff-index --quiet HEAD --; then \
-		echo "There are uncommitted changes. Aborting..."; \
+		echo "There are uncommitted changes. Stash or commit changes first"; \
 	else \
 		echo "Generating API documentation..."; \
 		$(ENV_PREFIX)pip install -r requirements-docs.txt; \
