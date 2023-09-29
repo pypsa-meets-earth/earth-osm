@@ -1,2 +1,5 @@
 site_name: earth_osm
-theme: readthedocs
+theme: material
+plugins:
+  - search
+  - awesome-pages

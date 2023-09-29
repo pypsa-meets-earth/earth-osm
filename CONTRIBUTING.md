@@ -114,7 +114,9 @@ the `make release` will ask you the version number to create the tag, ex: type `
 > **CAUTION**:  The make release will change local changelog files and commit all the unstaged changes you have.
 
 
-### Update Docs
+### Update API Docs
+API Docs should be updated using lazydocs
+
 ```bash
 lazydocs \
     --output-path="./docs/api-docs" \
@@ -129,6 +131,16 @@ lazydocs \
 We also generate [codecov](https://about.codecov.io/sign-up/) Reports
 
 ### Prject Design 
+
+### Documentation (Docs)
+MKdocs is used for the main documentation.
+Lazydocs is used to automatically generate documentation of the API from the docstrings.
+
+The following mkdocs plugins are used:
+- [material-theme](https://squidfunk.github.io/mkdocs-material/)
+- [awesome-pages](https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin)
+
+
 #### What is the purpose of the go_to_tmpdir fixture in conftest?
 The go_to_tmpdir fixture in conftest creates a temporary directory before each test to perform file system operations in isolation, and removes it after the test. Pytest automatically sets the temporary directory as the working directory before each test, ensuring that any temporary artifacts created during the test will be removed once the test is complete.
 
