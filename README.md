@@ -75,9 +75,9 @@ usage: earth_osm extract **primary** **--regions** region1, region2 **--features
 ## Advanced Usage
 
 ```py
-import earth_osm as eo
+import earth_osm.eo as eo
 
-eo.save_osm_data(
+eo.get_osm_data(
   primary_name = 'power',
   region_list = ['benin', 'monaco'],
   feature_list = ['substation', 'line'],
