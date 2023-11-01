@@ -3,6 +3,8 @@ earth_osm/data/
 
 # External Data Dir
 earth_data/
+earth_data_test/
+earth_data_out/
 
 # Protobuf Files
 *.proto
