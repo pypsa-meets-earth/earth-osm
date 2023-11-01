@@ -5,6 +5,7 @@ Changelog
 (unreleased)
 ------------
 - Update utils.py (#30) [Davide Fioriti]
+- Add option output directory option [Davide Fioriti]
 
   Drop non-way elements in way entries
 
