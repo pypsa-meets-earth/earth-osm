@@ -122,7 +122,7 @@ def get_osm_data(
 def save_osm_data(
     region_list=['germany'],
     primary_name='power',
-    feature_list=['tower'],
+    feature_list=[None],
     update=False,
     mp=True, # TODO: remove mp arg
     data_dir=os.path.join(os.getcwd(), 'earth_data'),
@@ -147,7 +147,7 @@ def save_osm_data(
     if out_aggregate == 'region' or out_aggregate is True:
         # for each feature, aggregate all regions
         for feature_name in feature_list:
-            with OutFileWriter(region_short_list, [feature_name], out_dir, out_format) as writer:
+            with OutFileWriter(region_short_list, primary_name, [feature_name], out_dir, out_format) as writer:
                 for region in region_tuple_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
                     writer(df_feature)
@@ -156,7 +156,7 @@ def save_osm_data(
     elif out_aggregate == 'feature':
         # for each region, aggreagate all features
         for region in region_tuple_list:
-            with OutFileWriter([region.short], feature_list, out_dir, out_format) as writer:
+            with OutFileWriter([region.short], primary_name, feature_list, out_dir, out_format) as writer:
                 for feature_name in feature_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
                     writer(df_feature)
@@ -166,7 +166,7 @@ def save_osm_data(
         for region in region_tuple_list:
                 for feature_name in feature_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
-                    with OutFileWriter([region.short], [feature_name], out_dir, out_format) as writer:
+                    with OutFileWriter([region.short], primary_name, [feature_name], out_dir, out_format) as writer:
                         writer(df_feature)
 
 

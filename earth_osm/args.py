@@ -108,8 +108,7 @@ def main():  # pragma: no cover
             if not set(feature_list) <= set(primary_feature_element[args.primary]):
                 raise KeyError(f'Invalid Feature {" ".join(set(feature_list) - set(primary_feature_element[args.primary]))}, run earth_osm view features to view valid features')
         else:
-            feature_list = list(primary_feature_element[args.primary].keys())
-            assert isinstance(feature_list, list), f'Invalid Feature List {feature_list}'
+            feature_list = [None]  # download all DEFAULT for primary feature
 
         if args.data_dir:
             if not os.path.exists(args.data_dir):

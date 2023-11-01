@@ -15,7 +15,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString, Point, Polygon
 
-from earth_osm.config import primary_feature_element
+from earth_osm.config import DEFAULT_FEATURE, primary_feature_element
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -295,11 +295,14 @@ def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, 
         )  # Generate GeoJson
 
 
-def get_list_slug(str_list):
+def get_list_slug(str_list, DEFAULT='all'):
     import hashlib
     str_list.sort()
     if len(str_list) == 1:
-        return str_list[0]
+        if is_default(str_list[0]):
+            return DEFAULT
+        else:
+            return str_list[0]
     else:
         filename = "_".join(str_list)
         if len(filename)>15:
@@ -310,17 +313,18 @@ def get_list_slug(str_list):
 
 class OutFileWriter:
 
-    def __init__(self, region_list, feature_list, data_dir, out_format):
+    def __init__(self, region_list, primary_name, feature_list, data_dir, out_format):
         self.region_list = region_list
+        self.primary_name = primary_name
         self.feature_list = feature_list
         self.data_dir = data_dir
         self.out_format = out_format
-        logger.info(f'File writer initialized with region_list: {region_list}, feature_list: {feature_list}')
+        logger.info(f'File writer initialized with region_list: {region_list}, primary_name: {primary_name}, feature_list: {feature_list}')
 
     def __enter__(self):
         # setup file name etc.
         region_slug = get_list_slug(self.region_list) # country code e.g. BJ
-        feature_slug = get_list_slug(self.feature_list)
+        feature_slug = get_list_slug(self.feature_list, self.primary_name)
     
         out_dir = os.path.join(self.data_dir, "out")  # Output file directory
         out_slug = os.path.join(out_dir, f"{region_slug}_{feature_slug}")
@@ -441,6 +445,12 @@ def output_creation(df_feature, primary_name, feature_list, region_list, data_di
         logger.debug("Writing GeoJSON file")
         gdf_feature = convert_pd_to_gdf(df_feature)
         gdf_feature.to_file(out_slug + '.geojson', driver="GeoJSON")
+
+def is_default(feature_name):
+    """
+    Check if feature is the default or not
+    """
+    return (feature_name is None) or (feature_name == DEFAULT_FEATURE)
 
 if __name__ == "__main__":
 
