@@ -72,6 +72,7 @@ def main():  # pragma: no cover
     extract_parser.add_argument('--update', action='store_true', default=False, help='Update Data')
     extract_parser.add_argument('--no_mp',  action='store_false', default=True, help='No Multiprocessing')
     extract_parser.add_argument('--data_dir', nargs="?", type=str, help='Earth Data Directory')
+    extract_parser.add_argument('--out_dir', nargs="?", type=str, help='Earth Output Directory')
     extract_parser.add_argument('--out_format', nargs="*", type=str, help='Export options')
     extract_parser.add_argument('--agg_feature', action='store_true', default=False, help='Aggregate Outputs by feature')
     extract_parser.add_argument('--agg_region', action='store_true', default=False, help='Aggregate Outputs by region')
@@ -119,6 +120,16 @@ def main():  # pragma: no cover
                 raise NotADirectoryError(f'Invalid Data Directory {args.data_dir}')
         else:
             data_dir = os.path.join(os.getcwd(), 'earth_data')
+
+        if args.out_dir:
+            if not os.path.exists(args.out_dir):
+                os.makedirs(args.out_dir, exist_ok=True)
+            if os.path.isdir(args.out_dir):
+                out_dir = args.out_dir
+            else:
+                raise NotADirectoryError(f'Invalid Output Directory {args.out_dir}')
+        else:
+            out_dir = data_dir
         
         if args.out_format:
             out_format = set(args.out_format)
@@ -145,6 +156,7 @@ def main():  # pragma: no cover
             f'Multiprocessing = {args.no_mp}',
             f'Update Data = {args.update}',
             f'Data Directory = {data_dir}',
+            f'Output Directory = {out_dir}',
             f'Output Format = {" - ".join(out_format)}',
             f'Aggregate Outputs = {out_aggregate}',
             ]))
@@ -154,6 +166,7 @@ def main():  # pragma: no cover
             primary_name=args.primary,
             feature_list=feature_list,
             data_dir=data_dir,
+            out_dir=out_dir,
             # move to kwargs
             update=args.update,
             mp=args.no_mp,
