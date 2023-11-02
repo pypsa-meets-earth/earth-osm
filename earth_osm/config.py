@@ -10,9 +10,7 @@ This module contains the config for osm features.
 DEFAULT_FEATURE = "__DEFAULT__"
 
 primary_feature_element = {
-    DEFAULT_FEATURE: ("node", "way", "area"),
     "power": {
-        DEFAULT_FEATURE: ("node", "way", "area"),
         "substation": ("node", "area"), 
         "generator": ("node", "way", "area"),
         "line": ("way"),
@@ -20,7 +18,6 @@ primary_feature_element = {
         "cable": ("way"),
         },
     "building": {
-        DEFAULT_FEATURE: ("area",),
         'allotment_house': ('area',),
         'apartments': ('area',),
         'barn': ('area',),

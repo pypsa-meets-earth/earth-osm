@@ -15,7 +15,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString, Point, Polygon
 
-from earth_osm.config import DEFAULT_FEATURE, primary_feature_element
+from earth_osm.config import primary_feature_element
 
 logger = logging.getLogger("osm_data_extractor")
 logger.setLevel(logging.INFO)
@@ -299,7 +299,7 @@ def get_list_slug(str_list, DEFAULT='all'):
     import hashlib
     str_list.sort()
     if len(str_list) == 1:
-        if is_default(str_list[0]):
+        if is_feature(str_list[0]):
             return DEFAULT
         else:
             return str_list[0]
@@ -446,11 +446,11 @@ def output_creation(df_feature, primary_name, feature_list, region_list, data_di
         gdf_feature = convert_pd_to_gdf(df_feature)
         gdf_feature.to_file(out_slug + '.geojson', driver="GeoJSON")
 
-def is_default(feature_name):
+def is_feature(feature_name):
     """
-    Check if feature is the default or not
+    Check if the required feature is a valid feature
     """
-    return (feature_name is None) or (feature_name == DEFAULT_FEATURE)
+    return (feature_name is not None) and isinstance(feature_name, str)
 
 if __name__ == "__main__":
 

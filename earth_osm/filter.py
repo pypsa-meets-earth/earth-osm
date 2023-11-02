@@ -17,7 +17,7 @@ from earth_osm.config import primary_feature_element
 from earth_osm.extract import filter_pbf
 from earth_osm.gfk_download import download_pbf
 from earth_osm.osmpbf import Node, Relation, Way
-from earth_osm.utils import is_default
+from earth_osm.utils import is_feature
 
 logging.basicConfig()
 logger=logging.getLogger(__name__)
@@ -39,7 +39,7 @@ def feature_filter(primary_data, filter_tuple = ('power', 'line')):
 
 
 def run_feature_filter(primary_dict, feature_name):
-    if is_default(feature_name):
+    if not is_feature(feature_name):
         logger.info('No sub-feature specified, skipping run_feature_filter')
         return primary_dict
     primary_name = primary_dict['Metadata']['primary_feature']
