@@ -7,8 +7,6 @@ This module contains the config for osm features.
 
 """
 
-DEFAULT_FEATURE = "__DEFAULT__"
-
 primary_feature_element = {
     "power": {
         "substation": ("node", "area"), 
