@@ -1,8 +1,11 @@
 # Internal Data Dir
-earth_osm/data/
+earth_osm/data/index-*
 
 # External Data Dir
 earth_data/
+
+# Test Data Dir
+earth_data_test/
 
 # Protobuf Files
 *.proto
@@ -108,6 +111,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# VSCode project settings
+.vscode/
 
 # Spyder project settings
 .spyderproject
