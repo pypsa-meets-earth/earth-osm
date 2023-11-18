@@ -4,7 +4,7 @@ import os
 
 def test_building():
     save_osm_data(
-        region_list=["benin"],
+        region_list=["malta"],
         primary_name="building",
         feature_list=[None],
         update=False,

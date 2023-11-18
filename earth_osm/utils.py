@@ -298,9 +298,9 @@ def get_list_slug(str_list, DEFAULT='all'):
     str_list.sort()
     if len(str_list) == 1:
         if is_feature(str_list[0]):
-            return DEFAULT
-        else:
             return str_list[0]
+        else:
+            return DEFAULT
     else:
         filename = "_".join(str_list)
         if len(filename)>15:
