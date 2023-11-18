@@ -16,6 +16,7 @@ from earth_osm.gfk_data import (
 def test_view():
     from pprint import pprint
     print(get_root_list())
+    # visual inspection
     pprint(get_all_regions_dict(level=2))
     view_regions()
 
@@ -46,3 +47,10 @@ def test_region_tuple():
     print(get_region_tuple("germany"))
     print(get_region_tuple("germany").short)
     print(get_all_valid_list())
+
+def test_others():
+    for o in ["gcc-states", "SN-GM"]:
+        r = get_region_tuple(o)
+        s = r.short
+
+

@@ -11,7 +11,7 @@ This module provides a CLI interface for the earth_osm project.
 import argparse
 import os
 
-from earth_osm.config import primary_feature_element
+from earth_osm.tagdata import get_feature_list, get_primary_list
 from earth_osm.eo import save_osm_data
 from earth_osm.gfk_data import get_all_valid_list, view_regions
 
@@ -61,7 +61,7 @@ def main():  # pragma: no cover
 
     extract_parser = subparser.add_parser('extract', help='Extract OSM Data')
 
-    extract_parser.add_argument('primary', choices=primary_feature_element.keys(), type=str, help='Primary Feature')
+    extract_parser.add_argument('primary', choices=get_primary_list(), type=str, help='Primary Feature')
 
     # region_group = extract_parser.add_mutually_exclusive_group(required=True) # Get regions using ids or coordinates
     # region_group.add_argument('--regions',nargs="+", type=str, help='Region Identifier')
@@ -105,10 +105,10 @@ def main():  # pragma: no cover
 
         if args.features:
             feature_list = list(args.features)
-            if not set(feature_list) <= set(primary_feature_element[args.primary]):
-                raise KeyError(f'Invalid Feature {" ".join(set(feature_list) - set(primary_feature_element[args.primary]))}, run earth_osm view features to view valid features')
+            if not set(feature_list) <= set(get_feature_list(args.primary)):
+                raise KeyError(f'Invalid Feature {" ".join(set(feature_list) - set(get_feature_list(args.primary)))}, run earth_osm view features to view valid features')
         else:
-            feature_list = list(primary_feature_element[args.primary].keys())
+            feature_list = list(get_feature_list(args.primary))
             assert isinstance(feature_list, list), f'Invalid Feature List {feature_list}'
 
         if args.data_dir:

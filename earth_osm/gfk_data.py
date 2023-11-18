@@ -20,7 +20,7 @@ import pandas as pd
 from earth_osm.gfk_download import download_sitemap
 
 logger = logging.getLogger("osm_data_extractor")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 pkg_data_dir = os.path.join(os.path.dirname(__file__), "data")
@@ -121,7 +121,7 @@ def get_id_by_code(code):
     try:
         return df.loc[df['short_code']== code, 'id'].item()
     except (KeyError, ValueError):
-        logger.debug(f'{code} not found')
+        logger.debug(f'{code} not found, probably an id')
         return None
 
 

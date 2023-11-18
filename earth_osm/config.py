@@ -3,7 +3,7 @@ __copyright__ = "Copyright 2022, The PyPSA meets Earth Initiative"
 __license__ = "MIT"
 
 """
-This module contains the config for osm features.
+DEPRECATED MODULE (see tagdata.py and taginfo.py)
 
 """
 
