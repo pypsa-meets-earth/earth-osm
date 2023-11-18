@@ -4,7 +4,7 @@
 <a/>
 </p>
 
-# earth-osm 
+# earth-osm. Python tool to extract large-amounts of OpenStreetMap data 
 
 
 [![PyPI version](https://img.shields.io/pypi/v/earth-osm.svg)](https://pypi.org/project/earth-osm/)

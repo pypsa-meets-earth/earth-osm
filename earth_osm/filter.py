@@ -13,7 +13,7 @@ import logging
 import os
 from datetime import datetime
 
-from earth_osm.config import primary_feature_element
+from earth_osm.tagdata import get_feature_list
 from earth_osm.extract import filter_pbf
 from earth_osm.gfk_download import download_pbf
 from earth_osm.osmpbf import Node, Relation, Way
@@ -64,7 +64,7 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     logger.info('New Pre-Filter Data')
     logger.info('Load OSM data from '+ PBF_inputfile+'\n')
 
-    feature_list = list(primary_feature_element[primary_name].keys())
+    feature_list = get_feature_list(primary_name)
     pre_filter = {
         Node: {primary_name: feature_list},
         Way: {primary_name: feature_list},

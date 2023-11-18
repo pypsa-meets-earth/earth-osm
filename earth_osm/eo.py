@@ -16,7 +16,7 @@ import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
-# from earth_osm.config import primary_feature_element, feature_columns
+from earth_osm.tagdata import get_feature_list
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple, view_regions
 from earth_osm.utils import OutFileWriter, lonlat_lookup, way_or_area
@@ -120,9 +120,9 @@ def get_osm_data(
 
 
 def save_osm_data(
-    region_list=['germany'],
-    primary_name='power',
-    feature_list=[None],
+    region_list,
+    primary_name,
+    feature_list=None,
     update=False,
     mp=True, # TODO: remove mp arg
     data_dir=os.path.join(os.getcwd(), 'earth_data'),
@@ -143,6 +143,9 @@ def save_osm_data(
     """
     region_tuple_list = [get_region_tuple(r) for r in region_list]
     region_short_list = [r.short for r in region_tuple_list]
+
+    if feature_list is None:
+        feature_list = get_feature_list(primary_name)
 
     if out_aggregate == 'region' or out_aggregate is True:
         # for each feature, aggregate all regions
