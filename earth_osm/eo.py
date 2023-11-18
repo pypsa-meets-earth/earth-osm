@@ -90,11 +90,11 @@ def get_osm_data(
         primary_name,
         feature_name,
         cached,
-        data_dir=os.path.join(os.getcwd(), 'earth_data'),
 ):
     region_tuple = get_region_tuple(region_str)
     mp = True
     update = cached
+    data_dir=os.path.join(os.getcwd(), 'earth_data')
     
     df = process_region(
         region_tuple,
@@ -146,6 +146,9 @@ def save_osm_data(
 
     if feature_list is None:
         feature_list = get_feature_list(primary_name)
+    elif feature_list == ['ALL']:
+        # Account for wild card
+        feature_list = [f'ALL_{primary_name}']
 
     if out_aggregate == 'region' or out_aggregate is True:
         # for each feature, aggregate all regions

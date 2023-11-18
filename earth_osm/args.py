@@ -105,7 +105,7 @@ def main():  # pragma: no cover
 
         if args.features:
             feature_list = list(args.features)
-            if not set(feature_list) <= set(get_feature_list(args.primary)):
+            if not (set(feature_list) <= set(get_feature_list(args.primary)) or set(feature_list) == {'ALL'}):
                 raise KeyError(f'Invalid Feature {" ".join(set(feature_list) - set(get_feature_list(args.primary)))}, run earth_osm view features to view valid features')
         else:
             feature_list = list(get_feature_list(args.primary))

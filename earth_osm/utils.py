@@ -293,21 +293,18 @@ def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, 
         )  # Generate GeoJson
 
 
-def get_list_slug(str_list, DEFAULT='all'):
+def get_list_slug(str_list):
     import hashlib
     str_list.sort()
     if len(str_list) == 1:
-        if is_feature(str_list[0]):
-            return str_list[0]
-        else:
-            return DEFAULT
+        return str_list[0]
     else:
-        filename = "_".join(str_list)
-        if len(filename)>15:
-            name_string = filename[:15] # TODO: could be partial string
-            name_code = hashlib.md5(filename[15:].encode()).hexdigest()[:8]
-            filename = name_string + '_' + name_code
-        return filename
+        file_slug = "_".join(str_list)
+        if len(file_slug)>15:
+            name_string = file_slug[:15] # TODO: could be partial string
+            name_code = hashlib.md5(file_slug[15:].encode()).hexdigest()[:8]
+            file_slug = name_string + '_' + name_code
+        return file_slug
 
 class OutFileWriter:
 
@@ -322,7 +319,7 @@ class OutFileWriter:
     def __enter__(self):
         # setup file name etc.
         region_slug = get_list_slug(self.region_list) # country code e.g. BJ
-        feature_slug = get_list_slug(self.feature_list, self.primary_name)
+        feature_slug = get_list_slug(self.feature_list)
     
         out_dir = os.path.join(self.data_dir, "out")  # Output file directory
         out_slug = os.path.join(out_dir, f"{region_slug}_{feature_slug}")
@@ -443,12 +440,6 @@ def output_creation(df_feature, primary_name, feature_list, region_list, data_di
         logger.debug("Writing GeoJSON file")
         gdf_feature = convert_pd_to_gdf(df_feature)
         gdf_feature.to_file(out_slug + '.geojson', driver="GeoJSON")
-
-def is_feature(feature_name):
-    """
-    Check if the required feature is a valid feature
-    """
-    return (feature_name is not None) and isinstance(feature_name, str)
 
 if __name__ == "__main__":
 
