@@ -102,7 +102,7 @@ def get_osm_data(
         feature_name,
         mp,
         update,
-        data_dir
+        data_dir,
     )
 
     # TODO: improve get_osm_data funciton with post processing
@@ -126,6 +126,7 @@ def save_osm_data(
     update=False,
     mp=True, # TODO: remove mp arg
     data_dir=os.path.join(os.getcwd(), 'earth_data'),
+    out_dir=os.path.join(os.getcwd(), 'earth_data'),
     out_format="csv", # TODO: rename out_format -> format
     out_aggregate=True, # TODO: rename out_aggregate -> aggregate
 ):
@@ -145,11 +146,14 @@ def save_osm_data(
 
     if feature_list is None:
         feature_list = get_feature_list(primary_name)
+    elif feature_list == ['ALL']:
+        # Account for wild card
+        feature_list = [f'ALL_{primary_name}']
 
     if out_aggregate == 'region' or out_aggregate is True:
         # for each feature, aggregate all regions
         for feature_name in feature_list:
-            with OutFileWriter(region_short_list, [feature_name], data_dir, out_format) as writer:
+            with OutFileWriter(region_short_list, primary_name, [feature_name], out_dir, out_format) as writer:
                 for region in region_tuple_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
                     writer(df_feature)
@@ -158,7 +162,7 @@ def save_osm_data(
     elif out_aggregate == 'feature':
         # for each region, aggreagate all features
         for region in region_tuple_list:
-            with OutFileWriter([region.short], feature_list, data_dir, out_format) as writer:
+            with OutFileWriter([region.short], primary_name, feature_list, out_dir, out_format) as writer:
                 for feature_name in feature_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
                     writer(df_feature)
@@ -168,7 +172,7 @@ def save_osm_data(
         for region in region_tuple_list:
                 for feature_name in feature_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
-                    with OutFileWriter([region.short], [feature_name], data_dir, out_format) as writer:
+                    with OutFileWriter([region.short], primary_name, [feature_name], out_dir, out_format) as writer:
                         writer(df_feature)
 
 

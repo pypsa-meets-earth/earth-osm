@@ -43,7 +43,7 @@ Process Country
 ## <kbd>function</kbd> `get_osm_data`
 
 ```python
-get_osm_data(region_str, primary_name, feature_name, cached)
+get_osm_data(region_str, primary_name, feature_name, cached, data_dir)
 ```
 
 

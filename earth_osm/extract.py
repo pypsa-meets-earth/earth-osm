@@ -30,7 +30,7 @@ def primary_entry_filter(entry, pre_filter):
             #  is the value for power in tags
             # feature_name == True gets all things tagged with power
             return any(
-                feature_name == True
+                feature_name[:4]=='ALL_' # check for wildcard
                 or feature_name in entry.tags.get(primary_name)
                 for feature_name in filtermap.get(primary_name)
             )

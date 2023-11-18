@@ -5,6 +5,8 @@ Changelog
 (unreleased)
 ------------
 - Update utils.py (#30) [Davide Fioriti]
+- Add option output directory option [Davide Fioriti]
+- Add option to download all data of primary features [Davide Fioriti]
 
   Drop non-way elements in way entries
 

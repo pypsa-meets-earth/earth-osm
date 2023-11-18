@@ -3,6 +3,8 @@ earth_osm/data/index-*
 
 # External Data Dir
 earth_data/
+earth_data_test/
+earth_data_out/
 
 # Test Data Dir
 earth_data_test/

@@ -299,21 +299,22 @@ def get_list_slug(str_list):
     if len(str_list) == 1:
         return str_list[0]
     else:
-        filename = "_".join(str_list)
-        if len(filename)>15:
-            name_string = filename[:15] # TODO: could be partial string
-            name_code = hashlib.md5(filename[15:].encode()).hexdigest()[:8]
-            filename = name_string + '_' + name_code
-        return filename
+        file_slug = "_".join(str_list)
+        if len(file_slug)>15:
+            name_string = file_slug[:15] # TODO: could be partial string
+            name_code = hashlib.md5(file_slug[15:].encode()).hexdigest()[:8]
+            file_slug = name_string + '_' + name_code
+        return file_slug
 
 class OutFileWriter:
 
-    def __init__(self, region_list, feature_list, data_dir, out_format):
+    def __init__(self, region_list, primary_name, feature_list, data_dir, out_format):
         self.region_list = region_list
+        self.primary_name = primary_name
         self.feature_list = feature_list
         self.data_dir = data_dir
         self.out_format = out_format
-        logger.info(f'File writer initialized with region_list: {region_list}, feature_list: {feature_list}')
+        logger.info(f'File writer initialized with region_list: {region_list}, primary_name: {primary_name}, feature_list: {feature_list}')
 
     def __enter__(self):
         # setup file name etc.
