@@ -4,6 +4,77 @@ Changelog
 
 (unreleased)
 ------------
+- Improve tests. [Matin Mahmood]
+- Improve gfk logging. [Matin Mahmood]
+- Dynamically get feature from taginfo api. [Matin Mahmood]
+- Update README.md. [Max Parzen]
+- Update api-docs. [Matin Mahmood]
+- Add lazydoc auto api documentaiton generation. [Matin Mahmood]
+- Add api docs generation. [Matin Mahmood]
+- Update docs workflow to use makefile. [Matin Mahmood]
+- Separate docs. [Matin Mahmood]
+- Update docs-ci.yml. [Matin Mahmood]
+- Add MkDocs. [Matin Mahmood]
+- Improve readibility. [Matin Mahmood]
+- Improve readability. [Matin Mahmood]
+- Update README.md. [Matin Mahmood]
+- Create docs-ci.yml. [Matin Mahmood]
+- Improve test. [Matin Mahmood]
+- Improve test. [Matin Mahmood]
+- Add building to config. [Matin Mahmood]
+- Add data_dir. [Matin Mahmood]
+- General bug fix. [Matin Mahmood]
+- Rename multiprocessing. [Matin Mahmood]
+- Push aggregation. [Matin Mahmood]
+- Rename get_osm_data to save_osm_data. [Matin Mahmood]
+- Add area (#38) [Matin Mahmood]
+
+  * add way_or_area funciton
+
+  * add way_to_polygon function
+
+  * fix retun statement in ways_lines
+
+  * add tags melt and explode functions
+
+  * combine functions to pd_to_gdf
+
+  * add output_creation
+
+  * add debug code
+
+  * improve imports
+
+  * rename country to region
+
+  * refactor process pipe
+
+  * add comments and small refactor
+
+  * reduce config
+
+  * add notes
+
+  * small refactor
+
+  * improve base test
+
+  * remove comment
+
+  * add power tests
+
+  * add todo code
+
+  * remove lint from make test for now
+- Remove code cov fixes #35. [Matin Mahmood]
+- Update protobuf. [Matin Mahmood]
+- Update README.md. [Matin Mahmood]
+- Improve error message missing region (#34) [Davide Fioriti]
+
+
+0.1.0 (2023-03-04)
+------------------
+- Release: version 0.1.0 🚀 [Matin Mahmood]
 - Update utils.py (#30) [Davide Fioriti]
 
   Drop non-way elements in way entries
