@@ -1,10 +1,63 @@
-site_name: Earth-OSM
+site_name: EarthOSM
 repo_url: https://github.com/pypsa-meets-earth/earth-osm
 repo_name: earth-osm
 site_description: OpenStreetMap data extraction
-site_author: Matin Mahmood
+site_author: PyPSA meets Earth
+copyright:
+  '<span>
+    <i> PyPSA meets Earth Team </i>
+    <br>
+    Copyright &copy; 
+    <script>document.write(new Date().getFullYear())</script> 
+    <a href="https://mnm-matin.github.io/">Matin Mahmood</a>
+  </span>'
 
-theme: material
 plugins:
   - search
   - awesome-pages
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          setup_commands:
+            - import os
+            - import sys
+            - sys.path.insert(0, os.path.abspath('.'))
+
+markdown_extensions:
+  - markdown_include.include
+
+
+theme:
+  name: material
+  icon:
+    logo: material/earth-box-plus
+    next: material/earth-arrow-right
+    previous: material/earth-minus
+    repo: material/github
+  favicon: material/earth-box-plus
+  
+  font:
+    text: Arimo
+    code: Roboto Mono
+  palette:
+    scheme: slate
+    primary: deep orange
+    accent: indigo
+  features:
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.instant
+    - navigation.footer
+    - navigation.top
+    - header.autohide
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pypsa-meets-earth/earth-osm
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/matin-mahmood
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/reAx9Ed8Xq
+  generator: false
