@@ -18,18 +18,19 @@ import requests
 import urllib3
 from tqdm.auto import tqdm
 
-logger = logging.getLogger("osm_geo")
+logger = logging.getLogger("osm_data")
 logger.setLevel(logging.INFO)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def earth_downloader(url, dir, exists_ok=False):
+def download_file(url, dir, exists_ok=False):
     """
     Download file from url to dir
 
     Args:
         url (str): url to download
         dir (str): directory to download to
+        exists_ok (bool): Flag to allow skipping download if file exists.
 
     Returns:
         str: filepath of downloaded file
@@ -57,77 +58,51 @@ def earth_downloader(url, dir, exists_ok=False):
             filepath = None
     return filepath
 
-# TODO: fix update param
-def download_pbf(url, update, data_dir):
-
-    pbf_dir = os.path.join(data_dir, "pbf")
-    pbf_filename = os.path.basename(url)
-    pbf_filepath = os.path.join(pbf_dir, pbf_filename)
-
-    # TODO: multi-part download each file for parallel downloading... (pip install pySmartDL)
-    if not os.path.exists(pbf_filepath):
-        # download file
-        d_filepath = earth_downloader(url, pbf_dir)
-        assert d_filepath == pbf_filepath
-    else:
-        logger.debug(f"{pbf_filename} already exists in {pbf_filepath}")
-
-    return pbf_filepath
-
-
-
 def download_sitemap(geom, pkg_data_dir):
     geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
 
-    sitemap_file = earth_downloader(geofabrik_sitemap_url, pkg_data_dir, exists_ok=True)
+    sitemap_file = download_file(geofabrik_sitemap_url, pkg_data_dir, exists_ok=True)
 
     return sitemap_file
 
 
-# def download_pbf(country_code, update, verify):
-# if verify is True:
-#     if verify_pbf(PBF_inputfile, geofabrik_url, update) is False:
-#         logger.warning(f"md5 mismatch, deleting {geofabrik_filename}")
-#         if os.path.exists(PBF_inputfile):
-#             os.remove(PBF_inputfile)
+def download_pbf(url, update, data_dir):
 
-#         download_pbf(country_code, update=False, verify=False)  # Only try downloading once
+    pbf_dir = os.path.join(data_dir, "pbf")
+    pbf_fn = os.path.basename(url)
+    pbf_fp = os.path.join(pbf_dir, pbf_fn)
 
-# return PBF_inputfile
+    # download file
+    down_pbf_fp = download_file(url, pbf_dir, exists_ok=not update)
+    down_md5_fp = download_file(url + ".md5", pbf_dir, exists_ok=not update)
+    
+    assert down_pbf_fp == pbf_fp
+
+    if not verify_pbf(down_pbf_fp, down_md5_fp):
+        logger.info(f"PBF Md5 mismatch, retrying download for {pbf_fn}")
+        down_pbf_fp = download_file(url, pbf_dir)
+        down_md5_fp = download_file(url + ".md5", pbf_dir, exists_ok=not update)
+        if not verify_pbf(down_pbf_fp, down_md5_fp):
+            raise ValueError(f"File verification failed after retry for {pbf_fn}")
+
+    return pbf_fp
 
 
-# verified_pbf = []
+def calculate_md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
+def verify_pbf(pbf_inputfile, pbf_md5file):
+    # Calculate local MD5
+    local_md5 = calculate_md5(pbf_inputfile)
 
-# def verify_pbf(PBF_inputfile, geofabrik_url, update):
-#     if PBF_inputfile in verified_pbf:
-#         return True
+    # Read remote MD5
+    with open(pbf_md5file, 'r') as f:
+        remote_md5 = f.read().split()[0]
 
-#     geofabrik_md5_url = geofabrik_url + ".md5"
-#     PBF_md5file = PBF_inputfile + ".md5"
-
-#     def calculate_md5(fname):
-#         hash_md5 = hashlib.md5()
-#         with open(fname, "rb") as f:
-#             for chunk in iter(lambda: f.read(4096), b""):
-#                 hash_md5.update(chunk)
-#         return hash_md5.hexdigest()
-
-#     if update is True or not os.path.exists(PBF_md5file):
-#         with requests.get(geofabrik_md5_url, stream=True, verify=False) as r:
-#             with open(PBF_md5file, "wb") as f:
-#                 shutil.copyfileobj(r.raw, f)
-
-#     local_md5 = calculate_md5(PBF_inputfile)
-
-#     with open(PBF_md5file) as f:
-#         contents = f.read()
-#         remote_md5 = contents.split()[0]
-
-#     if local_md5 == remote_md5:
-#         verified_pbf.append(PBF_inputfile)
-#         return True
-#     else:
-#         return False
+    return local_md5 == remote_md5
