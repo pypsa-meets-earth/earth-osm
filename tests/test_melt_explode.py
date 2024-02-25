@@ -2,13 +2,13 @@ import os
 from earth_osm.eo import get_osm_data
 from earth_osm.utils import tags_melt, tags_explode, columns_melt
 
-def test_column_melt():
+def test_column_melt(shared_data_dir):
     region = "nigeria"
     primary_name = "power"
     feature_name = "substation"
     mp = True
     update = False
-    data_dir = os.path.join(os.getcwd(), "earth_data_test")
+    data_dir = shared_data_dir
 
     df = get_osm_data(
         region, 
@@ -33,16 +33,6 @@ def test_column_melt():
 
     assert set(df_exp.columns.tolist()) == set(df.columns.tolist())
 
-    # TODO: check if values are the same
-
-    # df['refs'] = df['refs'].astype(str)
-    # df_exp['refs'] = df_exp['refs'].astype(str)
-
-    # print(df['refs'])
-    # print(df_exp['refs'])
-
-
-
     # check the types of the column refs, row by row
     for i in range(len(df)):
         if not df['refs'].iloc[i] == df_exp['refs'].iloc[i]:
@@ -63,15 +53,13 @@ def test_column_melt():
         assert df[col].equals(df_exp[col]), f'Column {col} is not equal'
 
     
-
-
-def test_melt():
+def test_melt(shared_data_dir):
     region = "nigeria"
     primary_name = "power"
     feature_name = "substation"
     mp = True
     update = False
-    data_dir = os.path.join(os.getcwd(), "earth_data_test")
+    data_dir = shared_data_dir
 
     df = get_osm_data(
         region, 

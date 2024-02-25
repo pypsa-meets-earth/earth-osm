@@ -10,7 +10,7 @@ def test_building():
         update=False,
         mp=True,
         data_dir=os.path.join(os.getcwd(), "earth_data_test"),
-        out_dir=os.path.join(os.getcwd(), "earth_data_out"),
+        out_dir=os.path.join(os.getcwd(), "earth_data_test"),
         out_format=["csv", "geojson"],
         out_aggregate=False,
     )
