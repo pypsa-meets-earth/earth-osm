@@ -144,29 +144,40 @@ def convert_ways_lines(df_way, primary_data):
 def tags_melt(df_exp, nan_threshold=0.75):
     # Find columns with high percentage of NaN values
     high_nan_cols = df_exp.columns[df_exp.isnull().mean() > nan_threshold]
+
+    logger.debug(f"Melting tags from the following columns: {high_nan_cols}")
+
     df_high_nan = df_exp[high_nan_cols]
 
+    # assert other_tags column does not already exist, if it does,
+    assert 'other_tags' not in df_exp.columns, "other_tags column already exists in dataframe"
     df_exp['other_tags'] = df_high_nan.apply(lambda x: x.dropna().to_dict(), axis=1)
+
+    # drop {} in other tags so that its nan
+    df_exp['other_tags'] = df_exp['other_tags'].apply(lambda x: x if x != {} else None)
+
+
     df_exp.drop(columns=high_nan_cols, inplace=True)
     return df_exp
 
 def columns_melt(df_exp, columns_to_move):
-    # Check if other_tags already exists, create it if it doesn't
-    # TODO: might not be necessary to create an other_tags column if it doesn't exist
-    if 'other_tags' not in df_exp.columns:
-        df_exp['other_tags'] = df_exp.apply(lambda x: {}, axis=1)
-        # df_exp.loc[:, 'other_tags'] = {}
-
     def concat_melt(row, col):
         # check if value to melt is NaN
         if str(row[col]) == 'nan':
-            return row['other_tags'] # TODO: just return nan?
-        
-        # check if row['other_tags'] is empty 
-        # TODO: check if other_tags exists and is not empty and is a dict, in that case append....
-        if row['other_tags'] == {} or row['other_tags'] is None or str(row['other_tags']) == 'nan':
+            return None
+        # if other_tags column does not exist, no need to concat
+        # or if other tags exist, but is empty/none/nan, still no need to concat
+        if (
+            'other_tags' not in row.keys() or
+            row['other_tags'] == {} or
+            row['other_tags'] is None or
+            str(row['other_tags']) == 'nan'
+        ):
             return {col: row[col]}
         else:
+            # before concating, check if the column already exists in other_tags
+            if col in row['other_tags']:
+                logger.warning(f"'{col}' already exists in 'row'.")
             return {**row['other_tags'], col: row[col]}
 
     # Move specified columns to other_tags
@@ -182,7 +193,7 @@ def columns_melt(df_exp, columns_to_move):
 def tags_explode(df_melt):
     # check if df_melt has column 'other_tags'
     if not 'other_tags' in df_melt.columns:
-        logger.debug("df is not melted, but tags_explode was called")
+        logger.warning("df is not melted, but tags_explode was called")
         return df_melt
 
     # check if other_tags is empty
@@ -191,51 +202,16 @@ def tags_explode(df_melt):
         # drop other_tags column
         df_melt.drop(columns=['other_tags'], inplace=True)
         return df_melt
-    
-    # TODO: avoid slow for loop, maybe try this :
-    # # convert stringified dicts to dict
-    # df_melt['other_tags'] = df_melt['other_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+    # convert stringified dicts to dict
+    df_melt['other_tags'] = df_melt['other_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
 
-    # # explode other_tags column into multiple columns
-    # df_exploded = df_melt.join(pd.json_normalize(df_melt['other_tags']))
+    # explode other_tags column into multiple columns
+    df_exploded = df_melt.join(pd.json_normalize(df_melt['other_tags']))
 
-    # # drop the original other_tags column
-    # df_exploded.drop(columns=['other_tags'], inplace=True)
+    # drop the original other_tags column
+    df_exploded.drop(columns=['other_tags'], inplace=True)
 
-    # return df_exploded
-
-    for index, row in df_melt.iterrows():
-        other_tags = row['other_tags']
-        
-        # skip empty other_tags
-        if not other_tags or str(other_tags) == 'nan':
-            continue
-
-        # sometimes other_tags dict gets infered as a string
-        if isinstance(other_tags, str):
-            try:
-                # nan values can cause a problem so convert to str
-                # TODO: nan values should have already been handled earlier
-                other_tags = ast.literal_eval(str(other_tags))
-            except ValueError:
-                logger.warning(f"Could not convert other_tags to dict: {other_tags}")
-                continue
-        
-        # mwarn if other tags is not a dict
-        if not isinstance(other_tags, dict):
-            logger.warning(f"other_tags is not dict: {other_tags}, it is {type(other_tags)}")
-
-        for col, val in other_tags.items():
-            # if val is a list this can cause problems
-            # TODO: handle this better, maybe [val]?
-            if isinstance(val, list):
-                val = str(val)
-
-            df_melt.at[index, col] = val
-
-        df_melt.at[index, 'other_tags'] = '' # mark as exploded
-    df_melt.drop(columns=['other_tags'], inplace=True)
-    return df_melt
+    return df_exploded
 
 
 def convert_pd_to_gdf(pd_df):
