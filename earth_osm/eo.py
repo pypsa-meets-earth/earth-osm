@@ -82,6 +82,10 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir):
         logger.debug(f"df_feature is empty for {region.short}, {primary_name}, {feature_name}")
     else:
         df_feature.insert(3, 'Region', region.short)
+
+    # dev logger warning
+    if 'other_tags' in df_feature.columns:
+        logger.warning(f"other_tags in extracted data from osm, change of other_tags to eo_tags is necessary, please open issue on github")
         
     return df_feature
 
@@ -90,13 +94,13 @@ def get_osm_data(
         primary_name,
         feature_name,
         data_dir=None,
-        cached = True,
-):
+        cached = True):
+    
     region_tuple = get_region_tuple(region_str)
     mp = True
     update = not cached
 
-    data_dir=os.path.join(os.getcwd(), 'earth_data')
+    data_dir=os.path.join(os.getcwd(), 'earth_data') if data_dir is None else data_dir
     
     df = process_region(
         region_tuple,
@@ -107,7 +111,6 @@ def get_osm_data(
         data_dir,
     )
 
-    # TODO: improve get_osm_data funciton with post processing
     return df
     
 
