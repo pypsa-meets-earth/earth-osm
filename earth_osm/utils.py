@@ -63,83 +63,7 @@ def way_or_area(df_way):
 
     return type_list
 
-# TODO: Deprecate/Remove this function
-def convert_ways_points(df_way, primary_data):
-    """
-    Convert Ways to Point Coordinates
-    """
-    lonlat_list = lonlat_lookup(df_way, primary_data)
-    way_polygon = list(
-        map(
-            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
-            lonlat_list,
-        )
-    )
-    area_column = list(
-        map(
-            int,
-            round(
-                gpd.GeoSeries(way_polygon)
-                .set_crs("EPSG:4326")
-                .to_crs("ESRI:54009")
-                .area,
-                -1,
-            ),
-        )
-    )  # TODO: Rounding should be done in cleaning scripts
 
-    def find_center_point(p):
-        if p.geom_type == "Polygon":
-            center_point = p.centroid
-        else:
-            center_point = p
-        return list((center_point.x, center_point.y))
-
-    lonlat_column = list(map(find_center_point, way_polygon))
-
-    # df_way.drop("refs", axis=1, inplace=True, errors="ignore")
-    df_way.insert(0, "Area", area_column)
-    df_way.insert(0, "lonlat", lonlat_column)
-
-# TODO: Deprecate/Remove this function
-def convert_ways_polygons(df_way, primary_data):
-    """
-    Convert Ways to Polygon and Point Coordinates
-    """
-    lonlat_list = lonlat_lookup(df_way, primary_data)
-    way_polygon = list(
-        map(
-            lambda lonlat: Polygon(lonlat) if len(lonlat) >= 3 else Point(lonlat[0]),
-            lonlat_list,
-        )
-    )
-
-
-    # df_way.insert(0, "Area", way_polygon)
-    return way_polygon
-
-# TODO: Deprecate/Remove this function
-def convert_ways_lines(df_way, primary_data):
-    """
-    Convert Ways to Line Coordinates
-
-    Args:
-
-    """
-    lonlat_list = lonlat_lookup(df_way, primary_data)
-    lonlat_column = lonlat_list
-    df_way.insert(0, "lonlat", lonlat_column)
-
-    way_linestring = map(lambda lonlats: LineString(lonlats), lonlat_list)
-    length_column = (
-        gpd.GeoSeries(way_linestring)
-        .set_crs("EPSG:4326")
-        .to_crs("EPSG:3857")
-        .length
-    )
-
-    df_way.insert(0, "Length", length_column)
-    return df_way
 
 def tags_melt(df_exp, nan_threshold=0.75):
     # Find columns with high percentage of NaN values
@@ -239,34 +163,6 @@ def convert_pd_to_gdf(pd_df):
     pd_df.drop(columns=['geometry'], inplace=True)
 
     return gdf
-
-# TODO: Deprecate/Remove this function
-def write_csv(df_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
-    """Create csv file. Optimized for large files as write on disk in chunks"""
-    if out_aggregate:
-        output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".csv")
-        df_feature.to_csv(
-            output_path, index=False, header= not os.path.exists(output_path), mode="a",
-        )  # Generate CSV
-    else:
-        output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".csv")
-        df_feature.to_csv(
-            output_path,
-        )  # Generate CSV
-
-# TODO: Deprecate/Remove this function
-def write_geojson(gdf_feature, outputfile_partial, feature_name, out_aggregate, fn_name):
-    """Create geojson file. Optimized for large files as write on disk in chunks"""
-    if out_aggregate:
-        output_path = os.path.join(outputfile_partial, f"all_{feature_name}s" + ".geojson")
-        gdf_feature.to_file(
-            output_path, driver="GeoJSON", index=False, mode="a" if os.path.exists(output_path) else "w"
-        )  # Generate GeoJson
-    else:
-        output_path = os.path.join(outputfile_partial, f"{fn_name}_{feature_name}s" + ".geojson")
-        gdf_feature.to_file(
-            output_path, driver="GeoJSON"
-        )  # Generate GeoJson
 
 
 def get_list_slug(str_list):
