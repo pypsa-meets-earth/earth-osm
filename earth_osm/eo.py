@@ -89,11 +89,13 @@ def get_osm_data(
         region_str,
         primary_name,
         feature_name,
-        cached,
+        data_dir=None,
+        cached = True,
 ):
     region_tuple = get_region_tuple(region_str)
     mp = True
-    update = cached
+    update = not cached
+
     data_dir=os.path.join(os.getcwd(), 'earth_data')
     
     df = process_region(
