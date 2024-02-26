@@ -1,14 +1,15 @@
-#%%
 import pandas as pd
-from pprint import pprint
+import logging
 
 from earth_osm.taginfo import get_tag_data
-import pandas as pd
+from earth_osm import logger as base_logger
+
+logger = logging.getLogger("eo.tag")
+logger.setLevel(logging.INFO)
 
 
 tag_data = get_tag_data()
 
-#%%
 def get_feature_list(primary_name):
     return list(tag_data[primary_name]['features'].keys())
 

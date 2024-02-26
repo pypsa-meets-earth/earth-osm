@@ -15,7 +15,9 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString, Point, Polygon
 
-logger = logging.getLogger("osm_data_extractor")
+from earth_osm import logger as base_logger
+
+logger = logging.getLogger("eo.utils")
 logger.setLevel(logging.INFO)
 
 # Notes: Types

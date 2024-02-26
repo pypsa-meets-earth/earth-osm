@@ -16,9 +16,9 @@ import multiprocessing as mp
 
 from earth_osm.osmpbf import Node, Relation, Way, osmformat_pb2
 from earth_osm.osmpbf.file import iter_blocks, iter_primitive_block, read_blob
+from earth_osm import logger as base_logger
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("eo.extract")
 logger.setLevel(logging.INFO)
 
 

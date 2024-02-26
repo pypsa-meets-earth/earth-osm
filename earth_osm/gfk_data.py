@@ -18,8 +18,9 @@ import geopandas as gpd
 import pandas as pd
 
 from earth_osm.gfk_download import download_sitemap
+from earth_osm import logger as base_logger
 
-logger = logging.getLogger("osm_data_extractor")
+logger = logging.getLogger("eo.gfk")
 logger.setLevel(logging.INFO)
 
 

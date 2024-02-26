@@ -20,8 +20,9 @@ from earth_osm.tagdata import get_feature_list
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple, view_regions
 from earth_osm.utils import OutFileWriter, lonlat_lookup, way_or_area
+from earth_osm import logger as base_logger
 
-logger = logging.getLogger("osm_data_extractor")
+logger = logging.getLogger("eo.eo")
 logger.setLevel(logging.INFO)
 
 def process_region(region, primary_name, feature_name, mp, update, data_dir):

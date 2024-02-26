@@ -18,7 +18,9 @@ import requests
 import urllib3
 from tqdm.auto import tqdm
 
-logger = logging.getLogger("osm_data")
+from earth_osm import logger as base_logger
+
+logger = logging.getLogger("eo.gfk")
 logger.setLevel(logging.INFO)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

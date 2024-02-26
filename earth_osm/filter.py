@@ -17,10 +17,9 @@ from earth_osm.tagdata import get_feature_list
 from earth_osm.extract import filter_pbf
 from earth_osm.gfk_download import download_pbf
 from earth_osm.osmpbf import Node, Relation, Way
+from earth_osm import logger as base_logger
 
-logging.basicConfig()
-logger=logging.getLogger(__name__)
-#logger.setLevel(logging.INFO)
+logger=logging.getLogger("eo.filter")
 logger.setLevel(logging.WARNING)
 
 
