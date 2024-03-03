@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+2.0 (2024-03-03)
+----------------
+- Release: version 2.0 🚀 [Matin Mahmood]
 - Improve error handling and adjust geom definition criteria. [Matin
   Mahmood]
 
