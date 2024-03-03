@@ -38,6 +38,7 @@ def lonlat_lookup(df_way, primary_data):
     """
     if "refs" not in df_way.columns:
         logger.warning("refs column not found")
+        return []
 
     def look(ref):
         lonlat_row = list(map(lambda r: tuple(primary_data["Node"][str(r)]["lonlat"]), ref))
@@ -52,13 +53,12 @@ def way_or_area(df_way):
         raise KeyError("refs column not found")
     
     def check_closed(refs):
-        if (refs[0] == refs[-1]) and (len(refs) >= 3):
+        if (refs[0] == refs[-1]) and (len(refs) >= 4):
             return "area"
-        elif len(refs) >= 3:
+        elif len(refs) >= 2:
             return "way"
         else:
-            # TODO: improve error handling
-            # logger.debug(f"Way with less than 3 refs: {refs}")
+            logger.debug(f"Way with less than 2 refs: {refs}")
             return None
 
     type_list = df_way["refs"].apply(check_closed)
