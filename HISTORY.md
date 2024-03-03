@@ -4,6 +4,32 @@ Changelog
 
 (unreleased)
 ------------
+- Improve error handling and adjust geom definition criteria. [Matin
+  Mahmood]
+
+  - Added a missing return statement to immediately exit the `lonlat_lookup` function when the `refs` column is unavailable, enhancing error resilience.
+  - Modified the minimum number of references required to classify geometries as areas or ways: now considering a sequence as an area if it's closed (first and last refs are the same) and consists of at least 4 points (previously 3), and as a way if it includes at least 2 points (previously 3). This adjustment aligns better with common geometric definitions, ensuring that areas have a more defined shape and ways are simplified.
+  - Replaced a TODO comment with a debug log statement for instances where geometries have less than the intended number of references, improving debuggability and future maintenance.
+
+  This change aims to enhance the accuracy of geometrical data processing and improve error handling for better stability and clarity in logs.
+- Update taginfo for data. [Matin Mahmood]
+- Standardize logger. [Matin Mahmood]
+- Small fixes to main function. [Matin Mahmood]
+- Update docs. [Matin Mahmood]
+- Corrupt pbf files cause bugs #36, also fix update param. [Matin
+  Mahmood]
+- Remove deprecated functions. [Matin Mahmood]
+- Fail CI if tests fail. [Matin Mahmood]
+- Fix issue ValueError: Must have equal len keys and value when setting
+  with an iterable #47. [Matin Mahmood]
+- Improve tests and coverage report (60% to 76%) [Matin Mahmood]
+- Fail test if error (#49) [Matin Mahmood]
+- Add tests to diagnose issue #47 (#48) [Matin Mahmood]
+
+  * add tests to diagnose issue #47
+
+  * update get_osm_data
+- Release: version 0.2 🚀 [Matin Mahmood]
 - Merge pull request #46 from davide-f/buildings. [Matin Mahmood]
 
   Buildings
