@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     from earth_osm.filter import get_filtered_data
     from earth_osm.gfk_data import get_region_tuple
-    region = "DE"
+    region = "denmark"
     primary_name = "power"
     feature_name = "line"
     mp = True
@@ -158,6 +158,16 @@ if __name__ == "__main__":
 
     df_node = pd.json_normalize(feature_data["Node"].values())
     df_way = pd.json_normalize(feature_data["Way"].values())
+
+    type_col = way_or_area(df_way)
+    df_way.insert(1, "Type", type_col)
+    logger.debug(df_way['Type'].value_counts(dropna=False))
+
+    # Drop rows with None in Type
+    logger.debug(f"Dropping {df_way['Type'].isna().sum()} rows with None in Type")
+    df_way.dropna(subset=["Type"], inplace=True)
+
+
 
 #%%
 # sort columns by percentage of nan missing values
@@ -180,8 +190,3 @@ if __name__ == "__main__":
 # drop columns that have 99% nan values
 # logger.debug(f"Dropping {df_way.isna().sum().gt(len(df_way)*0.99).sum()} columns out of {len(df_way.columns)} with more than 99% NaN (percentage of columns: {df_way.isna().sum().gt(len(df_way)*0.99).sum()/len(df_way.columns):.2%})")
 # df_way.dropna(axis=1, thresh=len(df_way)*0.01, inplace=True)
-
-# element_set = set(primary_feature_element[primary_name][feature_name])
-# print(element_set)
-# assert element_set <= set(['node', 'way', 'area']), f"Currenly only supports node, way and area. Got {element_set}"
-# if set(['way', 'area']) <= element_set:
