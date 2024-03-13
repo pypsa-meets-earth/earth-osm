@@ -4,7 +4,10 @@ flake8
 black
 isort
 pytest-cov
+codecov
 mypy>=0.9
 gitchangelog
+mkdocs
 pprint
+osmium
 

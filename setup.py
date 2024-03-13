@@ -19,6 +19,33 @@ def read(*paths, **kwargs):
         content = open_file.read().strip()
     return content
 
+# mirror of dependencies in setup and requirements.txt
+install_requires=[
+    "geopandas",
+    "pandas",
+    "tqdm",
+    "requests",
+    "protobuf>=4.21.1",
+]
+
+extras_require={"test": [
+    "pytest",
+    "coverage",
+    "flake8",
+    "black",
+    "isort",
+    "pytest-cov",
+    "codecov",
+    "mypy>=0.9",
+    "gitchangelog",
+    "mkdocs",
+    "pprint",
+    "osmium",
+    ]
+}
+
+assert read("requirements.txt") == "\n".join(install_requires)
+assert read("requirements-test.txt") == "\n".join(extras_require["test"])
 
 setup(
     name="earth_osm",
@@ -52,6 +79,7 @@ setup(
         "mypy>=0.9",
         "gitchangelog",
         "mkdocs",
+        "osmium",
         ],
     },
     classifiers=[
