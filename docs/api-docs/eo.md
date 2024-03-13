@@ -10,7 +10,7 @@
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L27"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L29"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `process_region`
 
@@ -38,12 +38,12 @@ Process Country
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L88"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L94"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_osm_data`
 
 ```python
-get_osm_data(region_str, primary_name, feature_name, cached, data_dir)
+get_osm_data(region_str, primary_name, feature_name, data_dir=None, cached=True)
 ```
 
 
@@ -53,18 +53,19 @@ get_osm_data(region_str, primary_name, feature_name, cached, data_dir)
 
 ---
 
-<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L122"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="https://github.com/pypsa-meets-earth/earth-osm/blob/main/earth_osm/eo.py#L129"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `save_osm_data`
 
 ```python
 save_osm_data(
-    region_list=['germany'],
-    primary_name='power',
-    feature_list=['tower'],
+    region_list,
+    primary_name,
+    feature_list=None,
     update=False,
     mp=True,
     data_dir='/home/matin/Projects/earth-osm/earth_data',
+    out_dir='/home/matin/Projects/earth-osm/earth_data',
     out_format='csv',
     out_aggregate=True
 )

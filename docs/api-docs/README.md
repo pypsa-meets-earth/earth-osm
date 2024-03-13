@@ -7,19 +7,22 @@
 - [`args`](./args.md#module-args)
 - [`config`](./config.md#module-config)
 - [`eo`](./eo.md#module-eo)
+- [`export`](./export.md#module-export)
 - [`extract`](./extract.md#module-extract)
 - [`filter`](./filter.md#module-filter)
 - [`gfk_data`](./gfk_data.md#module-gfk_data)
 - [`gfk_download`](./gfk_download.md#module-gfk_download)
 - [`osmpbf`](./osmpbf.md#module-osmpbf)
+- [`tagdata`](./tagdata.md#module-tagdata)
+- [`taginfo`](./taginfo.md#module-taginfo)
 - [`utils`](./utils.md#module-utils)
 
 ## Classes
 
+- [`export.OutFileWriter`](./export.md#class-outfilewriter)
 - [`osmpbf.Node`](./osmpbf.md#class-node): Node(id, tags, lonlat)
 - [`osmpbf.Relation`](./osmpbf.md#class-relation): Relation(id, tags, members)
 - [`osmpbf.Way`](./osmpbf.md#class-way): Way(id, tags, refs)
-- [`utils.OutFileWriter`](./utils.md#class-outfilewriter)
 
 ## Functions
 
@@ -27,6 +30,8 @@
 - [`eo.get_osm_data`](./eo.md#function-get_osm_data)
 - [`eo.process_region`](./eo.md#function-process_region): Process Country
 - [`eo.save_osm_data`](./eo.md#function-save_osm_data): Get OSM Data for a list of regions and features
+- [`export.convert_pd_to_gdf`](./export.md#function-convert_pd_to_gdf)
+- [`export.get_list_slug`](./export.md#function-get_list_slug)
 - [`extract.filter_file_block`](./extract.md#function-filter_file_block)
 - [`extract.filter_pbf`](./extract.md#function-filter_pbf): Parallized pre-Filtering of OSM file by a pre_filter
 - [`extract.id_filter`](./extract.md#function-id_filter)
@@ -46,19 +51,25 @@
 - [`gfk_data.get_region_dict`](./gfk_data.md#function-get_region_dict): Takes a region id (eg. germany) and returns a ditctionary consisting of
 - [`gfk_data.get_region_tuple`](./gfk_data.md#function-get_region_tuple): Takes a region id or code (eg. DE, germany) and returns a named tuple with 
 - [`gfk_data.get_root_list`](./gfk_data.md#function-get_root_list): Returns a list of regions without parents (i.e continents)
+- [`gfk_download.calculate_md5`](./gfk_download.md#function-calculate_md5)
+- [`gfk_download.download_file`](./gfk_download.md#function-download_file): Download file from url to dir
 - [`gfk_download.download_pbf`](./gfk_download.md#function-download_pbf)
 - [`gfk_download.download_sitemap`](./gfk_download.md#function-download_sitemap)
-- [`gfk_download.earth_downloader`](./gfk_download.md#function-earth_downloader): Download file from url to dir
+- [`gfk_download.verify_pbf`](./gfk_download.md#function-verify_pbf)
+- [`tagdata.get_feature_list`](./tagdata.md#function-get_feature_list)
+- [`tagdata.get_popular_features`](./tagdata.md#function-get_popular_features)
+- [`tagdata.get_primary_list`](./tagdata.md#function-get_primary_list)
+- [`tagdata.load_tag_data`](./tagdata.md#function-load_tag_data)
+- [`taginfo.fetch_all_data`](./taginfo.md#function-fetch_all_data)
+- [`taginfo.fetch_data_from_api`](./taginfo.md#function-fetch_data_from_api)
+- [`taginfo.get_data`](./taginfo.md#function-get_data)
+- [`taginfo.get_key_overview`](./taginfo.md#function-get_key_overview)
+- [`taginfo.get_tag_data`](./taginfo.md#function-get_tag_data)
+- [`taginfo.get_wiki_features`](./taginfo.md#function-get_wiki_features)
+- [`taginfo.get_wiki_features_df`](./taginfo.md#function-get_wiki_features_df)
+- [`taginfo.save_data`](./taginfo.md#function-save_data)
 - [`utils.columns_melt`](./utils.md#function-columns_melt)
-- [`utils.convert_pd_to_gdf`](./utils.md#function-convert_pd_to_gdf)
-- [`utils.convert_ways_lines`](./utils.md#function-convert_ways_lines): Convert Ways to Line Coordinates
-- [`utils.convert_ways_points`](./utils.md#function-convert_ways_points): Convert Ways to Point Coordinates
-- [`utils.convert_ways_polygons`](./utils.md#function-convert_ways_polygons): Convert Ways to Polygon and Point Coordinates
-- [`utils.get_list_slug`](./utils.md#function-get_list_slug)
 - [`utils.lonlat_lookup`](./utils.md#function-lonlat_lookup): Lookup refs and convert to list of longlats
-- [`utils.output_creation`](./utils.md#function-output_creation): Save Dataframe to disk
 - [`utils.tags_explode`](./utils.md#function-tags_explode)
 - [`utils.tags_melt`](./utils.md#function-tags_melt)
 - [`utils.way_or_area`](./utils.md#function-way_or_area)
-- [`utils.write_csv`](./utils.md#function-write_csv): Create csv file. Optimized for large files as write on disk in chunks
-- [`utils.write_geojson`](./utils.md#function-write_geojson): Create geojson file. Optimized for large files as write on disk in chunks

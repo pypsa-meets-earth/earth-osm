@@ -7,9 +7,6 @@
 
 
 
-**Global Variables**
----------------
-- **primary_feature_element**
 
 ---
 

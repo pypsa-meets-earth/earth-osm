@@ -109,6 +109,6 @@ docs: api-docs		## Build the documentation.
 	URL="site/index.html"; xdg-open $$URL || sensible-browser $$URL || x-www-browser $$URL || gnome-open $$URL
 
 .PHONY: docs-gh-deploy
-docs-deploy: api-docs		## Serve the documentation.
+docs-gh-deploy: api-docs		## Serve the documentation.
 	@echo "deploying documentation on github ..."
 	@$(ENV_PREFIX)mkdocs gh-deploy --force
