@@ -87,6 +87,8 @@ def download_pbf(url, update, data_dir):
         down_pbf_fp = download_file(url, pbf_dir)
         down_md5_fp = download_file(url + ".md5", pbf_dir, exists_ok=not update)
         if not verify_pbf(down_pbf_fp, down_md5_fp):
+            os.remove(down_pbf_fp)
+            os.remove(down_md5_fp)
             raise ValueError(f"File verification failed after retry for {pbf_fn}")
 
     return pbf_fp
