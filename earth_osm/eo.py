@@ -20,7 +20,7 @@ from earth_osm.tagdata import get_feature_list
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple, view_regions
 from earth_osm.utils import lonlat_lookup, way_or_area
-from earth_osm.export import OutFileWriter
+from earth_osm.export import EarthOSMWriter
 from earth_osm import logger as base_logger
 
 logger = logging.getLogger("eo.eo")
@@ -160,7 +160,7 @@ def save_osm_data(
     if out_aggregate == 'region' or out_aggregate is True:
         # for each feature, aggregate all regions
         for feature_name in feature_list:
-            with OutFileWriter(region_short_list, primary_name, [feature_name], out_dir, out_format) as writer:
+            with EarthOSMWriter(region_short_list, primary_name, [feature_name], out_dir, out_format) as writer:
                 for region in region_tuple_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
                     writer(df_feature)
@@ -169,7 +169,7 @@ def save_osm_data(
     elif out_aggregate == 'feature':
         # for each region, aggreagate all features
         for region in region_tuple_list:
-            with OutFileWriter([region.short], primary_name, feature_list, out_dir, out_format) as writer:
+            with EarthOSMWriter([region.short], primary_name, feature_list, out_dir, out_format) as writer:
                 for feature_name in feature_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
                     writer(df_feature)
@@ -179,7 +179,7 @@ def save_osm_data(
         for region in region_tuple_list:
                 for feature_name in feature_list:
                     df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
-                    with OutFileWriter([region.short], primary_name, [feature_name], out_dir, out_format) as writer:
+                    with EarthOSMWriter([region.short], primary_name, [feature_name], out_dir, out_format) as writer:
                         writer(df_feature)
 
 

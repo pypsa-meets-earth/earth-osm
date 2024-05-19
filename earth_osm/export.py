@@ -64,7 +64,7 @@ def convert_pd_to_gdf(pd_df):
 
 
 
-class OutFileWriter:
+class EarthOSMWriter:
 
     def __init__(self, region_list, primary_name, feature_list, data_dir, out_format):
         self.region_list = region_list
@@ -100,6 +100,8 @@ class OutFileWriter:
                 logger.debug(f"Deleting existing file: {out_path}")
                 os.remove(out_path)
 
+        self.df_list = []  # Store dataframes for each feature
+
         return self
     
 
@@ -108,54 +110,28 @@ class OutFileWriter:
             return
 
         df_feature.reset_index(drop=True, inplace=True) # avoids weird index
-
-        # Append by concating
-        if os.path.exists(self.out_slug + '.csv'):
-            # read the existing csv
-            df_existing = pd.read_csv(self.out_slug + '.csv')
-
-            # explode other_tags to get back original columns
-            df_existing = tags_explode(df_existing)
-
-            # concat the existing df with the new df
-            df_feature = pd.concat([df_existing, df_feature], ignore_index=True)
-
-        # melt 95% nan tags (TODO: remove hardcode)
-        df_feature = tags_melt(df_feature, 0.95)
-        # move refs column to other_tags
-        df_feature = columns_melt(df_feature,   ['refs'])
-
-        df_feature.to_csv(self.out_slug + '.csv', index=False)
-
-
-        # Apend by writing to csv (more efficient, but problem with dynamically changing columns)
-        # if os.path.exists(self.out_slug + '.csv'):
-        #     # read the existing columns
-        #     col_existing = pd.read_csv(self.out_slug + '.csv', nrows=1).columns.to_list()
-        #     # check if the columns are the same
-        #     col_incoming = df_feature.columns.to_list()
-        #     if col_existing != col_incoming:
-        #         # add missing columns to the end
-        #         missing_cols_in_incoming = [col for col in col_existing if col not in col_incoming]
-        #         new_cols_in_incoming = [col for col in col_incoming if col not in col_existing]
-        #     TODO: incomplete, should melt new_cols_in_incoming, and add missing cols
-
-        # write the new df to csv
-        # df_feature.to_csv(self.out_slug + '.csv', index=False, header= not os.path.exists(self.out_slug + '.csv'), mode="a")
+        self.df_list.append(df_feature)
 
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if os.path.exists(self.out_slug + '.csv'):
-            logger.info(f"Output file written to: {self.out_slug}.csv")
-            
-            if 'geojson' in self.out_format:
-                # read the csv file
-                df_feature = pd.read_csv(self.out_slug + '.csv')
-                # convert to geodataframe
-                gdf_feature = convert_pd_to_gdf(df_feature)
+        if self.df_list:
+            # Concatenate all dataframes
+            df_combined = pd.concat(self.df_list, ignore_index=True)
 
-                gdf_feature.to_file(
-                    self.out_slug + '.geojson', driver="GeoJSON", index=False, mode="w"
-                )
-                logger.info(f"Output file written to: {self.out_slug}.geojson")
+            # melt 95% nan tags (TODO: remove hardcode)
+            df_combined = tags_melt(df_combined, 0.95)
+
+            if 'csv' in self.out_format:
+                # Write the combined dataframe to CSV
+                df_combined.to_csv(self.out_slug + '.csv', index=False)
+                logger.info(f"CSV: {self.out_slug}.csv")
+
+            if 'geojson' in self.out_format:
+                # Read file again for concistency (if written)
+                df_combined = pd.read_csv(self.out_slug + '.csv') if 'csv' in self.out_format else df_combined
+                
+                # Convert to GeoDataFrame and write to GeoJSON
+                gdf_combined = convert_pd_to_gdf(df_combined)
+                gdf_combined.to_file(self.out_slug + '.geojson', driver="GeoJSON", index=False)
+                logger.info(f"GEOJSON: {self.out_slug}.geojson")
 
