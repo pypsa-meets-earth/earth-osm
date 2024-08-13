@@ -26,7 +26,7 @@ from earth_osm import logger as base_logger
 logger = logging.getLogger("eo.eo")
 logger.setLevel(logging.INFO)
 
-def process_region(region, primary_name, feature_name, mp, update, data_dir):
+def process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True):
     """
     Process Country
 
@@ -40,7 +40,7 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir):
     Returns:
         None
     """
-    primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir)
+    primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
 
     primary_data = primary_dict['Data']
     feature_data = feature_dict['Data']
@@ -96,7 +96,8 @@ def get_osm_data(
         primary_name,
         feature_name,
         data_dir=None,
-        cached = True):
+        cached = True, 
+        progress_bar=True):
     
     region_tuple = get_region_tuple(region_str)
     mp = True
@@ -111,6 +112,7 @@ def get_osm_data(
         mp,
         update,
         data_dir,
+        progress_bar=progress_bar
     )
 
     return df
@@ -136,6 +138,7 @@ def save_osm_data(
     out_dir=os.path.join(os.getcwd(), 'earth_data'),
     out_format="csv", # TODO: rename out_format -> format
     out_aggregate=True, # TODO: rename out_aggregate -> aggregate
+    progress_bar=True
 ):
     """
     Get OSM Data for a list of regions and features
@@ -162,7 +165,7 @@ def save_osm_data(
         for feature_name in feature_list:
             with EarthOSMWriter(region_short_list, primary_name, [feature_name], out_dir, out_format) as writer:
                 for region in region_tuple_list:
-                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
                     writer(df_feature)
                     # output_creation(df_feature, primary_name, [feature_name], region_short_list, data_dir, out_format)
 
@@ -171,14 +174,14 @@ def save_osm_data(
         for region in region_tuple_list:
             with EarthOSMWriter([region.short], primary_name, feature_list, out_dir, out_format) as writer:
                 for feature_name in feature_list:
-                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
                     writer(df_feature)
     
     elif out_aggregate is False:
         # no aggregation, one file per region per feature
         for region in region_tuple_list:
                 for feature_name in feature_list:
-                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir)
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
                     with EarthOSMWriter([region.short], primary_name, [feature_name], out_dir, out_format) as writer:
                         writer(df_feature)
 

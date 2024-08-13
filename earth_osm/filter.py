@@ -93,9 +93,9 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     return primary_dict
 
 
-def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir):
+def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True):
     geofabrik_pbf_url = region.urls['pbf']
-    PBF_inputfile = download_pbf(geofabrik_pbf_url, update, data_dir)
+    PBF_inputfile = download_pbf(geofabrik_pbf_url, update, data_dir, progress_bar=progress_bar)
     country_code = region.short
 
     # ------- primary file -------
