@@ -1,109 +1,162 @@
-<p align="center"> 
-<a href="https://pypsa-meets-earth.github.io/earth-osm/">
-    <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" height="50">
-<a/>
+<h1 align="center">earth-osm</h1>
+<p align="center">Extract Infrastructure data from OpenStreetMap</p>
+
+<p align="center">
+<a href="https://anaconda.org/conda-forge/earth-osm"><img src="https://img.shields.io/conda/dn/conda-forge/earth-osm" alt="Conda Downloads"></a>
+<a href="https://pypi.org/project/earth-osm/"><img src="https://img.shields.io/pypi/v/earth-osm.svg" alt="PyPI version"></a>
+<a href="https://anaconda.org/conda-forge/earth-osm"><img src="https://img.shields.io/conda/vn/conda-forge/earth-osm.svg" alt="Conda version"></a>
+<a href="https://codecov.io/gh/pypsa-meets-earth/earth-osm"><img src="https://codecov.io/gh/pypsa-meets-earth/earth-osm/branch/main/graph/badge.svg?token=ZS4PC5T4S8" alt="codecov"></a>
+<a href="https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml"><img src="https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg" alt="CI"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+<a href="https://discord.gg/AnuJBk23FU"><img src="https://img.shields.io/discord/911692131440148490?logo=discord" alt="Discord"></a>
+<a href="https://pypsa-meets-earth.github.io/earth-osm/"><img src="https://github.com/pypsa-meets-earth/earth-osm/actions/workflows/docs-ci.yml/badge.svg" alt="Docs"></a>
 </p>
 
-# earth-osm. Python tool to extract large-amounts of OpenStreetMap data 
+## 📚 Overview
 
+earth-osm downloads, filters, cleans and exports infrastructure data from OpenStreetMap (OSM). It provides a Python API and a CLI interface to extract data for various infrastructure types, such as power lines, substations, and more.
 
-[![PyPI version](https://img.shields.io/pypi/v/earth-osm.svg)](https://pypi.org/project/earth-osm/)
-[![Conda version](https://img.shields.io/conda/vn/conda-forge/earth-osm.svg)](https://anaconda.org/conda-forge/earth-osm)
-[![codecov](https://codecov.io/gh/pypsa-meets-earth/earth-osm/branch/main/graph/badge.svg?token=ZS4PC5T4S8)](https://codecov.io/gh/pypsa-meets-earth/earth-osm)
-[![CI](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg)](https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
-[![Docs](https://github.com/pypsa-meets-earth/earth-osm/actions/workflows/docs-ci.yml/badge.svg)](https://pypsa-meets-earth.github.io/earth-osm/)
+## 🌟 Key Features
 
-earth-osm is a python package that provides an end-to-end solution to extract & standardize **power infrastructure** data from OpenStreetmap (OSM).
+- 🔌 Extracts infrastructure data from OSM
+- 🧹 Cleans and standardizes the data *(coming soon)*
+- 🚀 No API rate limits (data served from GeoFabrik)
+- 🐍 Provides a Python API
+- 🖥️ Supports multiprocessing for faster extraction
+- 📊 Outputs data in .csv and .geojson formats
+- 🌍 Supports global data extraction
+- 🖱️ Easy-to-use CLI interface
 
-## Features
-* Extracts power infrastructure data from OSM
-* Cleans and Standardizes the data *(coming soon)*
-* No API rate limits (data served from GeoFabrik)
-* Provides a Python API
-* Supports multiprocessing
-* Outputs .csv and .geojson files
-* Aggregate data per feature or per region
-* Easy to use CLI interface
+## 🚀 Getting Started
 
-## Getting Started
-Install earth-osm with pip:
+### Installation
+
+Install earth-osm using pip (recommended):
+
 ```bash
 pip install earth-osm
 ```
+
 Or with conda:
+
 ```bash
 conda install --channel=conda-forge earth-osm
 ```
-Extract osm data
-```bash
-# Example CLI command
-earth_osm extract power --regions benin monaco  --features substation line
-```
-This will extract
-*primary feature = power* for the *regions = benin* and *monaco* and the *secondary features = substation* and *line*.
-By default the resulting .csv and .geojson are stored in `./earth_data/out`
 
-Load the substation data for benin using pandas
+### Basic Usage
+
+Extract OSM data using the CLI:
+
 ```bash
+earth_osm extract power --regions benin monaco --features substation line
+```
+
+This command extracts power infrastructure data for Benin and Monaco, focusing on substations and power lines. By default, the resulting .csv and .geojson files are stored in `./earth_data/out`.
+
+Load the extracted data using pandas:
+
+```python
+import pandas as pd
+import geopandas as gpd
+
 # For Pandas
 df_substations = pd.read_csv('./earth_data/out/BJ_raw_substations.csv')
+
 # For GeoPandas
 gdf_substations = gpd.read_file('./earth_data/out/BJ_raw_substations.geojson')
 ```
 
-## Other Arguments
-usage: earth_osm extract **primary** **--regions** region1, region2 **--features** feature1, feature2 **--data_dir** DATA_DIR [**--update**] [**--mp**] 
+## 🛠️ CLI Reference
 
-  **primary** (e.g power, water, road, etc) NOTE: currently only power is supported
+### Extract Command
 
-  **--regions** region1 region2 ... (use either iso3166-1:alpha2 or iso3166-2 codes or full names as given by running 'earth_osm view regions')
+```bash
+earth_osm extract <primary> --regions <region1> <region2> ... [options]
+```
 
-  **--features** feature1 feature2 ... (*optional*, use sub-features of primary feature, e.g. substation, line, etc)
+#### Arguments:
 
-  **--update** (*optional*, update existing data, default False)
+- `<primary>`: Primary feature to extract (e.g power)
 
-  **--mp** (*optional*, use multiprocessing, default True)
-  
-  **--data_dir** (*optional*, path to data directory, default './earth_data')
-  
-  **--out_format** (*optional*, export format options csv or geojson, default csv)
-  
-  **--out_aggregate** (*options*, combine outputs per feature, default False)
+#### Required Options:
 
-## Advanced Usage
+- `--regions`: Specify one or more regions using ISO 3166-1 alpha-2, ISO 3166-2 codes, or full names
 
-```py
+#### Optional Arguments:
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `--features` | Specify sub-features of the primary feature | All features |
+| `--update` | Update existing data | False |
+| `--no_mp` | Disable multiprocessing | False (MP enabled) |
+| `--data_dir` | Path to data directory | './earth_data' |
+| `--out_dir` | Path to output directory | Same as data_dir |
+| `--out_format` | Export format(s): csv and/or geojson | ['csv', 'geojson'] |
+| `--agg_feature` | Aggregate outputs by feature | False |
+| `--agg_region` | Aggregate outputs by region | False |
+
+## 🐍 Python API
+
+For more advanced usage, you can use the Python API:
+
+```python
 import earth_osm as eo
 
 eo.save_osm_data(
-  primary_name = 'power',
-  region_list = ['benin', 'monaco'],
-  feature_list = ['substation', 'line'],
-  update = False,
-  mp = True,
-  data_dir = './earth_data',
-  out_format = ['csv', 'geojson'],
-  out_aggregate = False,
+    primary_name='power',
+    region_list=['benin', 'monaco'],
+    feature_list=['substation', 'line'],
+    update=False,
+    mp=True,
+    data_dir='./earth_data',
+    out_format=['csv', 'geojson'],
+    out_aggregate=False,
 )
 ```
 
-## Development
+## 🛠️ Development
 
-(Optional) Intstall a specific version of earth_osm
-```
-pip install git+https://github.com/pypsa-meets-earth/earth-osm.git@<required-commit-hash>
-```
+To contribute to earth-osm, follow these steps:
 
-(Optional) Create a virtual environment for python>=3.10 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+1. (Optional) Install a specific version of earth_osm:
+   ```bash
+   pip install git+https://github.com/pypsa-meets-earth/earth-osm.git@<required-commit-hash>
+   ```
 
-Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
-```bash
-pip install git+https://github.com/pypsa-meets-earth/earth-osm.git
-pip install -r requirements-test.txt 
-```
+2. (Optional) Create a virtual environment for Python >=3.10:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+3. Install the development dependencies:
+   ```bash
+   pip install git+https://github.com/pypsa-meets-earth/earth-osm.git
+   pip install -r requirements-test.txt
+   ```
+
+4. Read the [CONTRIBUTING.md](CONTRIBUTING.md) file for more detailed information on how to contribute to the project.
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 🤝 Community
+
+Join our [Discord community](https://discord.gg/AnuJBk23FU) to connect with other users and contributors, ask questions, and get support.
+
+## 📚 Documentation
+
+For more detailed information, check out our [full documentation](https://pypsa-meets-earth.github.io/earth-osm/).
+
+---
+
+<p align="center">
+Made with ❤️ by the PyPSA meets Earth team
+</p>
+
+<p align="center"> 
+<a href="https://pypsa-meets-earth.github.io/earth-osm/">
+    <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" height="50" alt="earth-osm logo">
+</a>
+</p>
