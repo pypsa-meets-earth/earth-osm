@@ -97,7 +97,7 @@ def view_regions(level=0):
         orient='index',
     )
     view_df.index = pd.MultiIndex.from_tuples(view_df.index, names=['parent', 'id'])
-    print(view_df.to_string())
+    return view_df
 
 
 def get_region_dict(id):
@@ -179,3 +179,9 @@ def get_region_tuple(region_str):
     region_tuple = Region(**d)
     return region_tuple
 
+if __name__ == "__main__":
+    df = view_regions(level=1)
+    print(df.head())
+    print(df.to_string())
+    print(list(df.index.levels[0]))
+    # view_regions(level=1)
