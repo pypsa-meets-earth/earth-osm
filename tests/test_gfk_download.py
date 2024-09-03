@@ -34,6 +34,24 @@ def test_download_pbf_update():
     assert lm3 > lm2
 
 
+def test_download_pbf_no_progressbar():
+    region = get_region_tuple("malta")
+    geofabrik_pbf_url = region.urls['pbf']
+
+    data_dir = "earth_data_test"
+    fp = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf")
+    fp_hash = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf.md5")
+
+    download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir, progress_bar=False)
+
+    # check file last modified time
+    lm1 = os.path.getmtime(fp)
+    print(f"Last modified: {lm1}")
+
+    assert os.path.exists(fp)
+    assert verify_pbf(fp, fp_hash)
+
+
 def test_download_corrupted_file():
     data_dir = "earth_data_test"
     region = get_region_tuple("benin")
