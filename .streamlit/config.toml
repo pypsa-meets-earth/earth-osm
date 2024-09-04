@@ -1,0 +1,23 @@
+[theme]
+primaryColor = "#F63366"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+font = "sans serif"
+
+[server]
+enableCORS = false
+enableXsrfProtection = true
+scriptPath = "earth_osm/frontend.py"
+
+[browser]
+gatherUsageStats = false
+
+[global]
+developmentMode = false
+
+[client]
+toolbarMode = "minimal"
+
+[runner]
+magicEnabled = true

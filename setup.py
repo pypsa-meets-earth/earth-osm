@@ -28,19 +28,25 @@ install_requires=[
     "protobuf>=4.21.1",
 ]
 
-extras_require={"test": [
-    "pytest",
-    "coverage",
-    "flake8",
-    "black",
-    "isort",
-    "pytest-cov",
-    "codecov",
-    "mypy>=0.9",
-    "gitchangelog",
-    "mkdocs",
-    "pprint",
-    "osmium",
+extras_require={
+    "test": [
+        "pytest",
+        "coverage",
+        "flake8",
+        "black",
+        "isort",
+        "pytest-cov",
+        "codecov",
+        "mypy>=0.9",
+        "gitchangelog",
+        "mkdocs",
+        "pprint",
+        "osmium",
+    ],
+    "gui": [
+        "streamlit",
+        "folium",
+        "streamlit-folium",
     ]
 }
 
@@ -61,27 +67,8 @@ setup(
     entry_points={
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
-    install_requires=[
-        "geopandas",
-        "pandas",
-        "tqdm",
-        "requests",
-        "protobuf>=4.21.1",
-    ],
-    extras_require={"test": [
-        "pytest",
-        "coverage",
-        "flake8",
-        "black",
-        "isort",
-        "pytest-cov",
-        "codecov",
-        "mypy>=0.9",
-        "gitchangelog",
-        "mkdocs",
-        "osmium",
-        ],
-    },
+    install_requires=install_requires,
+    extras_require=extras_require,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
