@@ -2,6 +2,39 @@ Changelog
 =========
 
 
+(unreleased)
+------------
+- Return view_df. [Matin Mahmood]
+- Refactor arg parser. [Matin Mahmood]
+- Allow to disable the progressbar (#53) [Fabian Hofmann]
+- Update README. [Matin Mahmood]
+- Update OutFileWriter to EarthOSMWriter for consistency. [Matin
+  Mahmood]
+
+  Refactor OutFileWriter to EarthOSMWriter and optimize CSV/GeoJSON export
+
+  Renamed `OutFileWriter` to `EarthOSMWriter` across the codebase to maintain consistency with project naming conventions. Enhanced the export functionality by introducing a batch processing approach, accumulating dataframes before writing, which streamlines the CSV and GeoJSON file generation process. This change reduces I/O operations during export, potentially improving performance for large datasets. Furthermore, redundant data manipulation and file handling logic were removed, simplifying the export process. The new approach also includes optimizations such as melting tags with high percentages of NaN values and consolidating dataframe operations to minimize memory usage and improve runtime efficiency.
+- Rename test_power to test_export. [Matin Mahmood]
+- Update api docs. [Matin Mahmood]
+- - add a test for comparing earth_osm with osmium - update test
+  dependencies. [Matin Mahmood]
+- Auto-remove corrupt PBF and MD5 files on verification fail. [Matin
+  Mahmood]
+- Improve debug code. [Matin Mahmood]
+- Moved `OutFileWriter` and related functions (`convert_pd_to_gdf` and
+  `get_list_slug`) into a new `export.py` module to centralize export-
+  related responsibilities. This enhancement clears up `utils.py`,
+  focusing it more on utility functions that aren't directly tied to
+  data export. The shift to `export.py` allows for a more organized
+  structure, making it easier to extend export functionalities in the
+  future. [Matin Mahmood]
+
+
+2.1 (2024-03-03)
+----------------
+- Release: version 2.1 🚀 [Matin Mahmood]
+
+
 2.0 (2024-03-03)
 ----------------
 - Release: version 2.0 🚀 [Matin Mahmood]
