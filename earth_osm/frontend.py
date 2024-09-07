@@ -1,4 +1,6 @@
 import streamlit as st
+import sys
+sys.path.append("../")
 import os
 import subprocess
 subprocess.call(["make", "install-st"])
