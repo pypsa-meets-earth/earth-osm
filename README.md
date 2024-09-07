@@ -1,7 +1,7 @@
-<div align="center">
+<div align="center" markdown=1>
 
 # earth-osm
-One-command to extract infrastructure data from OpenStreetMap 
+One-command to extract infrastructure data from OpenStreetMap
 
 [![][badge-pypi-monthly-downloads]][pypi-url]
 [![][badge-codecov]][codecov-url]
