@@ -1,5 +1,5 @@
-import streamlit as st
 import sys
+import os
 # print folder structure and current dir
 print(os.listdir())
 print(os.getcwd())
@@ -7,7 +7,7 @@ print(os.listdir("../"))
 print(sys.path)
 sys.path.append("../")
 sys.path.append("../earth_osm")
-import os
+import streamlit as st
 import subprocess
 subprocess.call(["make", "install-st"])
 
