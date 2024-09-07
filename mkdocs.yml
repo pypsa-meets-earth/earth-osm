@@ -24,7 +24,6 @@ plugins:
             - import sys
             - sys.path.insert(0, os.path.abspath('.'))
 
-# Add this nav section
 nav:
   - Getting Started: index.md
   - Supported Regions: regions.md
@@ -39,8 +38,34 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
-  - pymdownx.superfences
+  - pymdownx.b64
+  - pymdownx.betterem
+  - pymdownx.blocks.admonition
+  - pymdownx.blocks.definition
+  - pymdownx.blocks.details
+  - pymdownx.blocks.html
+  - pymdownx.blocks.tab
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji
+  - pymdownx.escapeall
+  - pymdownx.extra
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
   - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.pathconverter
+  - pymdownx.progressbar
+  - pymdownx.saneheaders
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.striphtml
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist
+  - pymdownx.tilde
 
 theme:
   name: material
