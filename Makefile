@@ -115,7 +115,7 @@ docs-gh-deploy: api-docs		## Serve the documentation.
 
 
 .PHONY: install-st
-install:		## Install the project in dev mode.
+install-st:		## Install the project in dev mode.
 	@echo "Don't forget to run 'make virtualenv' if you got errors."
 	$(ENV_PREFIX)pip install -e .
 	$(ENV_PREFIX)pip install -e .[gui]
