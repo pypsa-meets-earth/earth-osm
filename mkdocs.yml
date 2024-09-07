@@ -24,33 +24,36 @@ plugins:
             - import sys
             - sys.path.insert(0, os.path.abspath('.'))
 
+# Add this nav section
+nav:
+  - Getting Started: index.md
+  - Supported Regions: regions.md
+  - API Reference: api-docs/README.md
+  # - User Guide: user-guide.md
+  # - About: about.md
+
 markdown_extensions:
   - markdown_include.include
-
 
 theme:
   name: material
   icon:
-    logo: material/earth-box-plus
-    next: material/earth-arrow-right
-    previous: material/earth-minus
+    logo: material/earth
     repo: material/github
   favicon: material/earth-box-plus
-  
   font:
-    text: Arimo
+    text: Roboto
     code: Roboto Mono
   palette:
-    scheme: slate
-    primary: deep orange
-    accent: indigo
+    - scheme: slate
+      primary: black
+      accent: white
   features:
-    - navigation.indexes
     - navigation.tabs
     - navigation.instant
-    - navigation.footer
     - navigation.top
-    - header.autohide
+    - search.suggest
+    - search.highlight
 
 extra:
   social:
