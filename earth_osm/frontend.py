@@ -5,9 +5,10 @@ subprocess.call(["make", "install-st"])
 
 import geopandas as gpd
 
-from earth_osm.eo import save_osm_data
-from earth_osm.tagdata import get_primary_list, get_feature_list
-from earth_osm.gfk_data import get_all_valid_list
+import earth_osm.eo as eo
+import earth_osm.tagdata as tagdata
+import earth_osm.gfk_data as gfk_data
+
 import folium
 from streamlit_folium import folium_static
 
@@ -20,14 +21,14 @@ st.markdown("Extract Infrastructure data from OpenStreetMap")
 st.sidebar.header("Settings")
 
 # Primary feature selection
-primary = st.sidebar.selectbox("Select Primary Feature", get_primary_list())
+primary = st.sidebar.selectbox("Select Primary Feature", tagdata.get_primary_list())
 
 # Region selection
-all_regions = get_all_valid_list()
+all_regions = gfk_data.get_all_valid_list()
 region = st.sidebar.selectbox("Select Region", all_regions)
 
 # Feature selection
-all_features = get_feature_list(primary)
+all_features = tagdata.get_feature_list(primary)
 feature = st.sidebar.selectbox("Select Feature", all_features)
 
 # Other options
@@ -37,7 +38,7 @@ data_dir = st.sidebar.text_input("Data Directory", value="./earth_data")
 if st.sidebar.button("Extract Data"):
     with st.spinner("Extracting data..."):
         try:
-            save_osm_data(
+            eo.save_osm_data(
                 region_list=[region],
                 primary_name=primary,
                 feature_list=[feature],
