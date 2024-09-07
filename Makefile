@@ -112,3 +112,9 @@ docs: api-docs		## Build the documentation.
 docs-gh-deploy: api-docs		## Serve the documentation.
 	@echo "deploying documentation on github ..."
 	@$(ENV_PREFIX)mkdocs gh-deploy --force
+
+
+.PHONY: install-st
+install:		## Install the project in dev mode.
+	@echo "Don't forget to run 'make virtualenv' if you got errors."
+	$(ENV_PREFIX)pip install -e .[gui]

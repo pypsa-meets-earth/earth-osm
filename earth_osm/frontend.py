@@ -1,6 +1,10 @@
 import streamlit as st
-import geopandas as gpd
 import os
+import subprocess
+subprocess.call(["make", "install-st"])
+
+import geopandas as gpd
+
 from earth_osm.eo import save_osm_data
 from earth_osm.tagdata import get_primary_list, get_feature_list
 from earth_osm.gfk_data import get_all_valid_list
