@@ -116,7 +116,4 @@ docs-gh-deploy: api-docs		## Serve the documentation.
 
 .PHONY: install-st
 install-st:		## Install the project in dev mode.
-	@echo "Don't forget to run 'make virtualenv' if you got errors."
-	pip install -e .
-	pip install -e .[gui]
-	pip install earth-osm
+	pip install -r requirements-gui.txt
