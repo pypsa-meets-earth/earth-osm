@@ -1,16 +1,24 @@
-<h1 align="center">earth-osm</h1>
-<p align="center">Extract Infrastructure data from OpenStreetMap</p>
+<div align="center">
 
-<p align="center">
-<a href="https://anaconda.org/conda-forge/earth-osm"><img src="https://img.shields.io/conda/dn/conda-forge/earth-osm" alt="Conda Downloads"></a>
-<a href="https://pypi.org/project/earth-osm/"><img src="https://img.shields.io/pypi/v/earth-osm.svg" alt="PyPI version"></a>
-<a href="https://anaconda.org/conda-forge/earth-osm"><img src="https://img.shields.io/conda/vn/conda-forge/earth-osm.svg" alt="Conda version"></a>
-<a href="https://codecov.io/gh/pypsa-meets-earth/earth-osm"><img src="https://codecov.io/gh/pypsa-meets-earth/earth-osm/branch/main/graph/badge.svg?token=ZS4PC5T4S8" alt="codecov"></a>
-<a href="https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml"><img src="https://github.com/pypsa-meets-africa/earth-osm/actions/workflows/main.yml/badge.svg" alt="CI"></a>
-<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-<a href="https://discord.gg/AnuJBk23FU"><img src="https://img.shields.io/discord/911692131440148490?logo=discord" alt="Discord"></a>
-<a href="https://pypsa-meets-earth.github.io/earth-osm/"><img src="https://github.com/pypsa-meets-earth/earth-osm/actions/workflows/docs-ci.yml/badge.svg" alt="Docs"></a>
-</p>
+# earth-osm
+One-command to extract infrastructure data from OpenStreetMap 
+
+[![][badge-pypi-monthly-downloads]][pypi-url]
+[![][badge-codecov]][codecov-url]
+[![][badge-ci]][gh-repo-url]
+[![][badge-docs]][docs-url]
+[![][badge-pypi]][pypi-url]
+[![][badge-conda]][conda-url]
+[![][badge-release]][gh-release-url]
+[![][badge-license]][license]
+[![][badge-discord]][discord-url]
+
+[![][badge-gh-stars]][gh-stars-url]
+[![][badge-gh-forks]][gh-forks-url]
+[![][badge-gh-issues]][gh-issues-url]
+[![][badge-gh-pulls]][gh-pulls-url]
+
+</div>
 
 ## 📚 Overview
 
@@ -163,3 +171,41 @@ Made with ❤️ by the PyPSA meets Earth team
     <img src="https://github.com/pypsa-meets-earth/pypsa-meets-earth.github.io/raw/main/assets/img/logo.png" height="50" alt="earth-osm logo">
 </a>
 </p>
+
+
+<!-- LINK GROUP -->
+
+[contributing]: CONTRIBUTING.md
+[license]: LICENSE
+[docs-url]: https://pypsa-meets-earth.github.io/earth-osm/
+[discord-url]: https://discord.gg/AnuJBk23FU
+[pypi-url]: https://pypi.org/project/earth-osm/
+[conda-url]: https://anaconda.org/conda-forge/earth-osm
+[codecov-url]: https://codecov.io/gh/pypsa-meets-earth/earth-osm
+[gh-repo-url]: https://github.com/pypsa-meets-earth/earth-osm
+[gh-release-url]: https://github.com/pypsa-meets-earth/earth-osm/releases
+[gh-stars-url]: https://github.com/pypsa-meets-earth/earth-osm/stargazers
+[gh-forks-url]: https://github.com/pypsa-meets-earth/earth-osm/network/members
+[gh-issues-url]: https://github.com/pypsa-meets-earth/earth-osm/issues
+[gh-pulls-url]: https://github.com/pypsa-meets-earth/earth-osm/pulls
+
+<!-- Primary badges -->
+[badge-pypi-monthly-downloads]: https://img.shields.io/pypi/dm/earth-osm?style=flat&labelColor=black&logoColor=white&logo=pypi
+[badge-codecov]: https://img.shields.io/codecov/c/github/pypsa-meets-earth/earth-osm?style=flat&labelColor=black&logoColor=white&logo=codecov
+[badge-ci]: https://img.shields.io/github/actions/workflow/status/pypsa-meets-earth/earth-osm/main.yml?style=flat&labelColor=black&logoColor=white&logo=github
+[badge-docs]: https://img.shields.io/github/actions/workflow/status/pypsa-meets-earth/earth-osm/docs-ci.yml?style=flat&labelColor=black&logoColor=white&logo=github
+
+[badge-pypi]: https://img.shields.io/pypi/v/earth-osm.svg?style=flat&labelColor=black&logoColor=white&logo=pypi
+[badge-conda]: https://img.shields.io/conda/vn/conda-forge/earth-osm.svg?style=flat&labelColor=black&logoColor=white&logo=conda-forge
+
+[badge-discord]: https://img.shields.io/discord/911692131440148490?style=flat&labelColor=black&logoColor=white&logo=discord&color=blue
+[badge-license]: https://img.shields.io/badge/License-MIT-blue.svg?style=flat&labelColor=black
+[badge-release]: https://img.shields.io/github/v/release/pypsa-meets-earth/earth-osm?style=flat&labelColor=black&logoColor=white&logo=github
+
+
+
+<!-- Secondary badges -->
+[badge-gh-stars]: https://img.shields.io/github/stars/pypsa-meets-earth/earth-osm?style=for-the-badge&labelColor=black&logoColor=white&color=yellow
+[badge-gh-forks]: https://img.shields.io/github/forks/pypsa-meets-earth/earth-osm?style=for-the-badge&labelColor=black&logoColor=white&color=grey
+[badge-gh-issues]: https://img.shields.io/github/issues/pypsa-meets-earth/earth-osm?style=for-the-badge&labelColor=black&logoColor=white&color=red
+[badge-gh-pulls]: https://img.shields.io/github/issues-pr/pypsa-meets-earth/earth-osm?style=for-the-badge&labelColor=black&logoColor=white&color=green
