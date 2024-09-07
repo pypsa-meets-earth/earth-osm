@@ -1,3 +1,4 @@
 streamlit
 folium
 streamlit-folium
+earth-osm
