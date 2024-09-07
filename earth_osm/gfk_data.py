@@ -23,19 +23,17 @@ from earth_osm import logger as base_logger
 logger = logging.getLogger("eo.gfk")
 logger.setLevel(logging.INFO)
 
-
 pkg_data_dir = os.path.join(os.path.dirname(__file__), "data")
-sitemap = download_sitemap(False, pkg_data_dir)
+csv_path = os.path.join(pkg_data_dir, "gfk_index.csv")
 
-with open(sitemap, encoding='utf8') as f:
-    d = json.load(f)
+def load_geofabrik_data():
+    if os.path.exists(csv_path):
+        return pd.read_csv(csv_path)
+    else:
+        logger.warning("CSV file not found. Please run the script as __main__ to generate it.")
+        return pd.DataFrame()
 
-df = pd.DataFrame(feature['properties'] for feature in d['features'])
-# Add short code column
-join_func = lambda x: '-'.join(x) if isinstance(x, list) else x
-col1 = df['iso3166-1:alpha2'].apply(join_func)
-col2 = df['iso3166-2'].apply(join_func)
-df['short_code'] = col1.combine_first(col2)
+df = load_geofabrik_data()
 
 def get_geom_sitemap(progress_bar=True):
     geom_sitemap = download_sitemap(True, pkg_data_dir, progress_bar=progress_bar)
@@ -179,9 +177,43 @@ def get_region_tuple(region_str):
     region_tuple = Region(**d)
     return region_tuple
 
+
+def generate_markdown_table(output_md):
+    """
+    Generates a markdown table of regions and saves it to a file.
+    """
+    md_table = "| Parent | ID | ISO Code |\n|---|---|---|\n"
+    
+    for parent, children in get_all_regions_dict().items():
+        md_table += f"| **{parent}** | | |\n" if parent else ""
+        for id, short_code in children.items():
+            short_code = "" if str(short_code) == 'nan' else short_code
+            md_table += f"| | {id} | {short_code} |\n"
+
+    with open(output_md, 'w') as f:
+        f.write(md_table)
+    
+    logger.info(f"Markdown table saved to {output_md}")
+
 if __name__ == "__main__":
-    df = view_regions(level=1)
-    print(df.head())
-    print(df.to_string())
-    print(list(df.index.levels[0]))
-    # view_regions(level=1)
+    sitemap = download_sitemap(False, pkg_data_dir)
+
+    with open(sitemap, encoding='utf8') as f:
+        d = json.load(f)
+
+    df = pd.DataFrame(feature['properties'] for feature in d['features'])
+    # Add short code column
+    join_func = lambda x: '-'.join(x) if isinstance(x, list) else x
+    col1 = df['iso3166-1:alpha2'].apply(join_func)
+    col2 = df['iso3166-2'].apply(join_func)
+    df['short_code'] = col1.combine_first(col2)
+
+    # Save the DataFrame as CSV
+    df.to_csv(csv_path, index=False)
+    print(f"DataFrame saved to {csv_path}")
+
+
+    # Generate markdown table
+    output_md = 'docs/generated-docs/regions_table.md'
+    generate_markdown_table(output_md)
+

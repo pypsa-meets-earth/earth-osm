@@ -82,6 +82,9 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 
 - `--regions`: Specify one or more regions using ISO 3166-1 alpha-2, ISO 3166-2 codes, or full names
 
+> **Tip:** A list of regions is available at [regions.md](docs/generated-docs/regions_table.md)
+
+
 #### Optional Arguments:
 
 | Argument | Description | Default |
