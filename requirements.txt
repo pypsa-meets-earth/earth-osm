@@ -3,3 +3,7 @@ pandas
 tqdm
 requests
 protobuf>=4.21.1
+streamlit
+folium
+streamlit-folium
+earth-osm
