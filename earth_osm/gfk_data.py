@@ -9,6 +9,7 @@ This module contains functions to set config for Geofabrik data.
 """
 
 
+import ast
 import json
 import logging
 import os
@@ -104,12 +105,14 @@ def get_region_dict(id):
     strings 'id', 'name', 'parent', 'short_code' and dictionary of 'urls'
     Raises error if id is not found
     """
-    return (
+    region_data = (
         df.loc[df['id'] == id]
         .drop('iso3166-1:alpha2', axis=1)
         .drop('iso3166-2', axis=1)
         .to_dict('records')[0]
     )
+    region_data['urls'] = ast.literal_eval(region_data['urls'])
+    return region_data
 
 
 def get_id_by_code(code):
