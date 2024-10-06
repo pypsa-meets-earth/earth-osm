@@ -23,7 +23,6 @@ BANNER = """
 ║             Earth-OSM                 ║
 ║  "Empowering Open Infrastructure      ║
 ║      Data for the People"             ║
-║                - @mnm-matin           ║
 ╚═══════════════════════════════════════╝
 """
 
@@ -60,6 +59,7 @@ def setup_extract_parser(subparsers):
     extract_parser.add_argument('--data_dir', type=str, help='Earth Data Directory')
     extract_parser.add_argument('--out_dir', type=str, help='Earth Output Directory')
     extract_parser.add_argument('--out_format', nargs="*", type=str, choices=['csv', 'geojson'], default=['csv', 'geojson'], help='Export options')
+    extract_parser.add_argument('--source', type=str, choices=['geofabrik', 'overpass'], default='geofabrik', help='Data Source')
     
     agg_group = extract_parser.add_mutually_exclusive_group()
     agg_group.add_argument('--agg_feature', action='store_true', help='Aggregate Outputs by feature')
@@ -110,6 +110,7 @@ def handle_extract(args):
         f'Output Directory = {out_dir}',
         f'Output Format = {" - ".join(args.out_format)}',
         f'Aggregate Outputs = {out_aggregate}',
+        f'Data Source = {args.source}'
     ]))
 
     save_osm_data(
@@ -122,6 +123,7 @@ def handle_extract(args):
         mp=not args.no_mp,
         out_format=set(args.out_format),
         out_aggregate=out_aggregate,
+        data_source=args.source
     )
 
 def handle_view(args):

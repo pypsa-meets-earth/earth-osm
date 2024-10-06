@@ -16,6 +16,7 @@ import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
+from earth_osm.overpass import get_overpass_data
 from earth_osm.tagdata import get_feature_list
 from earth_osm.filter import get_filtered_data
 from earth_osm.gfk_data import get_region_tuple, view_regions
@@ -26,7 +27,7 @@ from earth_osm import logger as base_logger
 logger = logging.getLogger("eo.eo")
 logger.setLevel(logging.INFO)
 
-def process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True):
+def process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True, data_source='geofabrik'):
     """
     Process Country
 
@@ -40,7 +41,11 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir, pro
     Returns:
         None
     """
-    primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
+
+    if data_source == 'geofabrik':
+        primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
+    elif data_source == 'overpass':
+        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir, progress_bar=progress_bar)
 
     primary_data = primary_dict['Data']
     feature_data = feature_dict['Data']
@@ -132,12 +137,13 @@ def save_osm_data(
     region_list,
     primary_name,
     feature_list=None,
-    update=False,
-    mp=True, # TODO: remove mp arg
-    data_dir=os.path.join(os.getcwd(), 'earth_data'),
-    out_dir=os.path.join(os.getcwd(), 'earth_data'),
     out_format="csv", # TODO: rename out_format -> format
     out_aggregate=True, # TODO: rename out_aggregate -> aggregate
+    out_dir=os.path.join(os.getcwd(), 'earth_data'),
+    data_source = 'geofabrik', # 'overpass'
+    data_dir=os.path.join(os.getcwd(), 'earth_data'),
+    update=False,
+    mp=True, # TODO: remove mp arg,
     progress_bar=True
 ):
     """
@@ -165,7 +171,7 @@ def save_osm_data(
         for feature_name in feature_list:
             with EarthOSMWriter(region_short_list, primary_name, [feature_name], out_dir, out_format) as writer:
                 for region in region_tuple_list:
-                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar, data_source=data_source)
                     writer(df_feature)
                     # output_creation(df_feature, primary_name, [feature_name], region_short_list, data_dir, out_format)
 
@@ -174,14 +180,14 @@ def save_osm_data(
         for region in region_tuple_list:
             with EarthOSMWriter([region.short], primary_name, feature_list, out_dir, out_format) as writer:
                 for feature_name in feature_list:
-                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar, data_source=data_source)
                     writer(df_feature)
     
     elif out_aggregate is False:
         # no aggregation, one file per region per feature
         for region in region_tuple_list:
                 for feature_name in feature_list:
-                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
+                    df_feature = process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar, data_source=data_source)
                     with EarthOSMWriter([region.short], primary_name, [feature_name], out_dir, out_format) as writer:
                         writer(df_feature)
 
