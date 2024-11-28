@@ -10,4 +10,3 @@ gitchangelog
 mkdocs
 pprint
 osmium
-

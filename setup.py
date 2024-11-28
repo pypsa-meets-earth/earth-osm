@@ -26,6 +26,7 @@ install_requires=[
     "tqdm",
     "requests",
     "protobuf>=4.21.1",
+    "setuptools",
 ]
 
 extras_require={"test": [
