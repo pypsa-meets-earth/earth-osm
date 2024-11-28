@@ -58,7 +58,7 @@ setup(
     url="https://github.com/pypsa-meets-earth/earth-osm/",
     packages=find_packages(exclude=["docs", "tests"]),
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     entry_points={
         "console_scripts": ["earth_osm = earth_osm.__main__:main"]
     },
