@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "earth_osm"
 version = "2.2"
 authors = [
-  { name="pypsa-meets-earth", url="https://github.com/pypsa-meets-earth/earth-osm/" },
+  { name="pypsa-meets-earth" },
 ]
 description = "Python tool to extract large-amounts of OpenStreetMap data"
 readme = "README.md"
