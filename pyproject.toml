@@ -44,7 +44,6 @@ test = [
     "mypy>=0.9",
     "gitchangelog",
     "mkdocs",
-    "pprint",
     "osmium",
 ]
 
@@ -58,7 +57,7 @@ version_scheme = "no-guess-dev"
 include = ["earth-osm"]
 
 [tool.setuptools.package-data]
-"earth-osm" = ["py.typed"]
+"earth_osm" = ["py.typed"]
 
 # Pytest settings
 
