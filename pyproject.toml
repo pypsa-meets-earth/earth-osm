@@ -58,7 +58,7 @@ version_scheme = "no-guess-dev"
 include = ["earth-osm"]
 
 [tool.setuptools.package-data]
-earth-osm = ["py.typed"]
+"earth-osm" = ["py.typed"]
 
 # Pytest settings
 
