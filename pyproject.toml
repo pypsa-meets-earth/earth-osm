@@ -33,7 +33,7 @@ Homepage = "https://github.com/pypsa-meets-earth/earth-osm/"
 Issues = "https://github.com/pypsa-meets-earth/earth-osm/issues"
 
 [project.optional-dependencies]
-dev = [
+test = [
     "pytest",
     "coverage",
     "flake8",
