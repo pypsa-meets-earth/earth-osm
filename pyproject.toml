@@ -33,7 +33,7 @@ Homepage = "https://github.com/pypsa-meets-earth/earth-osm/"
 Issues = "https://github.com/pypsa-meets-earth/earth-osm/issues"
 
 [project.optional-dependencies]
-test = [
+dev = [
     "pytest",
     "coverage",
     "flake8",
@@ -45,6 +45,14 @@ test = [
     "gitchangelog",
     "mkdocs",
     "osmium",
+]
+docs = [
+    "lazydocs",
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocs-awesome-pages-plugin",
+    "mkdocstrings[python]",
+    "markdown-include",
 ]
 
 [console_scripts]
