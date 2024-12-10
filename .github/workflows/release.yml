@@ -3,21 +3,6 @@ name: Publish Python 🐍 distribution 📦 to PyPI
 on: push
 
 jobs:
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
-          fetch-depth: 0
-      - name: Generate Changelog
-        run: .github/release_message.sh > release_message.md
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: release_message.md
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
@@ -41,13 +26,31 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
+  
+  release:
+    name: Create Release
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # by default, it uses a depth of 1
+          # this fetches all history so that we can read each commit
+          fetch-depth: 0
+      - name: Generate Changelog
+        run: .github/release_message.sh > release_message.md
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_message.md
 
   publish-to-pypi:
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
     needs:
-    - build
+    - release
     runs-on: ubuntu-latest
     environment:
       name: pypi
