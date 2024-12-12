@@ -1,5 +1,4 @@
 include LICENSE
 include HISTORY.md
-include requirements
 graft tests
 graft earth_osm

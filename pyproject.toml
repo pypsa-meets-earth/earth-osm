@@ -1,0 +1,101 @@
+[build-system]
+requires = ["pip", "setuptools>=64", "setuptools-scm", "wheel", "twine"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "earth_osm"
+dynamic = ["version"]
+authors = [
+  { name="pypsa-meets-earth" },
+]
+description = "Python tool to extract large-amounts of OpenStreetMap data"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT License"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "geopandas",
+    "pandas",
+    "tqdm",
+    "requests",
+    "protobuf>=4.21.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/pypsa-meets-earth/earth-osm/"
+Issues = "https://github.com/pypsa-meets-earth/earth-osm/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "coverage",
+    "flake8",
+    "black",
+    "isort",
+    "pytest-cov",
+    "codecov",
+    "mypy>=0.9",
+    "gitchangelog",
+    "mkdocs",
+    "osmium",
+]
+docs = [
+    "lazydocs",
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocs-awesome-pages-plugin",
+    "mkdocstrings[python]",
+    "markdown-include",
+]
+
+[console_scripts]
+earth_osm = "earth_osm.__main__:main"
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+
+[tool.setuptools.packages.find]
+include = ["earth-osm"]
+
+[tool.setuptools.package-data]
+"earth_osm" = ["py.typed"]
+
+# Pytest settings
+
+[tool.pytest.ini_options]   
+filterwarnings = [
+    "error::DeprecationWarning", # Raise all DeprecationWarnings as errors
+    "error::FutureWarning",      # Raise all FutureWarnings as errors
+]
+
+# Coverage settings
+
+[tool.coverage.run]
+branch = true
+source = ["earth_osm"]
+omit = ["test/*"]
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+]
+
+# Static type checker settings
+[tool.mypy]
+exclude = ['dev/*', 'examples/*', 'docs/*']
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_unused_ignores = true
+show_error_code_links = true
+
+
+[[tool.mypy.overrides]]
+module = "earth_osm.*"
+disallow_untyped_defs = true
+check_untyped_defs = true
