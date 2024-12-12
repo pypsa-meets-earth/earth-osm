@@ -1,9 +1,20 @@
 Changelog
 =========
 
-
 (unreleased)
 ------------
+
+
+2.3 (2024-12-12)
+------------
+
+- Add supported regions list to documentation. [Matin Mahmood]
+- Improve and bugfix in documentation. [Matin Mahmood]
+- Add mock overpass implementation [Matin Mahmood]
+- Include pyproject.toml in the package. [Davide Fioriti]
+
+2.2 (2024-09-05)
+----------------
 - Return view_df. [Matin Mahmood]
 - Refactor arg parser. [Matin Mahmood]
 - Allow to disable the progressbar (#53) [Fabian Hofmann]
