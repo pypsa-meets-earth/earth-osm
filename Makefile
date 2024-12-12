@@ -90,7 +90,7 @@ api-docs:		## Generate the API documentation.
 		echo "There are uncommitted changes. Stash or commit changes first"; \
 	else \
 		echo "Generating API documentation..."; \
-		$(ENV_PREFIX)pip install -r .[docs]; \
+		$(ENV_PREFIX)pip install .[docs]; \
 		$(ENV_PREFIX)lazydocs \
 			--output-path="./docs/api-docs" \
 			--overview-file="README.md" \
