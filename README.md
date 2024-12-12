@@ -143,7 +143,7 @@ To contribute to earth-osm, follow these steps:
 3. Install the development dependencies:
    ```bash
    pip install git+https://github.com/pypsa-meets-earth/earth-osm.git
-   pip install -r .[test]
+   pip install -e .[dev]
    ```
 
 4. Read the [CONTRIBUTING.md](CONTRIBUTING.md) file for more detailed information on how to contribute to the project.
