@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pip", "setuptools>=64", "setuptools-scm", "wheel", "twine"]
+requires = ["pip", "setuptools>=64", "setuptools-scm>=8", "wheel", "twine"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -13,6 +13,11 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT License"}
 classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
@@ -55,14 +60,14 @@ docs = [
     "markdown-include",
 ]
 
-[console_scripts]
+[project.scripts]
 earth_osm = "earth_osm.__main__:main"
 
 [tool.setuptools_scm]
 version_scheme = "no-guess-dev"
 
 [tool.setuptools.packages.find]
-include = ["earth-osm"]
+include = ["earth_osm"]
 
 [tool.setuptools.package-data]
 "earth_osm" = ["py.typed"]
