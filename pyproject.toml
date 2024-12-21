@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pip", "setuptools>=64", "setuptools-scm>=8", "wheel", "twine"]
+requires = ["pip", "setuptools>=64", "setuptools_scm>=8", "wheel", "twine"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -99,8 +99,10 @@ no_implicit_optional = true
 warn_unused_ignores = true
 show_error_code_links = true
 
-
 [[tool.mypy.overrides]]
 module = "earth_osm.*"
 disallow_untyped_defs = true
 check_untyped_defs = true
+
+[tool.setuptools.dynamic]
+version = {attr = "earth_osm.__version__"}
