@@ -34,9 +34,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
     - name: Install package and dependencies
       run: |
-        pip install .
+        python -m pip install uv
+        uv pip install --compile --system "$(ls dist/*.whl)[dev]"
     - name: Test package
       run: |
         earth_osm extract power --regions benin --features substation line
