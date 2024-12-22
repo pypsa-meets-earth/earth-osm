@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pip", "setuptools>=64", "setuptools_scm>=8", "wheel", "twine"]
+requires = ["pip", "setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -62,9 +62,6 @@ docs = [
 
 [project.scripts]
 earth_osm = "earth_osm.__main__:main"
-
-[tool.setuptools_scm]
-version_scheme = "no-guess-dev"
 
 [tool.setuptools.packages.find]
 include = ["earth_osm"]
