@@ -1,20 +1,37 @@
 Changelog
 =========
 
-(unreleased)
+2.3.post1 (2024-12-22)
 ------------
+- Release: version 2.3.post1 🚀 [Davide Fioriti]
+- Drop unused pyproject dependencies (#58) [Davide Fioriti]
+- Update pyproject and add CI test to pip installation (#57) [Davide
+  Fioriti]
+- Update pyproject. [Davide Fioriti]
 
 
-2.3 (2024-12-12)
-------------
+2.3 (2024-12-20)
+----------------
+- Update release.yml. [Davide Fioriti]
+- Drop trusted publisher. [Davide Fioriti]
+- Add password. [Davide Fioriti]
+- Revise README install dependencies. [Davide Fioriti]
+- Release: version 2.3. [Davide Fioriti]
+- Revise Makefile doc env. [Davide Fioriti]
+- Add setuptools to install dependency (#56) [Davide Fioriti]
+- Add mock overpass file. [Matin Mahmood]
+- Remove deprecated config file. [Matin Mahmood]
+- Fix region_tuple. [Matin Mahmood]
+- Mkdocs.yml remove unused extendsions. [Matin Mahmood]
+- Fix docs. [Matin Mahmood]
+- Attempt to fix docs. [Matin Mahmood]
+- Update README badges. [Matin Mahmood]
+- Add regions md table. [Matin Mahmood]
 
-- Add supported regions list to documentation. [Matin Mahmood]
-- Improve and bugfix in documentation. [Matin Mahmood]
-- Add mock overpass implementation [Matin Mahmood]
-- Include pyproject.toml in the package. [Davide Fioriti]
 
 2.2 (2024-09-05)
 ----------------
+- Release: version 2.2 🚀 [Matin Mahmood]
 - Return view_df. [Matin Mahmood]
 - Refactor arg parser. [Matin Mahmood]
 - Allow to disable the progressbar (#53) [Fabian Hofmann]
