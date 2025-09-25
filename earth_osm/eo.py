@@ -102,7 +102,8 @@ def get_osm_data(
         feature_name,
         data_dir=None,
         cached = True, 
-        progress_bar=True):
+        progress_bar=True,
+        data_source='geofabrik'):
     
     region_tuple = get_region_tuple(region_str)
     mp = True
@@ -117,7 +118,8 @@ def get_osm_data(
         mp,
         update,
         data_dir,
-        progress_bar=progress_bar
+        progress_bar=progress_bar,
+        data_source=data_source
     )
 
     return df
