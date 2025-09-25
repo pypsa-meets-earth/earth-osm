@@ -41,7 +41,8 @@ def test_osmium(shared_data_dir):
     osmium_handler.apply_file(pbf_fp, locations=True)
 
     # Compare unique feature counts instead of record counts
-    our_count = len(df)  # Our implementation returns one record per unique feature
+    # Our implementation returns one record per unique feature
+    our_count = len(df)
     osmium_count = osmium_handler.get_unique_count()
 
     assert our_count == osmium_count, f"Unique feature counts are not equal: {our_count} != {osmium_count}"
