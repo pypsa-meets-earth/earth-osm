@@ -22,7 +22,7 @@ def decode_strmap(primitive_block):
     Decode the string table from a primitive block into a list of strings.
     """
 
-    return tuple(s.decode('utf8') for s in primitive_block.stringtable.s)
+    return tuple(s.decode("utf8") for s in primitive_block.stringtable.s)
 
 
 def iter_blocks(file):
@@ -36,7 +36,7 @@ def iter_blocks(file):
         data = file.read(4)
         if len(data) < 4:
             return
-        header_size, = struct.unpack('>I', data)
+        (header_size,) = struct.unpack(">I", data)
         header = fileformat_pb2.BlobHeader()
         header.ParseFromString(file.read(header_size))
         ofs += 4 + header_size
@@ -57,7 +57,7 @@ def read_blob(file, ofs, header):
     elif blob.zlib_data:
         return zlib.decompress(blob.zlib_data)
     else:
-        raise ValueError('Unknown blob type')
+        raise ValueError("Unknown blob type")
 
 
 def parse_tags(strmap, keys_vals):
@@ -99,15 +99,15 @@ def iter_primitive_block(primitive_block):
 def iter_nodes(block, strmap, group):
     dense = group.dense
     if not dense:
-        raise ValueError('Only dense nodes are supported')
+        raise ValueError("Only dense nodes are supported")
     granularity = block.granularity or 100
     lat_offset = block.lat_offset or 0
     lon_offset = block.lon_offset or 0
     coord_scale = 0.000000001
     id = lat = lon = tag_pos = 0
     for did, dlat, dlon, tags in zip(
-            dense.id, dense.lat, dense.lon,
-            parse_tags(strmap, dense.keys_vals)):
+        dense.id, dense.lat, dense.lon, parse_tags(strmap, dense.keys_vals)
+    ):
         id += did
         lat += coord_scale * (lat_offset + granularity * dlat)
         lon += coord_scale * (lon_offset + granularity * dlon)
@@ -124,21 +124,15 @@ def iter_ways(block, strmap, group):
 def iter_relations(block, strmap, group):
     namemap = {}
     for relation in group.relations:
-        tags = {
-            strmap[k]: strmap[v] for k, v in zip(relation.keys, relation.vals)
-        }
+        tags = {strmap[k]: strmap[v] for k, v in zip(relation.keys, relation.vals)}
         refs = tuple(accumulate(relation.memids))
         members = [
             (
                 ref,
-                namemap.setdefault(
-                    rel_type, osmformat_pb2.Relation.MemberType.Name(rel_type)
-                ),
+                namemap.setdefault(rel_type, osmformat_pb2.Relation.MemberType.Name(rel_type)),
                 strmap[sid],
             )
-            for ref, rel_type, sid in zip(
-                refs, relation.types, relation.roles_sid
-            )
+            for ref, rel_type, sid in zip(refs, relation.types, relation.roles_sid)
         ]
 
         yield relation.id, members, tags

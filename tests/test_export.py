@@ -23,6 +23,7 @@ def test_no_aggregate(shared_data_dir):
     )
     assert True
 
+
 # same as pypsa-tutorial
 def test_aggregate(shared_data_dir):
     save_osm_data(
@@ -38,6 +39,7 @@ def test_aggregate(shared_data_dir):
     )
     assert True
 
+
 def test_small_count(shared_data_dir):
     save_osm_data(
         region_list=["malta"],
@@ -52,11 +54,10 @@ def test_small_count(shared_data_dir):
     )
     assert True
 
+
 # test low resource feature (cable)
 # test high resource feature (substation)
 
 # test aggregation by region (benin, germany)
 # test aggregation by feature (tower, line)
 # test no aggregation
- 
- 

@@ -5,6 +5,7 @@ import os
 # Define a fixed location for shared data
 fixed_earth_data = os.path.join(os.getcwd(), "earth_data_test")
 
+
 @pytest.fixture(scope="session")
 def shared_data_dir():
     # Ensure the directory exists

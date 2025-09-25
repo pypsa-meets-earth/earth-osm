@@ -47,7 +47,8 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
         logger.debug(f"{filepath} already exists")
         return filepath
     logger.info(f"{filename} downloading to {filepath}")
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)  # create download dir
+    os.makedirs(os.path.dirname(filepath),
+                exist_ok=True)  # create download dir
     with requests.get(url, stream=progress_bar, verify=False) as r:
         if r.status_code == 200:
             # url properly found, thus execute as expected
@@ -127,7 +128,8 @@ def download_pbf(
     pbf_fp = os.path.join(pbf_dir, pbf_fn)
 
     # download file
-    down_pbf_fp = download_file(url, pbf_dir, exists_ok=not update, progress_bar=progress_bar)
+    down_pbf_fp = download_file(
+        url, pbf_dir, exists_ok=not update, progress_bar=progress_bar)
     down_md5_fp = download_file(
         url + ".md5", pbf_dir, exists_ok=not update, progress_bar=progress_bar
     )
@@ -143,7 +145,8 @@ def download_pbf(
         if not verify_pbf(down_pbf_fp, down_md5_fp):
             os.remove(down_pbf_fp)
             os.remove(down_md5_fp)
-            raise ValueError(f"File verification failed after retry for {pbf_fn}")
+            raise ValueError(
+                f"File verification failed after retry for {pbf_fn}")
 
     return pbf_fp
 
@@ -250,7 +253,8 @@ def get_historical_files_from_directory(
         return historical_files
 
     except requests.RequestException as e:
-        logger.error(f"Failed to fetch directory listing from {region_base_url}: {e}")
+        logger.error(
+            f"Failed to fetch directory listing from {region_base_url}: {e}")
         return []
 
 
@@ -268,7 +272,8 @@ def find_historical_file_by_date(
     Returns:
         str or None: Filename of the closest historical file, or None if not found
     """
-    historical_files = get_historical_files_from_directory(region_base_url, region_id)
+    historical_files = get_historical_files_from_directory(
+        region_base_url, region_id)
 
     if not historical_files:
         logger.warning(f"No historical files found for region {region_id}")
@@ -321,7 +326,8 @@ def download_historical_pbf(
     Returns:
         str or None: Path to downloaded file, or None if failed
     """
-    historical_filename = find_historical_file_by_date(region_base_url, region_id, target_date)
+    historical_filename = find_historical_file_by_date(
+        region_base_url, region_id, target_date)
 
     if not historical_filename:
         return None
