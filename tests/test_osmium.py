@@ -3,6 +3,7 @@ import osmium
 import pandas as pd
 from earth_osm.eo import get_osm_data
 
+
 class PowerLineHandler(osmium.SimpleHandler):
     def __init__(self):
         super().__init__()
