@@ -27,7 +27,7 @@ earth-osm downloads, filters, cleans and exports infrastructure data from OpenSt
 ## 🌟 Key Features
 
 - 🔌 Extracts infrastructure data from OSM
-- 📅 **NEW:** Historical data support - fetch OSM data from specific dates
+- 📅 Historical data support (specify target dates)
 - 🧹 Cleans and standardizes the data *(coming soon)*
 - 🚀 No API rate limits (data served from GeoFabrik)
 - 🐍 Provides a Python API
@@ -126,57 +126,18 @@ eo.save_osm_data(
 )
 ```
 
-### 📅 Historical Data Support
-
-earth-osm now supports downloading historical OpenStreetMap data from Geofabrik's archives. You can fetch PBF files and power.json files for specific dates.
+For historical data, add the `target_date` parameter:
 
 ```python
 from datetime import datetime
-from earth_osm.eo import get_osm_data, save_osm_data
 
-# Get historical power data for a specific date
-historical_data = get_osm_data(
-    region_str="malta",
-    primary_name="power", 
-    feature_name="line",
-    target_date=datetime(2020, 1, 1),  # January 1, 2020
-    cached=False,
-    progress_bar=True
-)
-
-# Batch download historical data for multiple regions
-save_osm_data(
-    region_list=['malta', 'benin'],
+# Download historical data for a specific date
+eo.get_osm_data(
+    region_str='malta',
     primary_name='power',
-    feature_list=['line', 'substation'],
-    target_date=datetime(2022, 6, 15),  # June 15, 2022
-    out_format=['csv'],
-    data_dir='./historical_data',
-    update=False
+    feature_name='line',
+    target_date=datetime(2020, 1, 1)  # Jan 1, 2020
 )
-```
-
-#### Features of Historical Data Support:
-
-- **Automatic file discovery**: Finds the closest historical file for your target date
-- **Date-based filtering**: Specify any date and get the nearest available historical data
-- **Same API**: Uses the same functions with an optional `target_date` parameter
-- **Robust error handling**: Gracefully handles missing MD5 files and unavailable dates
-- **Archive integration**: Directly accesses Geofabrik's raw directory index
-
-#### Supported Date Range:
-Historical files are available from approximately 2015 onwards, with yearly snapshots for most regions and more frequent snapshots for recent years.
-
-```python
-# List available historical files for a region
-from earth_osm.gfk_download import get_historical_files_from_directory
-from earth_osm.gfk_data import get_region_tuple_historical
-
-region = get_region_tuple_historical("benin")
-files = get_historical_files_from_directory(region.base_url, "benin")
-print(f"Found {len(files)} historical files")
-for filename, date in files[:5]:  # Show first 5
-    print(f"  {filename} - {date.strftime('%Y-%m-%d')}")
 ```
 
 ## 🛠️ Development
