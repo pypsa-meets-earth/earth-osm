@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"name": "MC_tower",
+"features": [
+{ "type": "Feature", "properties": { "id": 4271732003, "tags.location:transition": "yes", "Region": "MC", "tags.operator": "RTE", "tags.operator:wikidata": "Q2178795", "tags.power": "tower", "Type": "node", "other_tags": null }, "geometry": { "type": "Point", "coordinates": [ 7.4154144, 43.7464096 ] } }
+]
+}
