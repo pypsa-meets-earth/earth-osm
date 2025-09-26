@@ -20,8 +20,8 @@ from typing import Optional
 import geopandas as gpd
 import pandas as pd
 
-from earth_osm import logger as base_logger
 from earth_osm.gfk_download import download_sitemap
+from earth_osm import logger as base_logger
 
 logger = logging.getLogger("eo.gfk")
 logger.setLevel(logging.INFO)
@@ -50,14 +50,14 @@ def get_root_list():
     """
     Returns a list of regions without parents (i.e continents)
     """
-    return list(df.loc[df["parent"].isna(), "id"])
+    return list(df.loc[df['parent'].isna(), 'id'])
 
 
 def get_all_valid_list():
     """
     Returns a list of all valid region ids
     """
-    return list(df.loc[~df["short_code"].isna(), "short_code"]) + list(df["id"])
+    return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
 
 
 def get_all_regions_dict(level=0):
