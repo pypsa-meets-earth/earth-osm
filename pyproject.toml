@@ -76,6 +76,9 @@ filterwarnings = [
     "error::DeprecationWarning", # Raise all DeprecationWarnings as errors
     "error::FutureWarning",      # Raise all FutureWarnings as errors
 ]
+markers = [
+    "integration: tests that hit live data sources",
+]
 
 # Coverage settings
 
