@@ -45,7 +45,7 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir, pro
     if data_source == 'geofabrik':
         primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
     elif data_source == 'overpass':
-        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir, progress_bar=progress_bar)
+        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir)
 
     primary_data = primary_dict['Data']
     feature_data = feature_dict['Data']

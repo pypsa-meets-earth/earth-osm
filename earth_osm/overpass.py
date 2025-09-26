@@ -9,14 +9,21 @@ This module provides functions to fetch OSM data from the Overpass API.
 
 import json
 import logging
-import time
 from datetime import datetime
+from textwrap import dedent
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 logger = logging.getLogger("eo.overpass")
-logger.setLevel(logging.INFO)
 
+OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter"
+REQUEST_TIMEOUT = 600
+QUERY_TIMEOUT = 300
+REQUEST_HEADERS = {
+    "User-Agent": "earth-osm/overpass (+https://github.com/pypsa-meets-earth/earth-osm)",
+}
 
 def build_overpass_query(country_code, primary_name, feature_name):
     """
@@ -33,85 +40,62 @@ def build_overpass_query(country_code, primary_name, feature_name):
     """
     # Define area query for the country
     area_query = f'area["ISO3166-1"="{country_code}"]'
-
-    # Build the specific query based on primary and feature name
-    if primary_name == 'power':
-        if feature_name == 'substation':
-            element_query = 'nwr["power"="substation"]'
-        elif feature_name == 'line':
-            element_query = 'way["power"="line"]'
-        elif feature_name == 'generator':
-            element_query = 'nwr["power"="generator"]'
-        elif feature_name == 'tower':
-            element_query = 'node["power"="tower"]'
-        elif feature_name == 'pole':
-            element_query = 'node["power"="pole"]'
-        elif feature_name == 'transformer':
-            element_query = 'nwr["power"="transformer"]'
-        else:
-            # Generic query for any power feature
-            element_query = f'nwr["power"="{feature_name}"]'
-    else:
-        # Generic query for other primary features
-        element_query = f'nwr["{primary_name}"="{feature_name}"]'
+    match_all = feature_name.startswith('ALL_')
+    element_query = (
+        f'nwr["{primary_name}"]'
+        if match_all
+        else f'nwr["{primary_name}"="{feature_name}"]'
+    )
 
     # Construct the full Overpass query with recursion to get referenced nodes
-    query = f"""
-        [out:json][timeout:300];
+    return dedent(
+        f"""
+        [out:json][timeout:{QUERY_TIMEOUT}];
         {area_query}->.searchArea;
         (
             {element_query}(area.searchArea);
         );
         (._;>;);
         out body geom;
-    """
+        """
+    ).strip()
 
-    return query
+
+_SESSION = requests.Session()
+_SESSION.headers.update(REQUEST_HEADERS)
+_RETRY = Retry(
+    total=3,
+    backoff_factor=2,
+    status_forcelist=(429, 500, 502, 503, 504),
+    allowed_methods=False,
+    respect_retry_after_header=True,
+)
+_ADAPTER = HTTPAdapter(max_retries=_RETRY)
+_SESSION.mount("http://", _ADAPTER)
+_SESSION.mount("https://", _ADAPTER)
 
 
-def fetch_overpass_data(query, retries=3, wait_time=5):
+def fetch_overpass_data(query):
     """
     Fetch data from the Overpass API.
 
     Args:
         query: Overpass query string
         retries: Number of retry attempts
-        wait_time: Initial wait time between retries (will increase with each retry)
 
+    Returns:
     Returns:
         dict: Response from Overpass API
     """
-    overpass_url = "https://overpass-api.de/api/interpreter"
-
-    for attempt in range(retries):
-        try:
-            logger.info(f"Fetching data from Overpass API (Attempt {attempt + 1})...")
-
-            response = requests.post(overpass_url, data=query, timeout=600)
-            response.raise_for_status()  # Raise HTTPError for bad responses
-
-            data = response.json()
-            logger.info("Successfully fetched data from Overpass API")
-            return data
-
-        except (json.JSONDecodeError, requests.exceptions.RequestException) as e:
-            logger.error(f"Error fetching data from Overpass API: {e}")
-            if attempt < retries - 1:
-                wait_time += 15
-                logger.info(f"Waiting {wait_time} seconds before retrying...")
-                time.sleep(wait_time)
-            else:
-                logger.error(f"Failed to retrieve data after {retries} attempts")
-                raise e
-        except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-            if attempt < retries - 1:
-                wait_time += 10
-                logger.info(f"Waiting {wait_time} seconds before retrying...")
-                time.sleep(wait_time)
-            else:
-                logger.error(f"Failed to retrieve data after {retries} attempts")
-                raise e
+    logger.debug("Fetching data from Overpass API")
+    response = _SESSION.post(
+        OVERPASS_ENDPOINT,
+        data=query,
+        timeout=REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    logger.info("Successfully fetched data from Overpass API")
+    return response.json()
 
 
 def transform_overpass_to_internal_format(overpass_data, primary_name, feature_name):
@@ -129,6 +113,29 @@ def transform_overpass_to_internal_format(overpass_data, primary_name, feature_n
     # Initialize the data structure
     primary_data = {'Node': {}, 'Way': {}, 'Relation': {}}
     feature_data = {'Node': {}, 'Way': {}, 'Relation': {}}
+    include_all = feature_name.startswith('ALL_')
+
+    def build_payload(metadata, data):
+        return {'Metadata': metadata, 'Data': data}
+
+    def node_attrs(element):
+        lon = element.get('lon')
+        lat = element.get('lat')
+        if lon is None or lat is None:
+            return None
+        return 'lonlat', [lon, lat]
+
+    def way_attrs(element):
+        return 'refs', element.get('nodes', [])
+
+    def relation_attrs(element):
+        return 'members', element.get('members', [])
+
+    type_extractors = {
+        'Node': node_attrs,
+        'Way': way_attrs,
+        'Relation': relation_attrs,
+    }
 
     # Process each element from the Overpass response
     for element in overpass_data.get('elements', []):
@@ -144,17 +151,12 @@ def transform_overpass_to_internal_format(overpass_data, primary_name, feature_n
             'tags': tags
         }
 
-        # Add coordinates for nodes
-        if element_type == 'Node':
-            element_data['lonlat'] = [element.get('lon', 0), element.get('lat', 0)]
-
-        # Add refs for ways
-        elif element_type == 'Way':
-            element_data['refs'] = element.get('nodes', [])
-
-        # Add members for relations
-        elif element_type == 'Relation':
-            element_data['members'] = element.get('members', [])
+        extractor = type_extractors.get(element_type)
+        if extractor:
+            extracted = extractor(element)
+            if extracted is not None:
+                key, value = extracted
+                element_data[key] = value
 
         # Always add nodes to primary data (needed for way references)
         # Add all elements with the primary tag to primary data
@@ -162,35 +164,31 @@ def transform_overpass_to_internal_format(overpass_data, primary_name, feature_n
             primary_data[element_type][element_id] = element_data
 
         # Add to feature data (elements that match the specific feature)
-        if tags.get(primary_name) == feature_name:
+        if not include_all and tags.get(primary_name) == feature_name:
             feature_data[element_type][element_id] = element_data
 
     # Create metadata
+    timestamp = datetime.now().isoformat()
+
     primary_metadata = {
-        'filter_date': datetime.now().isoformat(),
+        'filter_date': timestamp,
         'primary_feature': primary_name,
     }
+    primary_dict = build_payload(primary_metadata, primary_data)
+
+    if include_all:
+        return primary_dict, primary_dict
 
     feature_metadata = {
-        'filter_date': datetime.now().isoformat(),
+        'filter_date': timestamp,
         'filter_tuple': json.dumps((primary_name, feature_name)),
     }
-
-    # Create the dictionaries in the expected format
-    primary_dict = {
-        'Metadata': primary_metadata,
-        'Data': primary_data
-    }
-
-    feature_dict = {
-        'Metadata': feature_metadata,
-        'Data': feature_data
-    }
+    feature_dict = build_payload(feature_metadata, feature_data)
 
     return primary_dict, feature_dict
 
 
-def get_overpass_data(region, primary_name, feature_name, data_dir, progress_bar):
+def get_overpass_data(region, primary_name, feature_name, data_dir):
     """
     Get OSM data from Overpass API for a specific region and feature.
 
@@ -199,20 +197,19 @@ def get_overpass_data(region, primary_name, feature_name, data_dir, progress_bar
         primary_name: Primary feature name (e.g., 'power')
         feature_name: Specific feature name (e.g., 'substation')
         data_dir: Directory for data storage
-        progress_bar: Whether to show progress (currently not used)
+        data_dir: Directory for data storage
 
     Returns:
         tuple: (primary_dict, feature_dict) in the format expected by process_region
     """
-    logger.info('\n'.join(['',
-                           '-------- Overpass Function------- ',
-                           f'Primary Feature: {primary_name}',
-                           f'Feature Name: {feature_name}',
-                           f'Region Short: {region.short}',
-                           f'Region Name: {region.name}',
-                           f'Data Directory = {data_dir}',
-                           f'Progress Bar = {progress_bar}'
-                           ]))
+    logger.debug(
+        "Overpass request initialized: region=%s (%s), primary=%s, feature=%s, data_dir=%s",
+        region.short,
+        region.name,
+        primary_name,
+        feature_name,
+        data_dir,
+    )
 
     # Build the Overpass query
     query = build_overpass_query(region.short, primary_name, feature_name)
