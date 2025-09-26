@@ -44,19 +44,17 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
     filename = os.path.basename(url)
     filepath = os.path.join(dir, filename)
     if os.path.exists(filepath) and exists_ok:
-        logger.debug(f"{filepath} already exists")
+        logger.debug(f'{filepath} already exists')
         return filepath
     logger.info(f"{filename} downloading to {filepath}")
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)  # create download dir
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)  #  create download dir
     with requests.get(url, stream=progress_bar, verify=False) as r:
         if r.status_code == 200:
             # url properly found, thus execute as expected
             if progress_bar:
-                file_size = int(r.headers.get("Content-Length", 0))
+                file_size = int(r.headers.get('Content-Length', 0))
                 desc = "(Unknown total file size)" if file_size == 0 else ""
-                with tqdm.wrapattr(
-                    r.raw, "read", total=file_size, desc=desc, leave=False
-                ) as raw:
+                with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc, leave=False) as raw:
                     with open(filepath, "wb") as f:
                         shutil.copyfileobj(raw, f)
             else:

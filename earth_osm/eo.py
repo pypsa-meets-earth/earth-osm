@@ -1,11 +1,3 @@
-from earth_osm import logger as base_logger
-from earth_osm.export import EarthOSMWriter
-from earth_osm.filter import get_filtered_data
-from earth_osm.gfk_data import get_region_tuple, get_region_tuple_historical, view_regions
-from earth_osm.overpass import get_overpass_data
-from earth_osm.tagdata import get_feature_list
-from earth_osm.utils import lonlat_lookup, way_or_area
-
 __author__ = "PyPSA meets Earth"
 __copyright__ = "Copyright 2022, The PyPSA meets Earth Initiative"
 __license__ = "MIT"
@@ -16,32 +8,30 @@ This is the principal module of the earth_osm project.
 
 import logging
 import os
-
-# suppress pandas warning about fragmented dataframes
-# TODO: do not suppress warnings
-import warnings
 from datetime import datetime
 from typing import Optional
 
 import pandas as pd
 
-warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+# suppress pandas warning about fragmented dataframes
+# TODO: do not suppress warnings
+import warnings
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
+
+from earth_osm.overpass import get_overpass_data
+from earth_osm.tagdata import get_feature_list
+from earth_osm.filter import get_filtered_data
+from earth_osm.gfk_data import get_region_tuple, get_region_tuple_historical, view_regions
+from earth_osm.utils import lonlat_lookup, way_or_area
+from earth_osm.export import EarthOSMWriter
+from earth_osm import logger as base_logger
 
 
 logger = logging.getLogger("eo.eo")
 logger.setLevel(logging.INFO)
 
 
-def process_region(
-    region,
-    primary_name,
-    feature_name,
-    mp,
-    update,
-    data_dir,
-    progress_bar=True,
-    data_source="geofabrik",
-):
+def process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True, data_source='geofabrik'):
     """
     Process Country
 
@@ -56,17 +46,13 @@ def process_region(
         None
     """
 
-    if data_source == "geofabrik":
-        primary_dict, feature_dict = get_filtered_data(
-            region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar
-        )
-    elif data_source == "overpass":
-        primary_dict, feature_dict = get_overpass_data(
-            region, primary_name, feature_name, data_dir, progress_bar=progress_bar
-        )
+    if data_source == 'geofabrik':
+        primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
+    elif data_source == 'overpass':
+        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir, progress_bar=progress_bar)
 
-    primary_data = primary_dict["Data"]
-    feature_data = feature_dict["Data"]
+    primary_data = primary_dict['Data']
+    feature_data = feature_dict['Data']
 
     df_node = pd.json_normalize(feature_data["Node"].values())
     df_way = pd.json_normalize(feature_data["Way"].values())
@@ -77,7 +63,7 @@ def process_region(
     else:
         type_col = way_or_area(df_way)
         df_way.insert(1, "Type", type_col)
-        logger.debug(df_way["Type"].value_counts(dropna=False))
+        logger.debug(df_way['Type'].value_counts(dropna=False))
 
         # Drop rows with None in Type
         logger.debug(f"Dropping {df_way['Type'].isna().sum()} rows with None in Type")
@@ -93,10 +79,10 @@ def process_region(
     else:
         # df node has lonlat as [lon, lat] it should be [(lon, lat)]
         df_node["lonlat"] = df_node["lonlat"].apply(lambda x: [tuple(x)])
-
+        
         # set type to node
         df_node["Type"] = "node"
-
+    
     # concat ways and nodes
     df_feature = pd.concat([df_way, df_node], ignore_index=True)
 
@@ -106,37 +92,34 @@ def process_region(
     if df_feature.empty:
         logger.debug(f"df_feature is empty for {region.short}, {primary_name}, {feature_name}")
     else:
-        df_feature.insert(3, "Region", region.short)
+        df_feature.insert(3, 'Region', region.short)
 
     # dev logger warning
-    if "other_tags" in df_feature.columns:
-        logger.warning(
-            f"other_tags in extracted data from osm, change of other_tags to eo_tags is necessary, please open issue on github"
-        )
+    if 'other_tags' in df_feature.columns:
+        logger.warning(f"other_tags in extracted data from osm, change of other_tags to eo_tags is necessary, please open issue on github")
 
     return df_feature
 
 
 def get_osm_data(
-    region_str,
-    primary_name,
-    feature_name,
-    data_dir=None,
-    cached=True,
-    progress_bar=True,
-    target_date: Optional[datetime] = None,
-):
-
+        region_str,
+        primary_name,
+        feature_name,
+        data_dir=None,
+        cached = True, 
+        progress_bar=True,
+        target_date: Optional[datetime] = None):
+    
     if target_date:
         region_tuple = get_region_tuple_historical(region_str, target_date)
     else:
         region_tuple = get_region_tuple(region_str)
-
+        
     mp = True
     update = not cached
 
-    data_dir = os.path.join(os.getcwd(), "earth_data") if data_dir is None else data_dir
-
+    data_dir=os.path.join(os.getcwd(), 'earth_data') if data_dir is None else data_dir
+    
     df = process_region(
         region_tuple,
         primary_name,
@@ -144,7 +127,7 @@ def get_osm_data(
         mp,
         update,
         data_dir,
-        progress_bar=progress_bar,
+        progress_bar=progress_bar
     )
 
     return df
@@ -163,13 +146,13 @@ def save_osm_data(
     region_list,
     primary_name,
     feature_list=None,
-    out_format="csv",  # TODO: rename out_format -> format
-    out_aggregate=True,  # TODO: rename out_aggregate -> aggregate
-    out_dir=os.path.join(os.getcwd(), "earth_data"),
-    data_source="geofabrik",  # 'overpass'
-    data_dir=os.path.join(os.getcwd(), "earth_data"),
+    out_format="csv", # TODO: rename out_format -> format
+    out_aggregate=True, # TODO: rename out_aggregate -> aggregate
+    out_dir=os.path.join(os.getcwd(), 'earth_data'),
+    data_source = 'geofabrik', # 'overpass'
+    data_dir=os.path.join(os.getcwd(), 'earth_data'),
     update=False,
-    mp=True,  # TODO: remove mp arg,
+    mp=True, # TODO: remove mp arg,
     progress_bar=True,
     target_date: Optional[datetime] = None,
 ):
