@@ -89,7 +89,7 @@ def download_pbf(url, update, data_dir, progress_bar=True):
     if not verify_pbf(down_pbf_fp, down_md5_fp):
         logger.info(f"PBF Md5 mismatch, retrying download for {pbf_fn}")
         down_pbf_fp = download_file(url, pbf_dir, progress_bar=progress_bar)
-        down_md5_fp = download_file(url + ".md5", pbf_dir, exists_ok=not update, progress_bar=progress_bar)
+        down_md5_fp = download_file(url + ".md5", pbf_dir, progress_bar=progress_bar)
         if not verify_pbf(down_pbf_fp, down_md5_fp):
             os.remove(down_pbf_fp)
             os.remove(down_md5_fp)
