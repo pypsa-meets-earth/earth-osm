@@ -29,14 +29,12 @@ logger.setLevel(logging.INFO)
 pkg_data_dir = os.path.join(os.path.dirname(__file__), "data")
 csv_path = os.path.join(pkg_data_dir, "gfk_index.csv")
 
-
 def load_geofabrik_data():
     if os.path.exists(csv_path):
         return pd.read_csv(csv_path)
     else:
         logger.warning("CSV file not found. Please run the script as __main__ to generate it.")
         return pd.DataFrame()
-
 
 df = load_geofabrik_data()
 
@@ -52,13 +50,11 @@ def get_root_list():
     """
     return list(df.loc[df['parent'].isna(), 'id'])
 
-
 def get_all_valid_list():
     """
     Returns a list of all valid region ids
     """
     return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
-
 
 def get_all_regions_dict(level=0):
     """

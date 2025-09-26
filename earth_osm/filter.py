@@ -61,23 +61,26 @@ def run_feature_filter(primary_dict, feature_name):
 
 
 def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
-    logger.info("New Pre-Filter Data")
-    logger.info("Load OSM data from " + PBF_inputfile + "\n")
+    logger.info('New Pre-Filter Data')
+    logger.info('Load OSM data from '+ PBF_inputfile+'\n')
 
     feature_list = get_feature_list(primary_name)
     pre_filter = {
-        Node: {primary_name: feature_list},
-        Way: {primary_name: feature_list},
-        Relation: {primary_name: feature_list},
+        "Node": {primary_name: feature_list},
+        "Way": {primary_name: feature_list},
+        "Relation": {primary_name: feature_list},
     }
 
     primary_data = filter_pbf(PBF_inputfile, pre_filter, multiprocess)
 
     metadata = {
-        "filter_date": str(datetime.now().isoformat()),
-        "primary_feature": primary_name,
+        'filter_date': str(datetime.now().isoformat()),
+        'primary_feature': primary_name,
     }
-    primary_dict = {"Metadata": metadata, "Data": primary_data}
+    primary_dict = {
+        'Metadata': metadata,
+        'Data': primary_data
+    }
     # Save primary_dict
     with open(primary_file, "w", encoding="utf-8") as target:
         json.dump(
@@ -91,13 +94,11 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     return primary_dict
 
 
-def get_filtered_data(
-    region, primary_name, feature_name, mp, update, data_dir, progress_bar=True
-):
-    geofabrik_pbf_url = region.urls["pbf"]
+def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True):
+    geofabrik_pbf_url = region.urls['pbf']
 
     # Check if this is a historical region request
-    if hasattr(region, "target_date") and region.target_date is not None:
+    if hasattr(region, 'target_date') and region.target_date is not None:
         PBF_inputfile = download_pbf(
             geofabrik_pbf_url,
             update,

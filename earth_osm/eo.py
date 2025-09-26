@@ -26,7 +26,6 @@ from earth_osm.utils import lonlat_lookup, way_or_area
 from earth_osm.export import EarthOSMWriter
 from earth_osm import logger as base_logger
 
-
 logger = logging.getLogger("eo.eo")
 logger.setLevel(logging.INFO)
 
@@ -96,9 +95,8 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir, pro
     # dev logger warning
     if 'other_tags' in df_feature.columns:
         logger.warning(f"other_tags in extracted data from osm, change of other_tags to eo_tags is necessary, please open issue on github")
-
+        
     return df_feature
-
 
 def get_osm_data(
         region_str,
@@ -130,7 +128,7 @@ def get_osm_data(
     )
 
     return df
-
+    
 
 # TODO: Plan
 # Use an intermediary super efficient file format such as parquet
@@ -176,11 +174,11 @@ def save_osm_data(
 
     if feature_list is None:
         feature_list = get_feature_list(primary_name)
-    elif feature_list == ["ALL"]:
+    elif feature_list == ['ALL']:
         # Account for wild card
-        feature_list = [f"ALL_{primary_name}"]
+        feature_list = [f'ALL_{primary_name}']
 
-    if out_aggregate == "region" or out_aggregate is True:
+    if out_aggregate == 'region' or out_aggregate is True:
         # for each feature, aggregate all regions
         for feature_name in feature_list:
             with EarthOSMWriter(

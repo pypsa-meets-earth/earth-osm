@@ -28,7 +28,6 @@ logger.setLevel(logging.INFO)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
 def download_file(url, dir, exists_ok=False, progress_bar=True):
     """
     Download file from url to dir
@@ -69,27 +68,17 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
             filepath = None
     return filepath
 
-
 def download_sitemap(geom, pkg_data_dir, progress_bar=True):
     geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
 
-    sitemap_file = download_file(
-        geofabrik_sitemap_url, pkg_data_dir, exists_ok=True, progress_bar=progress_bar
-    )
+    sitemap_file = download_file(geofabrik_sitemap_url, pkg_data_dir, exists_ok=True, progress_bar=progress_bar)
 
     return sitemap_file
 
 
-def download_pbf(
-    url,
-    update,
-    data_dir,
-    progress_bar=True,
-    target_date: Optional[datetime] = None,
-    region_id: Optional[str] = None,
-):
+def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional[datetime] = None, region_id: Optional[str] = None):
     """
     Download PBF file - either latest or historical version
 
