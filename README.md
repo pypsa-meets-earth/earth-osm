@@ -36,6 +36,7 @@ earth-osm downloads, filters, cleans and exports infrastructure data from OpenSt
 - 🌍 Supports global data extraction
 - 🖱️ Easy-to-use CLI interface
 
+- 🌐 Dual data sources: GeoFabrik (default) and live Overpass API
 ## 🚀 Getting Started
 
 ### Installation
@@ -106,6 +107,7 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 | `--out_format` | Export format(s): csv and/or geojson | ['csv', 'geojson'] |
 | `--agg_feature` | Aggregate outputs by feature | False |
 | `--agg_region` | Aggregate outputs by region | False |
+| `--source` | Data source: geofabrik (default) or overpass | geofabrik |
 
 ## 🐍 Python API
 
@@ -123,6 +125,7 @@ eo.save_osm_data(
     data_dir='./earth_data',
     out_format=['csv', 'geojson'],
     out_aggregate=False,
+    data_source='geofabrik'  # or 'overpass'
 )
 ```
 
@@ -162,10 +165,6 @@ To contribute to earth-osm, follow these steps:
    ```
 
 4. Read the [CONTRIBUTING.md](https://github.com/pypsa-meets-earth/earth-osm/blob/main/CONTRIBUTING.md) file for more detailed information on how to contribute to the project.
-
-## 📄 License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/pypsa-meets-earth/earth-osm/blob/main/LICENSE) file for details.
 
 ## 🤝 Community
 

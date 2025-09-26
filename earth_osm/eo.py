@@ -47,7 +47,7 @@ def process_region(region, primary_name, feature_name, mp, update, data_dir, pro
     if data_source == 'geofabrik':
         primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
     elif data_source == 'overpass':
-        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir, progress_bar=progress_bar)
+        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir)
 
     primary_data = primary_dict['Data']
     feature_data = feature_dict['Data']
@@ -105,7 +105,9 @@ def get_osm_data(
         data_dir=None,
         cached = True, 
         progress_bar=True,
-        target_date: Optional[datetime] = None):
+        target_date: Optional[datetime] = None,
+        data_source='geofabrik'):
+
     
     if target_date:
         region_tuple = get_region_tuple_historical(region_str, target_date)
@@ -124,7 +126,8 @@ def get_osm_data(
         mp,
         update,
         data_dir,
-        progress_bar=progress_bar
+        progress_bar=progress_bar,
+        data_source=data_source
     )
 
     return df
