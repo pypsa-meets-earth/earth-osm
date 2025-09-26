@@ -59,15 +59,16 @@ def run_feature_filter(primary_dict, feature_name):
 
     return feature_dict
 
+
 def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     logger.info('New Pre-Filter Data')
     logger.info('Load OSM data from '+ PBF_inputfile+'\n')
 
     feature_list = get_feature_list(primary_name)
     pre_filter = {
-        Node: {primary_name: feature_list},
-        Way: {primary_name: feature_list},
-        Relation: {primary_name: feature_list},
+        "Node": {primary_name: feature_list},
+        "Way": {primary_name: feature_list},
+        "Relation": {primary_name: feature_list},
     }
 
     primary_data = filter_pbf(PBF_inputfile, pre_filter, multiprocess)
@@ -95,13 +96,27 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
 
 def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True):
     geofabrik_pbf_url = region.urls['pbf']
-    PBF_inputfile = download_pbf(geofabrik_pbf_url, update, data_dir, progress_bar=progress_bar)
+
+    # Check if this is a historical region request
+    if hasattr(region, 'target_date') and region.target_date is not None:
+        PBF_inputfile = download_pbf(
+            geofabrik_pbf_url,
+            update,
+            data_dir,
+            progress_bar=progress_bar,
+            target_date=region.target_date,
+            region_id=region.id,
+        )
+    else:
+        PBF_inputfile = download_pbf(
+            geofabrik_pbf_url, update, data_dir, progress_bar=progress_bar
+        )
+
     country_code = region.short
 
     # ------- primary file -------
     primary_file_exists = False
-    primary_file = os.path.join(data_dir, primary_name, f"{country_code}_{primary_name}.json"
-    )
+    primary_file = os.path.join(data_dir, primary_name, f"{country_code}_{primary_name}.json")
     if os.path.exists(primary_file):
         primary_file_exists = True
         with open(primary_file, encoding="utf-8") as f:
@@ -117,5 +132,3 @@ def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, 
     feature_dict = run_feature_filter(primary_dict, feature_name)
 
     return primary_dict, feature_dict
-
-
