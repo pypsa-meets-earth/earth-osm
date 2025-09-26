@@ -29,7 +29,7 @@ csv_path = os.path.join(pkg_data_dir, "gfk_index.csv")
 
 def load_geofabrik_data():
     if os.path.exists(csv_path):
-        return pd.read_csv(csv_path)
+        return pd.read_csv(csv_path, keep_default_na=False, na_values=[''])
     else:
         logger.warning("CSV file not found. Please run the script as __main__ to generate it.")
         return pd.DataFrame()
