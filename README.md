@@ -91,7 +91,7 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 
 - `--regions`: Specify one or more regions using ISO 3166-1 alpha-2, ISO 3166-2 codes, or full names
 
-> **Tip:** A list of regions is available at [regions.md](docs/generated-docs/regions_table.md)
+> **Tip:** A list of regions is available at [regions.md](https://github.com/pypsa-meets-earth/earth-osm/blob/main/docs/generated-docs/regions_table.md)
 
 
 #### Optional Arguments:
@@ -200,11 +200,11 @@ To contribute to earth-osm, follow these steps:
    pip install -e .[dev]
    ```
 
-4. Read the [CONTRIBUTING.md](CONTRIBUTING.md) file for more detailed information on how to contribute to the project.
+4. Read the [CONTRIBUTING.md](https://github.com/pypsa-meets-earth/earth-osm/blob/main/CONTRIBUTING.md) file for more detailed information on how to contribute to the project.
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/pypsa-meets-earth/earth-osm/blob/main/LICENSE) file for details.
 
 ## 🤝 Community
 
@@ -229,8 +229,8 @@ Made with ❤️ by the PyPSA meets Earth team
 
 <!-- LINK GROUP -->
 
-[contributing]: CONTRIBUTING.md
-[license]: LICENSE
+[contributing]: https://github.com/pypsa-meets-earth/earth-osm/blob/main/CONTRIBUTING.md
+[license]: https://github.com/pypsa-meets-earth/earth-osm/blob/main/LICENSE
 [docs-url]: https://pypsa-meets-earth.github.io/earth-osm/
 [discord-url]: https://discord.gg/AnuJBk23FU
 [pypi-url]: https://pypi.org/project/earth-osm/
