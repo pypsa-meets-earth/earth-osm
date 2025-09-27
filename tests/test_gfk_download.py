@@ -1,8 +1,12 @@
 import timeit
+import pytest
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.gfk_download import download_pbf, verify_pbf
 import signal
 import os
+
+
+pytestmark = pytest.mark.integration
 
 def test_download_pbf_update():
     region = get_region_tuple("malta")

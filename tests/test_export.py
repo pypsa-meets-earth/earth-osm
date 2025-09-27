@@ -1,12 +1,9 @@
-import os
 from earth_osm.eo import save_osm_data
 
 
 primary_name = "power"
 update = False
 mp = True
-data_dir = os.path.join(os.getcwd(), "earth_data_test")
-out_dir = os.path.join(os.getcwd(), "earth_data_test")
 
 
 def test_no_aggregate(shared_data_dir):
@@ -17,7 +14,7 @@ def test_no_aggregate(shared_data_dir):
         update=update,
         mp=mp,
         data_dir=shared_data_dir,
-        out_dir=out_dir,
+        out_dir=shared_data_dir,
         out_format=["csv", "geojson"],
         out_aggregate=False,
     )
@@ -31,8 +28,8 @@ def test_aggregate(shared_data_dir):
         feature_list=["substation", "line", "cable", "generator"],
         update=update,
         mp=mp,
-        data_dir=data_dir,
-        out_dir=out_dir,
+        data_dir=shared_data_dir,
+        out_dir=shared_data_dir,
         out_format=["csv", "geojson"],
         out_aggregate=True,
     )
@@ -45,8 +42,8 @@ def test_small_count(shared_data_dir):
         feature_list=["plant"],
         update=update,
         mp=mp,
-        data_dir=data_dir,
-        out_dir=out_dir,
+        data_dir=shared_data_dir,
+        out_dir=shared_data_dir,
         out_format=["csv", "geojson"],
         out_aggregate=False,
     )
