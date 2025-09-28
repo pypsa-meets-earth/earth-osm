@@ -36,10 +36,14 @@ lint:		## Run pep8, black, mypy linters.
 
 .PHONY: test
 test:		## Run tests and generate coverage report.
-	$(ENV_PREFIX)pytest -v --cov=earth_osm --cov-config= --cov-report= -l --tb=short --maxfail=1 tests/
+	@if [ -n "$$CI" ]; then \
+		$(ENV_PREFIX)pytest -v -m "not integration" --cov=earth_osm --cov-report=term --cov-report=xml -l --tb=short --maxfail=1 tests/; \
+	else \
+		$(ENV_PREFIX)pytest -v --cov=earth_osm --cov-config= --cov-report= -l --tb=short --maxfail=1 tests/; \
+		$(ENV_PREFIX)coverage xml --omit='*_pb2.py'; \
+		$(ENV_PREFIX)coverage html --omit='*_pb2.py'; \
+	fi
 	$(ENV_PREFIX)coverage report --omit='*_pb2.py'
-	$(ENV_PREFIX)coverage xml --omit='*_pb2.py'
-	$(ENV_PREFIX)coverage html --omit='*_pb2.py'
 
 .PHONY: watch
 watch:		## Run tests on every change.
