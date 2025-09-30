@@ -19,11 +19,11 @@ from earth_osm.gfk_download import download_pbf
 from earth_osm.osmpbf import Node, Relation, Way
 from earth_osm import logger as base_logger
 
-logger=logging.getLogger("eo.filter")
+logger = logging.getLogger("eo.filter")
 logger.setLevel(logging.WARNING)
 
 
-def feature_filter(primary_data, filter_tuple = ('power', 'line')):
+def feature_filter(primary_data, filter_tuple=('power', 'line')):
 
     if set(primary_data.keys()) != set(['Node', 'Way', 'Relation']):
         logger.error('malformed primary_data')
@@ -40,7 +40,7 @@ def run_feature_filter(primary_dict, feature_name):
     if feature_name[:4] == 'ALL_':
         logger.info('Using ALL wildcard, so feature filter is skipped')
         return primary_dict
-    
+
     primary_name = primary_dict['Metadata']['primary_feature']
     filter_tuple = (primary_name, feature_name)
     primary_data = primary_dict['Data']
@@ -54,21 +54,21 @@ def run_feature_filter(primary_dict, feature_name):
 
     feature_dict = {
         'Metadata': metadata,
-        'Data':feature_data
-        }
+        'Data': feature_data
+    }
 
     return feature_dict
 
 
 def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     logger.info('New Pre-Filter Data')
-    logger.info('Load OSM data from '+ PBF_inputfile+'\n')
+    logger.info('Load OSM data from ' + PBF_inputfile+'\n')
 
     feature_list = get_feature_list(primary_name)
     pre_filter = {
-        "Node": {primary_name: feature_list},
-        "Way": {primary_name: feature_list},
-        "Relation": {primary_name: feature_list},
+        Node: {primary_name: feature_list},
+        Way: {primary_name: feature_list},
+        Relation: {primary_name: feature_list},
     }
 
     primary_data = filter_pbf(PBF_inputfile, pre_filter, multiprocess)
@@ -116,7 +116,8 @@ def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, 
 
     # ------- primary file -------
     primary_file_exists = False
-    primary_file = os.path.join(data_dir, primary_name, f"{country_code}_{primary_name}.json")
+    primary_file = os.path.join(
+        data_dir, primary_name, f"{country_code}_{primary_name}.json")
     if os.path.exists(primary_file):
         primary_file_exists = True
         with open(primary_file, encoding="utf-8") as f:
@@ -126,7 +127,8 @@ def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, 
 
     # TODO: compare update time using metadata in primary_dict
     if not primary_file_exists or update is True:
-        primary_dict = run_primary_filter(PBF_inputfile, primary_file, primary_name, mp)
+        primary_dict = run_primary_filter(
+            PBF_inputfile, primary_file, primary_name, mp)
 
     # ------- feature file -------
     feature_dict = run_feature_filter(primary_dict, feature_name)
