@@ -85,7 +85,43 @@ def test_download_corrupted_file():
     assert file_size > corrupt_file_size
 
 
+def test_md5_retry_logic():
+    """Test that MD5 file is re-downloaded on retry when verification fails."""
+    import tempfile
+    
+    data_dir = "earth_data_test"
+    region = get_region_tuple("malta")
+    geofabrik_pbf_url = region.urls['pbf']
+    
+    # First download to get valid files
+    download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir)
+    
+    pbf_file = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf")
+    md5_file = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf.md5")
+    
+    assert os.path.exists(pbf_file)
+    assert os.path.exists(md5_file)
+    
+    # Corrupt the MD5 file to force a retry
+    with open(md5_file, 'w') as f:
+        f.write("corrupted_md5_hash  malta-latest.osm.pbf\n")
+    
+    # This should succeed by re-downloading both files
+    result_fp = download_pbf(geofabrik_pbf_url, update=False, data_dir=data_dir)
+    
+    assert result_fp == pbf_file
+    assert verify_pbf(pbf_file, md5_file)
+    
+    # Verify the MD5 file was actually re-downloaded
+    with open(md5_file, 'r') as f:
+        md5_content = f.read().strip()
+    
+    assert md5_content != "corrupted_md5_hash  malta-latest.osm.pbf"
+    assert len(md5_content.split()[0]) == 32  # MD5 hash should be 32 chars
+
+
 if __name__ == '__main__':
     test_download_pbf_update()
     test_download_corrupted_file()
+    test_md5_retry_logic()
     
