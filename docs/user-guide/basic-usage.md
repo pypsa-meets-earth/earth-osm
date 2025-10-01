@@ -149,6 +149,8 @@ Common power features:
 - `tower`: Transmission towers
 - `cable`: Underground cables
 
+**See our [visualization examples](../generated-examples/README.md) for power infrastructure analysis with real plots and maps.**
+
 ### Transportation
 
 ```python
@@ -158,6 +160,8 @@ eo.save_osm_data('railway', ['france'], ['rail', 'station', 'platform'])
 # Road infrastructure  
 eo.save_osm_data('highway', ['netherlands'], ['primary', 'secondary', 'trunk'])
 ```
+
+**View the [Luxembourg highway network visualization](../generated-examples/README.md) showing multi-class road networks.**
 
 ### Water Infrastructure
 

@@ -143,31 +143,51 @@ Earth-OSM supports extraction of various infrastructure types:
 
 ## 📊 Example: Power Infrastructure Analysis
 
-Let's extract and visualize power substations in the Netherlands:
+Let's extract and visualize power substations in Monaco:
 
 ```python
-import earth_osm as eo
+from earth_osm.eo import save_osm_data
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
-# Extract power infrastructure
-eo.save_osm_data(
+# Extract power infrastructure for Monaco
+save_osm_data(
+    region_list=['monaco'],
     primary_name='power',
-    region_list=['netherlands'],
-    feature_list=['substation', 'line']
+    out_dir='./earth_data'
 )
 
 # Load and visualize
-substations = gpd.read_file('./earth_data/out/NL_substation.geojson')
-lines = gpd.read_file('./earth_data/out/NL_line.geojson')
+substations = gpd.read_file('./earth_data/out/MC_substation.geojson')
+generators = gpd.read_file('./earth_data/out/MC_generator.geojson')
 
 fig, ax = plt.subplots(figsize=(12, 8))
-lines.plot(ax=ax, color='red', linewidth=0.5, alpha=0.7, label='Power Lines')
-substations.plot(ax=ax, color='blue', markersize=20, alpha=0.8, label='Substations')
-ax.set_title('Netherlands Power Infrastructure')
+generators.plot(ax=ax, color='green', markersize=60, alpha=0.8, label='Generators')
+substations.plot(ax=ax, color='red', markersize=100, alpha=0.8, label='Substations', marker='s')
+ax.set_title('Monaco Power Infrastructure')
 ax.legend()
 plt.show()
 ```
+
+### Visualization Results
+
+![Monaco Power Infrastructure](generated-examples/images/monaco_power_infrastructure.png)
+
+The visualization shows Monaco's power infrastructure with generators (green circles) and substations (red squares). You can also create detailed analysis plots:
+
+![Monaco Power Analysis](generated-examples/images/monaco_power_analysis.png)
+
+### Multi-Infrastructure Analysis
+
+Earth-OSM supports various infrastructure types. Here's a highway network visualization for Luxembourg:
+
+![Luxembourg Highway Network](generated-examples/images/luxembourg_highway_network.png)
+
+### Regional Comparisons
+
+Compare infrastructure across different regions:
+
+![Regional Comparison](generated-examples/images/region_comparison.png)
 
 !!! tip "Next Steps"
     - 📖 Read the [User Guide](user-guide/getting-started.md) for comprehensive tutorials

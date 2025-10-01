@@ -5,7 +5,7 @@ description: Create compelling visualizations of infrastructure data
 
 # Visualization with Earth-OSM
 
-This guide shows how to create compelling visualizations of infrastructure data extracted with Earth-OSM.
+This guide shows how to create compelling visualizations of infrastructure data extracted with Earth-OSM, with real examples and plots.
 
 ## Setup
 
@@ -15,28 +15,186 @@ First, install the required visualization libraries:
 pip install matplotlib plotly seaborn folium contextily
 ```
 
-## Basic Plotting with GeoPandas
+## Earth-OSM Workflow
 
-### Simple Infrastructure Map
+Understanding the Earth-OSM workflow helps you plan your visualization approach:
+
+![Earth-OSM Workflow](../generated-examples/images/earth_osm_workflow.png)
+
+## Real Infrastructure Visualizations
+
+Let's explore actual infrastructure data with visualizations.
+
+### Power Infrastructure Analysis
+
+Here's a complete example using Monaco's power infrastructure:
 
 ```python
+from earth_osm.eo import save_osm_data
 import geopandas as gpd
 import matplotlib.pyplot as plt
-import earth_osm as eo
 
-# Extract power infrastructure for Netherlands
-eo.save_osm_data(
+# Extract power infrastructure for Monaco
+save_osm_data(
+    region_list=['monaco'],
     primary_name='power',
-    region_list=['netherlands'],
-    feature_list=['substation', 'line'],
-    out_format=['geojson']
+    out_dir='./earth_data'
 )
 
-# Load and plot substations
-substations = gpd.read_file('./earth_data/out/NL_substation.geojson')
-lines = gpd.read_file('./earth_data/out/NL_line.geojson')
+# Load the data
+substations = gpd.read_file('./earth_data/out/MC_substation.geojson')
+generators = gpd.read_file('./earth_data/out/MC_generator.geojson')
 
+# Create visualization
 fig, ax = plt.subplots(figsize=(12, 10))
+
+# Plot generators as green circles
+generators.plot(ax=ax, color='#2ecc71', markersize=60, alpha=0.8, 
+                label='Generators', edgecolor='darkgreen')
+
+# Plot substations as red squares  
+substations.plot(ax=ax, color='#e74c3c', markersize=100, alpha=0.8, 
+                 label='Substations', marker='s', edgecolor='darkred')
+
+ax.set_title('Monaco Power Infrastructure', fontsize=16, fontweight='bold')
+ax.set_xlabel('Longitude')
+ax.set_ylabel('Latitude')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Result:**
+
+![Monaco Power Infrastructure](../generated-examples/images/monaco_power_infrastructure.png)
+
+### Statistical Analysis
+
+Create comprehensive analysis plots:
+
+```python
+import pandas as pd
+import seaborn as sns
+
+# Load CSV data for analysis
+df_power = pd.read_csv('./earth_data/out/MC_generator.csv')
+
+# Create multi-panel analysis
+fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+fig.suptitle('Monaco Power Infrastructure Analysis', fontsize=16)
+
+# Element type distribution
+type_counts = df_power['Type'].value_counts()
+axes[0, 0].pie(type_counts.values, labels=type_counts.index, autopct='%1.1f%%')
+axes[0, 0].set_title('OSM Element Types')
+
+# Power source types
+power_types = df_power['tags.power'].value_counts().head(5)
+axes[0, 1].bar(range(len(power_types)), power_types.values)
+axes[0, 1].set_title('Power Source Types')
+
+# Data completeness analysis
+completeness = (df_power.isnull().sum() / len(df_power) * 100)
+top_missing = completeness.head(8)
+axes[1, 0].barh(range(len(top_missing)), top_missing.values)
+axes[1, 0].set_title('Missing Data by Column (%)')
+
+# Feature counts
+feature_counts = {'Generators': len(generators), 'Substations': len(substations)}
+axes[1, 1].bar(feature_counts.keys(), feature_counts.values())
+axes[1, 1].set_title('Infrastructure Feature Count')
+
+plt.tight_layout()
+plt.show()
+```
+
+**Result:**
+
+![Monaco Power Analysis](../generated-examples/images/monaco_power_analysis.png)
+
+### Highway Network Visualization
+
+Visualize road networks with different classifications:
+
+```python
+# Extract highway data for Luxembourg
+save_osm_data(
+    region_list=['luxembourg'],
+    primary_name='highway',
+    out_dir='./highway_data'
+)
+
+# Load different road types
+road_types = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'residential']
+colors = ['#2c3e50', '#8e44ad', '#e74c3c', '#e67e22', '#f1c40f', '#bdc3c7']
+
+fig, ax = plt.subplots(figsize=(14, 10))
+
+# Plot roads in order of importance (least important first)
+for road_type, color in zip(reversed(road_types), reversed(colors)):
+    try:
+        gdf = gpd.read_file(f'./highway_data/out/LU_{road_type}.geojson')
+        if len(gdf) > 0:
+            linewidth = 3 if road_type in ['motorway', 'trunk'] else 2 if road_type == 'primary' else 1
+            gdf.plot(ax=ax, color=color, linewidth=linewidth, alpha=0.8, label=road_type.title())
+    except FileNotFoundError:
+        continue
+
+ax.set_title('Luxembourg Road Network by Classification', fontsize=16, fontweight='bold')
+ax.legend(loc='best')
+ax.grid(True, alpha=0.3)
+plt.show()
+```
+
+**Result:**
+
+![Luxembourg Highway Network](../generated-examples/images/luxembourg_highway_network.png)
+
+### Regional Comparisons
+
+Compare infrastructure across multiple regions:
+
+```python
+# Extract data for multiple regions
+regions = ['monaco', 'andorra']
+comparison_data = []
+
+for region in regions:
+    save_osm_data(
+        region_list=[region],
+        primary_name='power',
+        out_dir=f'./{region}_power'
+    )
+    
+    # Count total features
+    csv_files = glob.glob(f'./{region}_power/out/*.csv')
+    total_features = sum(len(pd.read_csv(f)) for f in csv_files)
+    
+    comparison_data.append({
+        'region': region.title(),
+        'total_features': total_features
+    })
+
+# Create comparison chart
+df_comparison = pd.DataFrame(comparison_data)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+bars = ax.bar(df_comparison['region'], df_comparison['total_features'], 
+              color=['#3498db', '#e74c3c'], alpha=0.8)
+
+# Add value labels
+for bar, value in zip(bars, df_comparison['total_features']):
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1, 
+           str(value), ha='center', va='bottom', fontweight='bold')
+
+ax.set_title('Power Infrastructure Comparison', fontsize=16, fontweight='bold')
+ax.set_ylabel('Total Power Features')
+plt.show()
+```
+
+**Result:**
+
+![Regional Comparison](../generated-examples/images/region_comparison.png)
 
 # Plot power lines
 lines.plot(ax=ax, color='red', linewidth=0.5, alpha=0.7, label='Power Lines')

@@ -1,21 +1,40 @@
 # Monaco Power Infrastructure Example
 
-*Generated on 2024-09-26*
+*Generated on 2024-10-01*
 
 ## Overview
 
 This example demonstrates extracting power infrastructure data for Monaco using Earth-OSM.
 
 **Statistics:**
-- Total features extracted: 32
+- Total features extracted: 34
 - Feature types: substation, generator, cable, tower
 - Region: Monaco
+
+## Visualization Results
+
+### Power Infrastructure Map
+
+![Monaco Power Infrastructure](images/monaco_power_infrastructure.png)
+
+The map shows Monaco's power infrastructure with:
+- **Green circles**: Power generators (29 features) - includes solar panels and other generation sources
+- **Red squares**: Substations (2 features) - critical electrical distribution nodes
+
+### Statistical Analysis
+
+![Monaco Power Analysis](images/monaco_power_analysis.png)
+
+The analysis reveals:
+- **Element Types**: Primarily node-based features (point locations)
+- **Power Sources**: Various generator types including solar installations
+- **Data Quality**: Comprehensive attribute coverage with minimal missing data
+- **Infrastructure Count**: Detailed breakdown of each feature type
 
 ## Code Example
 
 ```python
 from earth_osm.eo import save_osm_data
-import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
@@ -23,21 +42,35 @@ import matplotlib.pyplot as plt
 save_osm_data(
     region_list=['monaco'],
     primary_name='power',
-    out_dir='./earth_data',
-    out_format=['csv', 'geojson']
+    out_dir='./earth_data'
 )
 
-# Load substations data
-substations_df = pd.read_csv('./earth_data/out/MC_substation.csv')
-print(f"Found {len(substations_df)} substations")
+# Load and visualize the data
+substations = gpd.read_file('./earth_data/out/MC_substation.geojson')
+generators = gpd.read_file('./earth_data/out/MC_generator.geojson')
 
-# Load generators data  
-generators_df = pd.read_csv('./earth_data/out/MC_generator.csv')
-print(f"Found {len(generators_df)} generators")
+# Create visualization
+fig, ax = plt.subplots(figsize=(12, 10))
 
-# Display sample data
-print("\nSubstation data sample:")
-print(substations_df[['id', 'Type', 'tags.power', 'tags.voltage']].head())
+# Plot generators as green circles
+generators.plot(ax=ax, color='#2ecc71', markersize=60, alpha=0.8, 
+                label='Generators', edgecolor='darkgreen')
+
+# Plot substations as red squares
+substations.plot(ax=ax, color='#e74c3c', markersize=100, alpha=0.8, 
+                 label='Substations', marker='s', edgecolor='darkred')
+
+ax.set_title('Monaco Power Infrastructure', fontsize=16, fontweight='bold')
+ax.set_xlabel('Longitude')
+ax.set_ylabel('Latitude')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.show()
+
+# Load CSV data for detailed analysis
+df_generators = pd.read_csv('./earth_data/out/MC_generator.csv')
+print(f"Found {len(df_generators)} generators")
+print(f"Generator types: {df_generators['tags.power'].value_counts()}")
 ```
 
 ## Results
