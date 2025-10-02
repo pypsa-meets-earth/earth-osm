@@ -66,7 +66,9 @@ plt.show()
 
 **Result:**
 
-![Monaco Power Infrastructure](../generated-examples/images/monaco_power_infrastructure.png)
+![Monaco Complete Power Network](../generated-examples/images/monaco_power_network_complete.png)
+
+*This comprehensive visualization shows Monaco's complete electrical infrastructure: substations (red squares), generators (green circles), power lines (blue), and cables (purple), all overlaid on a geographic basemap for real-world context.*
 
 ### Statistical Analysis
 
@@ -148,53 +150,63 @@ plt.show()
 
 **Result:**
 
-![Luxembourg Highway Network](../generated-examples/images/luxembourg_highway_network.png)
+![Luxembourg Highway Hierarchy](../generated-examples/images/luxembourg_highway_hierarchy.png)
 
-### Regional Comparisons
+*Luxembourg's complete road network showing the hierarchy from motorways (dark red) to residential streets (gray), displayed over an OpenStreetMap base layer for geographic context.*
 
-Compare infrastructure across multiple regions:
+### Network Topology Analysis
+
+Analyze power grid topology and connectivity:
 
 ```python
-# Extract data for multiple regions
-regions = ['monaco', 'andorra']
-comparison_data = []
+import networkx as nx
 
-for region in regions:
-    save_osm_data(
-        region_list=[region],
-        primary_name='power',
-        out_dir=f'./{region}_power'
-    )
-    
-    # Count total features
-    csv_files = glob.glob(f'./{region}_power/out/*.csv')
-    total_features = sum(len(pd.read_csv(f)) for f in csv_files)
-    
-    comparison_data.append({
-        'region': region.title(),
-        'total_features': total_features
-    })
+# Extract power network data
+save_osm_data(
+    region_list=['luxembourg'],
+    primary_name='power',
+    out_dir='./power_network'
+)
 
-# Create comparison chart
-df_comparison = pd.DataFrame(comparison_data)
+# Load substations and lines
+substations = gpd.read_file('./power_network/out/LU_substation.geojson')
+lines = gpd.read_file('./power_network/out/LU_line.geojson')
 
-fig, ax = plt.subplots(figsize=(10, 6))
-bars = ax.bar(df_comparison['region'], df_comparison['total_features'], 
-              color=['#3498db', '#e74c3c'], alpha=0.8)
+# Create network graph
+G = nx.Graph()
 
-# Add value labels
-for bar, value in zip(bars, df_comparison['total_features']):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1, 
-           str(value), ha='center', va='bottom', fontweight='bold')
+# Add substations as nodes
+for idx, row in substations.iterrows():
+    G.add_node(row['id'], pos=(row.geometry.x, row.geometry.y))
 
-ax.set_title('Power Infrastructure Comparison', fontsize=16, fontweight='bold')
-ax.set_ylabel('Total Power Features')
+# Analyze network properties
+print(f"Network Statistics:")
+print(f"- Nodes (Substations): {G.number_of_nodes()}")
+print(f"- Network Density: {nx.density(G):.3f}")
+print(f"- Connected Components: {nx.number_connected_components(G)}")
+
+# Visualize network
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+# Geographic layout
+pos = nx.get_node_attributes(G, 'pos')
+nx.draw_networkx_nodes(G, pos, ax=ax1, node_color='red', node_size=100, alpha=0.8)
+nx.draw_networkx_edges(G, pos, ax=ax1, edge_color='blue', width=1, alpha=0.6)
+ax1.set_title('Power Network (Geographic)')
+ax1.set_xlabel('Longitude')
+ax1.set_ylabel('Latitude')
+
+# Force-directed layout
+spring_pos = nx.spring_layout(G, k=1, iterations=50)
+nx.draw_networkx(G, spring_pos, ax=ax2, node_color='red', node_size=50, 
+                 with_labels=False, edge_color='blue', width=0.5, alpha=0.7)
+ax2.set_title('Power Network (Force-Directed)')
+
+plt.tight_layout()
 plt.show()
 ```
 
-**Result:**
-
-![Regional Comparison](../generated-examples/images/region_comparison.png)
+*Network analysis helps identify critical infrastructure nodes, connectivity patterns, and potential vulnerabilities in power grids.*
 
 # Plot power lines
 lines.plot(ax=ax, color='red', linewidth=0.5, alpha=0.7, label='Power Lines')

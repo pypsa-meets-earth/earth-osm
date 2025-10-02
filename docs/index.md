@@ -141,53 +141,74 @@ Earth-OSM supports extraction of various infrastructure types:
 
 </div>
 
-## 📊 Example: Power Infrastructure Analysis
+## 📊 Example: Complete Power Network Analysis
 
-Let's extract and visualize power substations in Monaco:
+Let's extract and visualize a complete power network in Monaco, including substations, generators, lines, and cables:
 
 ```python
 from earth_osm.eo import save_osm_data
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import contextily as ctx
 
-# Extract power infrastructure for Monaco
+# Extract complete power infrastructure for Monaco
 save_osm_data(
     region_list=['monaco'],
     primary_name='power',
     out_dir='./earth_data'
 )
 
-# Load and visualize
+# Load all power network components
 substations = gpd.read_file('./earth_data/out/MC_substation.geojson')
 generators = gpd.read_file('./earth_data/out/MC_generator.geojson')
+lines = gpd.read_file('./earth_data/out/MC_line.geojson')
+cables = gpd.read_file('./earth_data/out/MC_cable.geojson')
 
-fig, ax = plt.subplots(figsize=(12, 8))
-generators.plot(ax=ax, color='green', markersize=60, alpha=0.8, label='Generators')
-substations.plot(ax=ax, color='red', markersize=100, alpha=0.8, label='Substations', marker='s')
-ax.set_title('Monaco Power Infrastructure')
-ax.legend()
+# Create comprehensive visualization with basemap
+fig, ax = plt.subplots(figsize=(14, 12))
+
+# Convert to Web Mercator for basemap
+substations_web = substations.to_crs(epsg=3857)
+generators_web = generators.to_crs(epsg=3857)
+lines_web = lines.to_crs(epsg=3857)
+cables_web = cables.to_crs(epsg=3857)
+
+# Plot network components
+lines_web.plot(ax=ax, color='#3498db', linewidth=2, alpha=0.6, label='Power Lines')
+cables_web.plot(ax=ax, color='#9b59b6', linewidth=1.5, alpha=0.6, linestyle='--', label='Cables')
+generators_web.plot(ax=ax, color='#2ecc71', markersize=80, alpha=0.8, label='Generators')
+substations_web.plot(ax=ax, color='#e74c3c', markersize=120, alpha=0.9, label='Substations', marker='s')
+
+# Add basemap for geographic context
+ctx.add_basemap(ax, source=ctx.providers.CartoDB.DarkMatter, alpha=0.7)
+
+ax.set_title('Monaco Complete Power Network', fontsize=16, fontweight='bold')
+ax.legend(loc='upper left')
+ax.set_axis_off()
 plt.show()
 ```
 
-### Visualization Results
+### Complete Power Network Visualization
 
-![Monaco Power Infrastructure](generated-examples/images/monaco_power_infrastructure.png)
+![Monaco Complete Power Network](generated-examples/images/monaco_power_network_complete.png)
 
-The visualization shows Monaco's power infrastructure with generators (green circles) and substations (red squares). You can also create detailed analysis plots:
+*This visualization shows Monaco's complete electrical infrastructure network with substations (red squares), generators (green circles), power lines (blue), and underground cables (purple dashes) overlaid on a geographic basemap.*
+
+### Statistical Analysis
+
+Create detailed infrastructure analysis with data quality metrics:
 
 ![Monaco Power Analysis](generated-examples/images/monaco_power_analysis.png)
 
-### Multi-Infrastructure Analysis
+*Multi-panel analysis showing OSM element type distribution, power source types, data completeness metrics, and infrastructure feature counts.*
 
-Earth-OSM supports various infrastructure types. Here's a highway network visualization for Luxembourg:
+### Road Network Hierarchy
 
-![Luxembourg Highway Network](generated-examples/images/luxembourg_highway_network.png)
+Earth-OSM supports various infrastructure types. Here's a highway network visualization for Luxembourg showing road classification hierarchy with basemap:
 
-### Regional Comparisons
+![Luxembourg Highway Hierarchy](generated-examples/images/luxembourg_highway_hierarchy.png)
 
-Compare infrastructure across different regions:
-
-![Regional Comparison](generated-examples/images/region_comparison.png)
+*Luxembourg's road network color-coded by importance: motorways (dark red), trunk roads (purple), primary roads (bright red), secondary (orange), tertiary (yellow), and residential streets (gray), displayed over an OpenStreetMap base layer.*
 
 !!! tip "Next Steps"
     - 📖 Read the [User Guide](user-guide/getting-started.md) for comprehensive tutorials

@@ -6,23 +6,25 @@ This section contains comprehensive visualization examples showcasing Earth-OSM'
 
 ## 🎨 Featured Visualizations
 
-### Power Infrastructure Analysis
-Comprehensive analysis of electrical infrastructure with real data extraction and visualization.
+### Complete Power Network Analysis
+Comprehensive electrical infrastructure network showing all components with geographic context.
 
-![Monaco Power Infrastructure](images/monaco_power_infrastructure.png)
+![Monaco Complete Power Network](images/monaco_power_network_complete.png)
 
 - **Data Source**: Monaco power infrastructure (OSM)
-- **Features**: Substations, generators, power lines
-- **Visualization**: Geographic mapping with feature differentiation
+- **Features**: Substations, generators, power lines, and underground cables
+- **Visualization**: Multi-layer geographic mapping with basemap (CartoDB Dark Matter)
+- **Value**: Shows complete power grid topology for energy system modeling and analysis
 
-### Highway Network Analysis
-Multi-class road network visualization showing transportation infrastructure hierarchy.
+### Highway Network Hierarchy
+Multi-class road network visualization showing transportation infrastructure hierarchy with basemap.
 
-![Luxembourg Highway Network](images/luxembourg_highway_network.png)
+![Luxembourg Highway Hierarchy](images/luxembourg_highway_hierarchy.png)
 
 - **Data Source**: Luxembourg road network (OSM)  
-- **Features**: Motorways, trunk roads, primary/secondary roads
-- **Visualization**: Color-coded network by road classification
+- **Features**: Motorways, trunk roads, primary/secondary/tertiary roads, and residential streets
+- **Visualization**: Color-coded by importance with OpenStreetMap base layer
+- **Value**: Demonstrates road classification for transportation planning and logistics analysis
 
 ### Statistical Analysis
 Data quality and distribution analysis with comprehensive plots.
@@ -33,14 +35,7 @@ Data quality and distribution analysis with comprehensive plots.
 - **Metrics**: Feature distribution, data completeness, infrastructure counts
 - **Applications**: Data quality assessment, research analysis
 
-### Regional Comparisons
-Cross-regional infrastructure comparison and benchmarking.
 
-![Regional Comparison](images/region_comparison.png)
-
-- **Regions**: Monaco, Andorra (expandable to any regions)
-- **Metric**: Total power infrastructure features
-- **Use Case**: Comparative studies, infrastructure density analysis
 
 ### Workflow Overview
 Understanding the Earth-OSM data extraction and visualization workflow.

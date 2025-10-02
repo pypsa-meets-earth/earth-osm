@@ -13,13 +13,16 @@ This example demonstrates extracting power infrastructure data for Monaco using 
 
 ## Visualization Results
 
-### Power Infrastructure Map
+### Complete Power Network Map
 
-![Monaco Power Infrastructure](images/monaco_power_infrastructure.png)
+![Monaco Complete Power Network](images/monaco_power_network_complete.png)
 
-The map shows Monaco's power infrastructure with:
-- **Green circles**: Power generators (29 features) - includes solar panels and other generation sources
+The comprehensive power network visualization shows Monaco's complete electrical infrastructure:
 - **Red squares**: Substations (2 features) - critical electrical distribution nodes
+- **Green circles**: Power generators (29 features) - includes solar panels and other generation sources
+- **Blue lines**: Power transmission lines - main electrical distribution network
+- **Purple dashed lines**: Underground cables - supplementary power distribution
+- **Basemap**: CartoDB Dark Matter provides geographic context
 
 ### Statistical Analysis
 
@@ -37,40 +40,70 @@ The analysis reveals:
 from earth_osm.eo import save_osm_data
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import contextily as ctx
 
-# Extract power infrastructure for Monaco
+# Extract complete power infrastructure for Monaco
 save_osm_data(
     region_list=['monaco'],
     primary_name='power',
     out_dir='./earth_data'
 )
 
-# Load and visualize the data
+# Load all power network components
 substations = gpd.read_file('./earth_data/out/MC_substation.geojson')
 generators = gpd.read_file('./earth_data/out/MC_generator.geojson')
+lines = gpd.read_file('./earth_data/out/MC_line.geojson')
+cables = gpd.read_file('./earth_data/out/MC_cable.geojson')
 
-# Create visualization
-fig, ax = plt.subplots(figsize=(12, 10))
+# Create comprehensive visualization with basemap
+fig, ax = plt.subplots(figsize=(14, 12))
 
-# Plot generators as green circles
-generators.plot(ax=ax, color='#2ecc71', markersize=60, alpha=0.8, 
-                label='Generators', edgecolor='darkgreen')
+# Convert to Web Mercator for basemap compatibility
+substations_web = substations.to_crs(epsg=3857)
+generators_web = generators.to_crs(epsg=3857)
+lines_web = lines.to_crs(epsg=3857) if not lines.empty else None
+cables_web = cables.to_crs(epsg=3857) if not cables.empty else None
 
-# Plot substations as red squares
-substations.plot(ax=ax, color='#e74c3c', markersize=100, alpha=0.8, 
-                 label='Substations', marker='s', edgecolor='darkred')
+# Plot network components (layers from bottom to top)
+if lines_web is not None:
+    lines_web.plot(ax=ax, color='#3498db', linewidth=2, alpha=0.6, 
+                   label=f'Power Lines ({len(lines)})')
 
-ax.set_title('Monaco Power Infrastructure', fontsize=16, fontweight='bold')
-ax.set_xlabel('Longitude')
-ax.set_ylabel('Latitude')
-ax.legend()
-ax.grid(True, alpha=0.3)
+if cables_web is not None:
+    cables_web.plot(ax=ax, color='#9b59b6', linewidth=1.5, alpha=0.6, 
+                    linestyle='--', label=f'Cables ({len(cables)})')
+
+generators_web.plot(ax=ax, color='#2ecc71', markersize=80, alpha=0.8, 
+                    label=f'Generators ({len(generators)})', 
+                    edgecolor='darkgreen', linewidth=1.5)
+
+substations_web.plot(ax=ax, color='#e74c3c', markersize=120, alpha=0.9, 
+                     label=f'Substations ({len(substations)})', 
+                     marker='s', edgecolor='darkred', linewidth=1.5)
+
+# Add basemap for geographic context
+ctx.add_basemap(ax, source=ctx.providers.CartoDB.DarkMatter, alpha=0.7)
+
+ax.set_title('Monaco Complete Power Network\n(Substations, Generators, Lines & Cables)', 
+             fontsize=16, fontweight='bold', pad=20)
+ax.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
+ax.set_axis_off()  # Cleaner look with basemap
+
+plt.tight_layout()
 plt.show()
 
-# Load CSV data for detailed analysis
+# Detailed analysis
+print(f"\nPower Network Statistics:")
+print(f"- Substations: {len(substations)}")
+print(f"- Generators: {len(generators)}")
+print(f"- Power Lines: {len(lines)}")
+print(f"- Cables: {len(cables)}")
+
+# Analyze generator types
+import pandas as pd
 df_generators = pd.read_csv('./earth_data/out/MC_generator.csv')
-print(f"Found {len(df_generators)} generators")
-print(f"Generator types: {df_generators['tags.power'].value_counts()}")
+print(f"\nGenerator Types:")
+print(df_generators['tags.power'].value_counts())
 ```
 
 ## Results
