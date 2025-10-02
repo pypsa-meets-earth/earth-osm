@@ -1,12 +1,16 @@
 import gzip
 import hashlib
 import io
+import os
+import signal
+import string
 import timeit
+from pathlib import Path
+
 import pytest
+
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.gfk_download import download_file, download_pbf, verify_pbf
-import signal
-import os
 
 
 pytestmark = pytest.mark.integration
@@ -170,6 +174,30 @@ def test_download_corrupted_file():
     print(f"New File size: {file_size / (1024 * 1024)} MB")
 
     assert file_size > corrupt_file_size
+
+
+def test_download_cd_md5(tmp_path):
+    region = get_region_tuple("congo-democratic-republic")
+    md5_url = region.urls['pbf'] + ".md5"
+
+    md5_dir = tmp_path / "cd_md5"
+    md5_path = download_file(md5_url, str(md5_dir), progress_bar=False)
+
+    assert os.path.exists(md5_path)
+
+    payload = Path(md5_path).read_bytes()
+    if payload.startswith(b"\x1f\x8b"):
+        payload = gzip.decompress(payload)
+
+    line = payload.decode("ascii").strip()
+    parts = line.split()
+
+    assert len(parts) >= 2
+    checksum, filename = parts[0], parts[-1]
+
+    assert len(checksum) == 32
+    assert all(ch in string.hexdigits for ch in checksum)
+    assert filename.endswith("congo-democratic-republic-latest.osm.pbf")
 
 
 def test_md5_retry_logic():
