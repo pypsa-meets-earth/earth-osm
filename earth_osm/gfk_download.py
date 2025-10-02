@@ -9,6 +9,7 @@ This module contains functions to download Geofabrik data.
 """
 
 
+import gzip
 import hashlib
 import logging
 import os
@@ -47,6 +48,7 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
     with requests.get(url, stream=progress_bar, verify=False) as r:
         if r.status_code == 200:
             # url properly found, thus execute as expected
+            r.raw.decode_content = True
             if progress_bar:
                 file_size = int(r.headers.get('Content-Length', 0))
                 desc = "(Unknown total file size)" if file_size == 0 else ""
@@ -109,8 +111,13 @@ def verify_pbf(pbf_inputfile, pbf_md5file):
     # Calculate local MD5
     local_md5 = calculate_md5(pbf_inputfile)
 
-    # Read remote MD5
-    with open(pbf_md5file, 'r') as f:
-        remote_md5 = f.read().split()[0]
+    # Read remote MD5 (handle gzipped .md5 files)
+    with open(pbf_md5file, "rb") as f:
+        remote_payload = f.read()
+
+    if remote_payload.startswith(b"\x1f\x8b"):
+        remote_payload = gzip.decompress(remote_payload)
+
+    remote_md5 = remote_payload.decode("ascii").split()[0]
 
     return local_md5 == remote_md5
