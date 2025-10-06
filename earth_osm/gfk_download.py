@@ -9,6 +9,7 @@ This module contains functions to download Geofabrik data.
 """
 
 
+import gzip
 import hashlib
 import logging
 import os
@@ -47,9 +48,10 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
         return filepath
     logger.info(f"{filename} downloading to {filepath}")
     os.makedirs(os.path.dirname(filepath), exist_ok=True)  #  create download dir
-    with requests.get(url, stream=progress_bar, verify=False) as r:
+    with requests.get(url, stream=True, verify=False) as r:
         if r.status_code == 200:
             # url properly found, thus execute as expected
+            r.raw.decode_content = True
             if progress_bar:
                 file_size = int(r.headers.get('Content-Length', 0))
                 desc = "(Unknown total file size)" if file_size == 0 else ""
@@ -58,7 +60,9 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
                         shutil.copyfileobj(raw, f)
             else:
                 with open(filepath, "wb") as f:
-                    f.write(r.content)
+                    for chunk in r.iter_content(chunk_size=1 << 20):  # 1 MiB chunks
+                        if chunk:
+                            f.write(chunk)
         else:
             # error status code: file not found
             logger.error(
@@ -124,9 +128,7 @@ def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional
     if not verify_pbf(down_pbf_fp, down_md5_fp):
         logger.info(f"PBF Md5 mismatch, retrying download for {pbf_fn}")
         down_pbf_fp = download_file(url, pbf_dir, progress_bar=progress_bar)
-        down_md5_fp = download_file(
-            url + ".md5", pbf_dir, exists_ok=not update, progress_bar=progress_bar
-        )
+        down_md5_fp = download_file(url + ".md5", pbf_dir, exists_ok=False, progress_bar=progress_bar)
         if not verify_pbf(down_pbf_fp, down_md5_fp):
             os.remove(down_pbf_fp)
             os.remove(down_md5_fp)
@@ -147,9 +149,14 @@ def verify_pbf(pbf_inputfile, pbf_md5file):
     # Calculate local MD5
     local_md5 = calculate_md5(pbf_inputfile)
 
-    # Read remote MD5
-    with open(pbf_md5file, "r") as f:
-        remote_md5 = f.read().split()[0]
+    # Read remote MD5 (handle gzipped .md5 files)
+    with open(pbf_md5file, "rb") as f:
+        remote_payload = f.read()
+
+    if remote_payload.startswith(b"\x1f\x8b"):
+        remote_payload = gzip.decompress(remote_payload)
+
+    remote_md5 = remote_payload.decode("ascii").split()[0]
 
     return local_md5 == remote_md5
 

@@ -54,3 +54,20 @@ def test_others():
         s = r.short
 
 
+def test_namibia_na_code():
+    """Test that Namibia's 'NA' ISO code is properly handled (issue #59)"""
+    # Test that 'NA' is recognized as Namibia's code
+    assert get_id_by_code("NA") == "namibia"
+    
+    # Test that get_region_tuple works with 'NA'
+    region = get_region_tuple("NA")
+    assert region.id == "namibia"
+    assert region.short == "NA"
+    
+    # Test that both 'NA' and 'namibia' resolve to the same region
+    region_by_code = get_region_tuple("NA")
+    region_by_name = get_region_tuple("namibia")
+    assert region_by_code.id == region_by_name.id
+    assert region_by_code.short == region_by_name.short
+
+
