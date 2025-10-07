@@ -56,7 +56,7 @@ def build_overpass_query(country_code, primary_name, feature_name):
             {element_query}(area.searchArea);
         );
         (._;>;);
-        out body geom;
+        out body;
         """
     ).strip()
 
@@ -81,9 +81,7 @@ def fetch_overpass_data(query):
 
     Args:
         query: Overpass query string
-        retries: Number of retry attempts
 
-    Returns:
     Returns:
         dict: Response from Overpass API
     """
@@ -94,8 +92,9 @@ def fetch_overpass_data(query):
         timeout=REQUEST_TIMEOUT,
     )
     response.raise_for_status()
+    data = response.json()
     logger.info("Successfully fetched data from Overpass API")
-    return response.json()
+    return data
 
 
 def transform_overpass_to_internal_format(overpass_data, primary_name, feature_name):
@@ -197,28 +196,28 @@ def get_overpass_data(region, primary_name, feature_name, data_dir):
         primary_name: Primary feature name (e.g., 'power')
         feature_name: Specific feature name (e.g., 'substation')
         data_dir: Directory for data storage
-        data_dir: Directory for data storage
 
     Returns:
         tuple: (primary_dict, feature_dict) in the format expected by process_region
     """
+    if feature_name.startswith('ALL_'):
+        raise ValueError(
+            "Overpass backend does not support wildcard features (ALL_*). "
+            "Specify concrete feature values or use the geofabrik data source."
+        )
+
     logger.debug(
-        "Overpass request initialized: region=%s (%s), primary=%s, feature=%s, data_dir=%s",
+        "Overpass request: region=%s, primary=%s, feature=%s",
         region.short,
-        region.name,
         primary_name,
         feature_name,
-        data_dir,
     )
 
-    # Build the Overpass query
     query = build_overpass_query(region.short, primary_name, feature_name)
     logger.debug(f"Overpass query: {query}")
 
-    # Fetch data from Overpass API
     overpass_response = fetch_overpass_data(query)
 
-    # Transform to internal format
     primary_dict, feature_dict = transform_overpass_to_internal_format(
         overpass_response, primary_name, feature_name
     )
