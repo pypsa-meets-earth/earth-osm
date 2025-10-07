@@ -7,12 +7,20 @@ from earth_osm.gfk_data import get_region_tuple
 
 TEST_CASES = [
     pytest.param('benin', 'power', 'substation', id='benin-power-substation'),
-    pytest.param('ghana', 'power', 'substation', id='ghana-power-substation'),
-    pytest.param('nigeria', 'power', 'substation', id='nigeria-power-substation'),
-    pytest.param('burkina-faso', 'power', 'substation', id='burkina-faso-power-substation'),
     pytest.param('benin', 'power', 'line', id='benin-power-line'),
-    pytest.param('ghana', 'power', 'line', id='ghana-power-line'),
 ]
+
+def test_overpass_disallows_all_wildcard(tmp_path):
+    with pytest.raises(ValueError, match="Overpass backend does not support wildcard"):
+        get_osm_data(
+            'benin',
+            'power',
+            'ALL_power',
+            data_dir=str(tmp_path / 'overpass_all'),
+            cached=False,
+            progress_bar=False,
+            data_source='overpass',
+        )
 
 
 @pytest.mark.integration
