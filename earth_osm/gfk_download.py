@@ -29,6 +29,7 @@ logger.setLevel(logging.INFO)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 def download_file(url, dir, exists_ok=False, progress_bar=True):
     """
     Download file from url to dir
@@ -47,7 +48,8 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
         logger.debug(f'{filepath} already exists')
         return filepath
     logger.info(f"{filename} downloading to {filepath}")
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)  #  create download dir
+    os.makedirs(os.path.dirname(filepath),
+                exist_ok=True)  # create download dir
     with requests.get(url, stream=True, verify=False) as r:
         if r.status_code == 200:
             # url properly found, thus execute as expected
@@ -72,17 +74,19 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
             filepath = None
     return filepath
 
+
 def download_sitemap(geom, pkg_data_dir, progress_bar=True):
     geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
 
-    sitemap_file = download_file(geofabrik_sitemap_url, pkg_data_dir, exists_ok=True, progress_bar=progress_bar)
+    sitemap_file = download_file(
+        geofabrik_sitemap_url, pkg_data_dir, exists_ok=True, progress_bar=progress_bar)
 
     return sitemap_file
 
 
-def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional[datetime] = None, region_id: Optional[str] = None):
+def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional[datetime] = None, region_id: Optional[str] = None) -> str:
     """
     Download PBF file - either latest or historical version
 
@@ -96,6 +100,10 @@ def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional
 
     Returns:
         str: Path to downloaded file
+
+    Raises:
+        FileNotFoundError: When historical file is not found (for historical downloads)
+        ValueError: When region_id is not provided for historical downloads
     """
     # If target_date is specified, download historical file
     if target_date is not None:
@@ -118,7 +126,8 @@ def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional
     pbf_fp = os.path.join(pbf_dir, pbf_fn)
 
     # download file
-    down_pbf_fp = download_file(url, pbf_dir, exists_ok=not update, progress_bar=progress_bar)
+    down_pbf_fp = download_file(
+        url, pbf_dir, exists_ok=not update, progress_bar=progress_bar)
     down_md5_fp = download_file(
         url + ".md5", pbf_dir, exists_ok=not update, progress_bar=progress_bar
     )
@@ -128,11 +137,13 @@ def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional
     if not verify_pbf(down_pbf_fp, down_md5_fp):
         logger.info(f"PBF Md5 mismatch, retrying download for {pbf_fn}")
         down_pbf_fp = download_file(url, pbf_dir, progress_bar=progress_bar)
-        down_md5_fp = download_file(url + ".md5", pbf_dir, exists_ok=False, progress_bar=progress_bar)
+        down_md5_fp = download_file(
+            url + ".md5", pbf_dir, exists_ok=False, progress_bar=progress_bar)
         if not verify_pbf(down_pbf_fp, down_md5_fp):
             os.remove(down_pbf_fp)
             os.remove(down_md5_fp)
-            raise ValueError(f"File verification failed after retry for {pbf_fn}")
+            raise ValueError(
+                f"File verification failed after retry for {pbf_fn}")
 
     return pbf_fp
 
@@ -244,7 +255,8 @@ def get_historical_files_from_directory(
         return historical_files
 
     except requests.RequestException as e:
-        logger.error(f"Failed to fetch directory listing from {region_base_url}: {e}")
+        logger.error(
+            f"Failed to fetch directory listing from {region_base_url}: {e}")
         return []
 
 
@@ -262,7 +274,8 @@ def find_historical_file_by_date(
     Returns:
         str or None: Filename of the closest historical file, or None if not found
     """
-    historical_files = get_historical_files_from_directory(region_base_url, region_id)
+    historical_files = get_historical_files_from_directory(
+        region_base_url, region_id)
 
     if not historical_files:
         logger.warning(f"No historical files found for region {region_id}")
@@ -300,7 +313,7 @@ def download_historical_pbf(
     update: bool,
     data_dir: str,
     progress_bar: bool = True,
-) -> Optional[str]:
+) -> str:
     """
     Download historical PBF file for a specific date
 
@@ -313,12 +326,19 @@ def download_historical_pbf(
         progress_bar (bool): Whether to show progress bar
 
     Returns:
-        str or None: Path to downloaded file, or None if failed
+        str: Path to downloaded file
+
+    Raises:
+        FileNotFoundError: When no historical PBF file is available for the target date
     """
-    historical_filename = find_historical_file_by_date(region_base_url, region_id, target_date)
+    historical_filename = find_historical_file_by_date(
+        region_base_url, region_id, target_date)
 
     if not historical_filename:
-        return None
+        raise FileNotFoundError(
+            f"No historical PBF file found for {region_id} on/before {target_date.strftime('%Y-%m-%d')} "
+            f"at {region_base_url}. Check available dates or try a more recent target date."
+        )
 
     # Construct full URL
     historical_url = region_base_url.rstrip("/") + "/" + historical_filename
@@ -332,7 +352,10 @@ def download_historical_pbf(
     )
 
     if down_pbf_fp is None:
-        return None
+        raise FileNotFoundError(
+            f"Failed to download historical PBF file {historical_filename} from {historical_url}. "
+            f"The file may have been moved or is temporarily unavailable."
+        )
 
     # Try to download MD5 file (may not exist for all historical files)
     md5_url = historical_url + ".md5"
