@@ -27,6 +27,7 @@ earth-osm downloads, filters, cleans and exports infrastructure data from OpenSt
 ## 🌟 Key Features
 
 - 🔌 Extracts infrastructure data from OSM
+- 📅 Historical data support (specify target dates)
 - 🧹 Cleans and standardizes the data *(coming soon)*
 - 🚀 No API rate limits (data served from GeoFabrik)
 - 🐍 Provides a Python API
@@ -125,6 +126,20 @@ eo.save_osm_data(
     out_format=['csv', 'geojson'],
     out_aggregate=False,
     data_source='geofabrik'  # or 'overpass'
+)
+```
+
+For historical data, add the `target_date` parameter:
+
+```python
+from datetime import datetime
+
+# Download historical data for a specific date
+eo.get_osm_data(
+    region_str='malta',
+    primary_name='power',
+    feature_name='line',
+    target_date=datetime(2020, 1, 1)  # Jan 1, 2020
 )
 ```
 
