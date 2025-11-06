@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+2.0.0 (2025-11-06)
+------------------
+- Release: version 2.0.0 🚀 [Matin Mahmood]
 - Chore: allow non-interactive release prompts. [Matin Mahmood]
 - Release: version  🚀 [Matin Mahmood]
 - Feat: enable streaming backend and planetary exports. [Matin Mahmood]
