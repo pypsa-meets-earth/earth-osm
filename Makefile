@@ -78,16 +78,21 @@ virtualenv:		## Create a virtual environment.
 .PHONY: release
 release:		## Create a new tag for release.
 	@echo "WARNING: This operation will create a version tag and push to github"
-	@read -p "Version? (provide the next x.y.z semver) : " TAG
-	@echo "$${TAG}" > earth_osm/VERSION
-	@$(ENV_PREFIX)gitchangelog > HISTORY.md
-	@git add earth_osm/VERSION HISTORY.md
-	@git commit -m "release: version $${TAG} 🚀"
-	@git push -u origin HEAD
-	@echo "creating git tag : $${TAG}"
-	@git tag $${TAG}
-	@git push -u origin HEAD --tags
-	@echo "Github Actions will detect the new tag and release the new version."
+	@TAG_INPUT="$$TAG"; \
+	if [ -z "$$TAG_INPUT" ]; then \
+		read -p "Version? (provide the next x.y.z semver) : " TAG_INPUT; \
+	fi; \
+	TAG="$$TAG_INPUT"; \
+	echo "$$TAG" > earth_osm/VERSION; \
+	$(ENV_PREFIX)gitchangelog > HISTORY.md; \
+	gittarget="release: version $$TAG 🚀"; \
+	git add earth_osm/VERSION HISTORY.md; \
+	git commit -m "$$gittarget"; \
+	git push -u origin HEAD; \
+	printf "creating git tag : $$TAG\n"; \
+	git tag $$TAG; \
+	git push -u origin HEAD --tags; \
+	echo "Github Actions will detect the new tag and release the new version."
 
 .PHONY: api-docs
 api-docs:		## Generate the API documentation.
