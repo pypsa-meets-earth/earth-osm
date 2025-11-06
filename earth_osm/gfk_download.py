@@ -15,22 +15,76 @@ import logging
 import os
 import re
 import shutil
+import subprocess
 from datetime import datetime
 from typing import List, Optional, Tuple
+from urllib.parse import urljoin
 
 import requests
 import urllib3
 from tqdm.auto import tqdm
-
-from earth_osm import logger as base_logger
 
 logger = logging.getLogger("eo.gfk")
 logger.setLevel(logging.INFO)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+PARALLEL_DOWNLOADS_ENV = "EO_PARALLEL_DOWNLOADS"
+ARIA2C_EXECUTABLE = "aria2c"
 
-def download_file(url, dir, exists_ok=False, progress_bar=True):
+
+def _resolve_parallel_downloads():
+    raw = os.environ.get(PARALLEL_DOWNLOADS_ENV)
+    if raw is None:
+        return 1
+
+    try:
+        value = int(raw)
+    except ValueError:
+        return 1
+
+    return value if value > 1 else 1
+
+
+def _download_with_aria2c(
+    aria2c_path,
+    url,
+    output_dir,
+    output_filename,
+    connections,
+    progress_bar,
+):
+    os.makedirs(output_dir, exist_ok=True)
+
+    command = [
+        aria2c_path,
+        "--continue=true",
+        "--allow-overwrite=true",
+        "--auto-file-renaming=false",
+        f"--max-connection-per-server={connections}",
+        f"--split={connections}",
+        "--min-split-size=1M",
+        "--max-tries=5",
+        "--console-log-level=warn",
+        f"--dir={output_dir}",
+        f"--out={output_filename}",
+    ]
+
+    if not progress_bar:
+        command.append("--summary-interval=0")
+
+    command.append(url)
+
+    subprocess.run(command, check=True)
+
+    expected_path = os.path.join(output_dir, output_filename)
+    if not os.path.exists(expected_path):
+        raise RuntimeError(
+            f"aria2c reported success but {expected_path!r} was not created"
+        )
+ 
+
+def download_file(url, dir, exists_ok=False, progress_bar=True, *, target_filename=None):
     """
     Download file from url to dir
 
@@ -38,15 +92,34 @@ def download_file(url, dir, exists_ok=False, progress_bar=True):
         url (str): url to download
         dir (str): directory to download to
         exists_ok (bool): Flag to allow skipping download if file exists.
+        target_filename (str, optional): Explicit filename for the local copy.
 
     Returns:
         str: filepath of downloaded file
     """
-    filename = os.path.basename(url)
+    filename = target_filename or os.path.basename(url)
     filepath = os.path.join(dir, filename)
     if os.path.exists(filepath) and exists_ok:
         logger.debug(f'{filepath} already exists')
         return filepath
+
+    parallel_downloads = _resolve_parallel_downloads()
+    if parallel_downloads > 1 and url.endswith(".osm.pbf"):
+        aria2c_path = shutil.which(ARIA2C_EXECUTABLE)
+        if aria2c_path:
+            try:
+                _download_with_aria2c(
+                    aria2c_path,
+                    url,
+                    dir,
+                    filename,
+                    parallel_downloads,
+                    progress_bar,
+                )
+                return filepath
+            except (subprocess.CalledProcessError, RuntimeError):
+                logger.info("aria2c failed for %s, falling back to single connection download", filename)
+
     logger.info(f"{filename} downloading to {filepath}")
     os.makedirs(os.path.dirname(filepath),
                 exist_ok=True)  # create download dir
@@ -79,31 +152,65 @@ def download_sitemap(geom, pkg_data_dir, progress_bar=True):
     geofabrik_geo = "https://download.geofabrik.de/index-v1.json"
     geofabrik_nogeo = "https://download.geofabrik.de/index-v1-nogeom.json"
     geofabrik_sitemap_url = geofabrik_geo if geom else geofabrik_nogeo
-
-    sitemap_file = download_file(
-        geofabrik_sitemap_url, pkg_data_dir, exists_ok=True, progress_bar=progress_bar)
+    sitemap_file = download_file(geofabrik_sitemap_url, pkg_data_dir, exists_ok=True, progress_bar=progress_bar)
 
     return sitemap_file
 
 
-def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional[datetime] = None, region_id: Optional[str] = None) -> str:
+def _parse_md5_file(md5_path: str):
+    with open(md5_path, "rb") as f:
+        payload = f.read()
+
+    if payload.startswith(b"\x1f\x8b"):
+        payload = gzip.decompress(payload)
+
+    text = payload.decode("ascii").strip()
+    if not text:
+        raise ValueError(f"MD5 file {md5_path} is empty")
+
+    parts = text.split()
+    checksum = parts[0].lower()
+    remote_name = None
+
+    for candidate in parts[1:]:
+        cleaned = candidate.lstrip("*")
+        if cleaned.endswith(".osm.pbf"):
+            remote_name = cleaned
+            break
+
+    return checksum, remote_name
+
+
+def _build_versioned_url(base_url: str, remote_filename: Optional[str]) -> str:
+    if not remote_filename:
+        return base_url
+    return urljoin(base_url, remote_filename)
+def download_pbf(
+    url,
+    update,
+    data_dir,
+    progress_bar=True,
+    *,
+    target_date: Optional[datetime] = None,
+    region_id: Optional[str] = None,
+):
     """
-    Download PBF file - either latest or historical version
+    Download a PBF archive supporting latest and historical endpoints.
 
     Args:
-        url (str): URL to download (for latest) or base URL (for historical)
-        update (bool): Whether to force re-download if file exists
-        data_dir (str): Directory to download to
-        progress_bar (bool): Whether to show progress bar
-        target_date (datetime, optional): If specified, download historical version for this date
-        region_id (str, optional): Region identifier, required for historical downloads
+        url: URL to download (for latest) or base URL (for historical).
+        update: Whether to force re-download if the file exists.
+        data_dir: Directory to download to.
+        progress_bar: Whether to show the progress bar.
+        target_date: Optional target date to fetch a historical snapshot.
+        region_id: Region identifier, required for historical downloads.
 
     Returns:
-        str: Path to downloaded file
+        Path to the downloaded file.
 
     Raises:
-        FileNotFoundError: When historical file is not found (for historical downloads)
-        ValueError: When region_id is not provided for historical downloads
+        FileNotFoundError: When the requested historical file cannot be located.
+        ValueError: When ``region_id`` is omitted for historical downloads.
     """
     # If target_date is specified, download historical file
     if target_date is not None:
@@ -124,26 +231,55 @@ def download_pbf(url, update, data_dir, progress_bar=True, target_date: Optional
     pbf_dir = os.path.join(data_dir, "pbf")
     pbf_fn = os.path.basename(url)
     pbf_fp = os.path.join(pbf_dir, pbf_fn)
+    md5_fp = pbf_fp + ".md5"
 
-    # download file
-    down_pbf_fp = download_file(
-        url, pbf_dir, exists_ok=not update, progress_bar=progress_bar)
-    down_md5_fp = download_file(
-        url + ".md5", pbf_dir, exists_ok=not update, progress_bar=progress_bar
-    )
+    # Track existing files before download attempts
+    pbf_existed = os.path.exists(pbf_fp)
+    md5_existed = os.path.exists(md5_fp)
+
+    def _download_md5(force: bool) -> str:
+        exists_ok = (not force) and os.path.exists(md5_fp)
+        return download_file(
+            url + ".md5",
+            pbf_dir,
+            exists_ok=exists_ok,
+            progress_bar=progress_bar,
+        )
+
+    def _download_versioned_pbf(force_md5: bool = True) -> tuple[str, str]:
+        md5_path = _download_md5(force=force_md5)
+        _, remote_name = _parse_md5_file(md5_path)
+        source_url = _build_versioned_url(url, remote_name)
+
+        if os.path.exists(pbf_fp):
+            os.remove(pbf_fp)
+
+        downloaded_path = download_file(
+            source_url,
+            pbf_dir,
+            exists_ok=False,
+            progress_bar=progress_bar,
+            target_filename=pbf_fn,
+        )
+        return downloaded_path, md5_path
+
+    if update or not pbf_existed:
+        down_pbf_fp, down_md5_fp = _download_versioned_pbf(force_md5=True)
+    else:
+        down_pbf_fp = download_file(url, pbf_dir, exists_ok=True, progress_bar=progress_bar)
+        down_md5_fp = md5_fp if md5_existed else _download_md5(force=True)
 
     assert down_pbf_fp == pbf_fp
 
     if not verify_pbf(down_pbf_fp, down_md5_fp):
         logger.info(f"PBF Md5 mismatch, retrying download for {pbf_fn}")
-        down_pbf_fp = download_file(url, pbf_dir, progress_bar=progress_bar)
-        down_md5_fp = download_file(
-            url + ".md5", pbf_dir, exists_ok=False, progress_bar=progress_bar)
+        down_pbf_fp, down_md5_fp = _download_versioned_pbf(force_md5=True)
         if not verify_pbf(down_pbf_fp, down_md5_fp):
-            os.remove(down_pbf_fp)
-            os.remove(down_md5_fp)
-            raise ValueError(
-                f"File verification failed after retry for {pbf_fn}")
+            if os.path.exists(down_pbf_fp):
+                os.remove(down_pbf_fp)
+            if os.path.exists(down_md5_fp):
+                os.remove(down_md5_fp)
+            raise ValueError(f"File verification failed after retry for {pbf_fn}")
 
     return pbf_fp
 
@@ -160,14 +296,7 @@ def verify_pbf(pbf_inputfile, pbf_md5file):
     # Calculate local MD5
     local_md5 = calculate_md5(pbf_inputfile)
 
-    # Read remote MD5 (handle gzipped .md5 files)
-    with open(pbf_md5file, "rb") as f:
-        remote_payload = f.read()
-
-    if remote_payload.startswith(b"\x1f\x8b"):
-        remote_payload = gzip.decompress(remote_payload)
-
-    remote_md5 = remote_payload.decode("ascii").split()[0]
+    remote_md5, _ = _parse_md5_file(pbf_md5file)
 
     return local_md5 == remote_md5
 

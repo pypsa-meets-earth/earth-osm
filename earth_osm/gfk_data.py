@@ -21,8 +21,11 @@ import geopandas as gpd
 import pandas as pd
 
 from earth_osm.gfk_download import download_sitemap
-from earth_osm import logger as base_logger
-
+from earth_osm.planet import (
+    PLANET_REGION_ID,
+    PLANET_REGION_SHORT_CODE,
+    get_planet_region_dict,
+)
 logger = logging.getLogger("eo.gfk")
 logger.setLevel(logging.INFO)
 
@@ -54,7 +57,41 @@ def get_all_valid_list():
     """
     Returns a list of all valid region ids
     """
-    return list(df.loc[~df['short_code'].isna(), 'short_code']) + list(df['id'])
+    codes = list(df.loc[~df['short_code'].isna(), 'short_code'])
+    ids = list(df['id'])
+
+    if PLANET_REGION_SHORT_CODE not in codes:
+        codes.append(PLANET_REGION_SHORT_CODE)
+    if PLANET_REGION_ID not in ids:
+        ids.append(PLANET_REGION_ID)
+
+    return codes + ids
+
+
+def get_children_regions(parent_id, require_iso=True):
+    """Return child regions of a parent as Region tuples.
+
+    Args:
+        parent_id: Parent region identifier (e.g. 'europe').
+        require_iso: When True, only include children with a valid ISO short code.
+
+    Returns:
+        List of Region namedtuples for each child.
+    """
+
+    if parent_id == PLANET_REGION_ID:
+        return []
+
+    children = df.loc[df['parent'] == parent_id]
+    if children.empty:
+        return []
+
+    if require_iso:
+        children = children[
+            children['short_code'].notna() & (children['short_code'].astype(str).str.strip() != '')
+        ]
+
+    return [get_region_tuple(child_id) for child_id in children['id'].tolist()]
 
 def get_all_regions_dict(level=0):
     """
@@ -107,6 +144,9 @@ def get_region_dict(id):
     strings 'id', 'name', 'parent', 'short_code' and dictionary of 'urls'
     Raises error if id is not found
     """
+    if str(id) == PLANET_REGION_ID:
+        return get_planet_region_dict()
+
     region_data = (
         df.loc[df["id"] == id]
         .drop("iso3166-1:alpha2", axis=1)
@@ -122,8 +162,18 @@ def get_id_by_code(code):
     Takes a region code (eg. DE) and returns its id (eg. germany)
     Supresses error if id is not found
     """
+    if code is None:
+        return None
+
+    normalized = str(code).strip()
+    if not normalized:
+        return None
+
+    if normalized.upper() == PLANET_REGION_SHORT_CODE or normalized.lower() == PLANET_REGION_ID:
+        return PLANET_REGION_ID
+
     try:
-        return df.loc[df["short_code"] == code, "id"].item()
+        return df.loc[df["short_code"] == normalized, "id"].item()
     except (KeyError, ValueError):
         logger.debug(f"{code} not found, probably an id")
         return None
@@ -134,6 +184,9 @@ def get_code_by_id(id):
     Takes a region id (eg. germany) and returns its code (eg. DE)
     Supresses error if id is not found
     """
+    if str(id) == PLANET_REGION_ID:
+        return PLANET_REGION_SHORT_CODE
+
     try:
         c_dict = get_region_dict(id)
     except (KeyError, IndexError):

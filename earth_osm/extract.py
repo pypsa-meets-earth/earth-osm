@@ -16,7 +16,7 @@ import multiprocessing as mp
 
 from earth_osm.osmpbf import Node, Relation, Way, osmformat_pb2
 from earth_osm.osmpbf.file import iter_blocks, iter_primitive_block, read_blob
-from earth_osm import logger as base_logger
+from earth_osm.utils import tag_value_matches
 
 logger = logging.getLogger("eo.extract")
 logger.setLevel(logging.INFO)
@@ -24,16 +24,14 @@ logger.setLevel(logging.INFO)
 
 def primary_entry_filter(entry, pre_filter):
     filtermap = pre_filter[type(entry)]  # {"power": ['line', 'tower]}
-    for primary_name in filtermap.keys():  # power
-        if (primary_name in entry.tags.keys()):  # tags a dict with keys (...'power')
-            # for filtermap.get(key) is ['line', 'tower']
-            #  is the value for power in tags
-            # feature_name == True gets all things tagged with power
-            return any(
-                feature_name[:4]=='ALL_' # check for wildcard
-                or feature_name in entry.tags.get(primary_name)
-                for feature_name in filtermap.get(primary_name)
-            )
+    for primary_name, feature_names in filtermap.items():
+        value = entry.tags.get(primary_name)
+        if value is None:
+            continue
+        for feature_name in feature_names:
+            if tag_value_matches(value, feature_name):
+                return True
+    return False
 
 
 def id_filter(entry, idset):

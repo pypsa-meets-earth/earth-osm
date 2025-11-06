@@ -2,7 +2,6 @@ import pandas as pd
 import logging
 
 from earth_osm.taginfo import get_tag_data
-from earth_osm import logger as base_logger
 
 logger = logging.getLogger("eo.tag")
 logger.setLevel(logging.INFO)

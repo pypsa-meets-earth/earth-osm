@@ -10,11 +10,25 @@ This module provides a CLI interface for the earth_osm project.
 
 import argparse
 import os
-from typing import List, Set
+import sys
+import resource
+from typing import List, Optional
 
 from earth_osm.tagdata import get_feature_list, get_primary_list
 from earth_osm.eo import save_osm_data
 from earth_osm.gfk_data import get_all_valid_list, view_regions
+
+
+def _get_peak_rss() -> Optional[int]:
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    return getattr(usage, "ru_maxrss", None)
+
+
+def _format_rss(value: Optional[int]) -> str:
+    if value is None:
+        return "n/a"
+    divisor = 1024 * 1024 if sys.platform == "darwin" else 1024
+    return f"{value / divisor:.1f} MiB"
 
 
 
@@ -60,6 +74,8 @@ def setup_extract_parser(subparsers):
     extract_parser.add_argument('--out_dir', type=str, help='Earth Output Directory')
     extract_parser.add_argument('--out_format', nargs="*", type=str, choices=['csv', 'geojson'], default=['csv', 'geojson'], help='Export options')
     extract_parser.add_argument('--source', type=str, choices=['geofabrik', 'overpass'], default='geofabrik', help='Data Source')
+    extract_parser.add_argument('--legacy_pipeline', action='store_true', help='Use legacy in-memory pipeline instead of streaming (benchmark only)')
+    extract_parser.add_argument('--cache_primary', action='store_true', help='Cache primary tag snapshot (disabled by default)')
     
     agg_group = extract_parser.add_mutually_exclusive_group()
     agg_group.add_argument('--agg_feature', action='store_true', help='Aggregate Outputs by feature')
@@ -99,6 +115,7 @@ def handle_extract(args):
     out_dir = ensure_directory(args.out_dir or data_dir)
 
     out_aggregate = 'feature' if args.agg_feature else 'region' if args.agg_region else False
+    stream_backend = not args.legacy_pipeline
 
     print('\n'.join([
         f'Primary Feature: {args.primary}',
@@ -110,8 +127,12 @@ def handle_extract(args):
         f'Output Directory = {out_dir}',
         f'Output Format = {" - ".join(args.out_format)}',
         f'Aggregate Outputs = {out_aggregate}',
-        f'Data Source = {args.source}'
+        f'Data Source = {args.source}',
+        f'Streaming Backend = {"enabled" if stream_backend else "disabled (legacy)"}',
+    f'Primary Cache = {"enabled" if args.cache_primary else "disabled"}',
     ]))
+
+    peak_before = _get_peak_rss()
 
     save_osm_data(
         region_list=args.regions,
@@ -123,8 +144,20 @@ def handle_extract(args):
         mp=not args.no_mp,
         out_format=set(args.out_format),
         out_aggregate=out_aggregate,
-        data_source=args.source
+        data_source=args.source,
+        stream_backend=stream_backend,
+    cache_primary=args.cache_primary,
     )
+
+    peak_after = _get_peak_rss()
+    if peak_after is None:
+        print('Peak RSS: n/a (resource module unavailable)')
+    else:
+        message = f'Peak RSS: {_format_rss(peak_after)}'
+        if peak_before is not None:
+            delta = max(0, peak_after - peak_before)
+            message += f' (Δ {_format_rss(delta)})'
+        print(message)
 
 def handle_view(args):
     if args.type == 'regions':

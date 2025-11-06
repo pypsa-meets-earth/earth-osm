@@ -6,6 +6,7 @@ earth_data/
 earth_data_test/
 earth_data_out/
 earth_data_*
+notebooks/earth_data/
 
 # Demo and local test files
 demo_historical.py

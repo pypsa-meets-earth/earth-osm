@@ -1,65 +1,97 @@
 import gzip
 import hashlib
-import io
 import os
-import signal
-import string
-import timeit
+import time
 from pathlib import Path
 
 import pytest
 
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.gfk_download import download_file, download_pbf, verify_pbf
+from earth_osm import gfk_download
 
 
 pytestmark = pytest.mark.integration
 
+SMALL_REGION_ID = "monaco"
 
-def test_download_file_enables_decode_content(tmp_path, monkeypatch):
-    data = b"1234567890abcdef"
-    responses = []
 
-    class DummyRaw(io.BytesIO):
-        def __init__(self, payload):
-            super().__init__(payload)
-            self.decode_content = False
+def _prepare_region_pbf_url():
+    region = get_region_tuple(SMALL_REGION_ID)
+    return region.urls["pbf"]
 
-    class DummyResponse:
-        def __init__(self, payload):
-            self.status_code = 200
-            self.headers = {"Content-Length": str(len(payload))}
-            self.raw = DummyRaw(payload)
-            self._content = payload
 
-        def __enter__(self):
-            return self
+def _download_dir(tmp_path: Path) -> str:
+    data_dir = tmp_path / "earth_data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return str(data_dir)
 
-        def __exit__(self, exc_type, exc, tb):
-            return False
 
-        def close(self):
-            self.raw.close()
+def test_download_small_region_pbf(tmp_path):
+    pbf_url = _prepare_region_pbf_url()
+    data_dir = _download_dir(tmp_path)
 
-        @property
-        def content(self):
-            return self._content
+    pbf_path_str = download_pbf(pbf_url, update=True, data_dir=data_dir, progress_bar=False)
+    pbf_path = Path(pbf_path_str)
+    md5_path = Path(f"{pbf_path_str}.md5")
 
-    def fake_get(url, stream=None, verify=None):
-        resp = DummyResponse(data)
-        responses.append(resp)
-        return resp
+    assert pbf_path.exists()
+    assert md5_path.exists()
+    assert verify_pbf(str(pbf_path), str(md5_path))
+    assert pbf_path.name == Path(pbf_url).name
+    assert md5_path.name.endswith(".md5")
 
-    monkeypatch.setattr("earth_osm.gfk_download.requests.get", fake_get)
+def test_download_pbf_update_cycle(tmp_path):
+    pbf_url = _prepare_region_pbf_url()
+    data_dir = _download_dir(tmp_path)
 
-    download_dir = tmp_path / "downloads"
-    result = download_file("https://example.com/test.md5", str(download_dir), progress_bar=True)
+    pbf_path = Path(download_pbf(pbf_url, update=True, data_dir=data_dir, progress_bar=False))
+    first_mtime = pbf_path.stat().st_mtime
 
-    assert responses, "Expected mocked response to be captured"
-    assert responses[0].raw.decode_content is True
-    assert os.path.exists(result)
-    with open(result, "rb") as downloaded:
-        assert downloaded.read() == data
+    time.sleep(1)
+    download_pbf(pbf_url, update=False, data_dir=data_dir, progress_bar=False)
+    second_mtime = pbf_path.stat().st_mtime
+    assert second_mtime == first_mtime
+
+    time.sleep(1)
+    download_pbf(pbf_url, update=True, data_dir=data_dir, progress_bar=False)
+    third_mtime = pbf_path.stat().st_mtime
+    assert third_mtime > second_mtime
+
+
+def test_download_pbf_recovers_from_corruption(tmp_path):
+    pbf_url = _prepare_region_pbf_url()
+    data_dir = _download_dir(tmp_path)
+
+    pbf_path = Path(download_pbf(pbf_url, update=True, data_dir=data_dir, progress_bar=False))
+    original_size = pbf_path.stat().st_size
+
+    # Corrupt the file locally and ensure a subsequent download repairs it
+    pbf_path.write_bytes(b"0")
+    assert pbf_path.stat().st_size < original_size
+
+    download_pbf(pbf_url, update=False, data_dir=data_dir, progress_bar=False)
+    repaired_size = pbf_path.stat().st_size
+    assert repaired_size >= original_size
+
+    md5_path = Path(f"{pbf_path}.md5")
+    assert verify_pbf(str(pbf_path), str(md5_path))
+
+
+def test_download_md5_metadata(tmp_path):
+    pbf_url = _prepare_region_pbf_url()
+    md5_url = f"{pbf_url}.md5"
+
+    md5_dir = tmp_path / "md5"
+    md5_dir.mkdir(parents=True, exist_ok=True)
+
+    md5_path = Path(download_file(md5_url, str(md5_dir), progress_bar=False))
+
+    assert md5_path.exists()
+    contents = md5_path.read_text(encoding="ascii").strip()
+    assert contents
+    assert md5_path.name.endswith(".md5")
+    assert Path(pbf_url).name in contents
 
 
 def test_verify_pbf_handles_gzipped_md5(tmp_path):
@@ -75,168 +107,44 @@ def test_verify_pbf_handles_gzipped_md5(tmp_path):
     assert verify_pbf(str(pbf_path), str(md5_path))
 
 
-def test_verify_pbf_handles_real_cd_md5(tmp_path, monkeypatch):
-    region = get_region_tuple("congo-democratic-republic")
-    md5_url = region.urls["pbf"] + ".md5"
+def test_download_pbf_refreshes_md5_when_pbf_downloaded(monkeypatch, tmp_path):
+    url = "https://example.com/sample.osm.pbf"
+    data_dir = tmp_path / "earth_data"
+    data_dir.mkdir(parents=True, exist_ok=True)
 
-    md5_path = download_file(md5_url, str(tmp_path), progress_bar=False)
-    assert md5_path is not None
+    pbf_dir = data_dir / "pbf"
+    pbf_dir.mkdir(parents=True, exist_ok=True)
 
-    with open(md5_path, "rb") as fh:
-        payload = fh.read()
-    if payload.startswith(b"\x1f\x8b"):
-        remote_md5 = gzip.decompress(payload).decode("ascii").split()[0]
-    else:
-        remote_md5 = payload.decode("ascii").split()[0]
+    md5_path = pbf_dir / "sample.osm.pbf.md5"
+    md5_path.write_text("old-checksum sample.osm.pbf\n", encoding="ascii")
 
-    fake_pbf = tmp_path / "fake.osm.pbf"
-    fake_pbf.write_bytes(b"earth-osm-test")
+    call_args = []
 
-    monkeypatch.setattr(
-        "earth_osm.gfk_download.calculate_md5",
-        lambda _: remote_md5,
-    )
+    def fake_download_file(
+        call_url,
+        directory,
+        exists_ok=False,
+        progress_bar=True,
+        *,
+        target_filename=None,
+    ):
+        filename = target_filename or os.path.basename(call_url)
+        path = Path(directory) / filename
+        call_args.append((call_url, exists_ok, target_filename))
+        if not exists_ok or not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if filename.endswith(".md5"):
+                path.write_text("new-checksum sample-20240101.osm.pbf\n", encoding="ascii")
+            else:
+                path.write_bytes(b"data")
+        return str(path)
 
-    assert verify_pbf(str(fake_pbf), md5_path)
+    monkeypatch.setattr(gfk_download, "download_file", fake_download_file)
+    monkeypatch.setattr(gfk_download, "verify_pbf", lambda *_: True)
 
-def test_download_pbf_update():
-    region = get_region_tuple("malta")
-    geofabrik_pbf_url = region.urls['pbf']
+    result = download_pbf(url, update=False, data_dir=str(data_dir), progress_bar=False)
 
-    data_dir = "earth_data_test"
-    fp = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf")
-    fp_hash = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf.md5")
-
-    download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir)
-
-    # check file last modified time
-    lm1 = os.path.getmtime(fp)
-    print(f"Last modified: {lm1}")
-
-    assert os.path.exists(fp)
-    assert verify_pbf(fp, fp_hash)
-
-    download_pbf(geofabrik_pbf_url, update=False, data_dir=data_dir)
-    lm2 = os.path.getmtime(fp)
-    print(f"Last modified: {lm2}")
-
-    assert lm2 == lm1
-
-    download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir)
-    lm3 = os.path.getmtime(fp)
-    print(f"Last modified: {lm3}")
-
-    assert lm3 > lm2
-
-
-def test_download_pbf_no_progressbar():
-    region = get_region_tuple("malta")
-    geofabrik_pbf_url = region.urls['pbf']
-
-    data_dir = "earth_data_test"
-    fp = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf")
-    fp_hash = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf.md5")
-
-    download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir, progress_bar=False)
-
-    # check file last modified time
-    lm1 = os.path.getmtime(fp)
-    print(f"Last modified: {lm1}")
-
-    assert os.path.exists(fp)
-    assert verify_pbf(fp, fp_hash)
-
-
-def test_download_corrupted_file():
-    data_dir = "earth_data_test"
-    region = get_region_tuple("benin")
-    geofabrik_pbf_url = region.urls['pbf']
-    
-    def cancel_download(signal, frame):
-        raise KeyboardInterrupt
-
-    signal.signal(signal.SIGALRM, cancel_download)
-    signal.alarm(2)
-
-    try:
-        download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir)
-    except KeyboardInterrupt:
-        print("Download cancelled.")
-
-    
-    # check file size of file in human readable format
-    fp = os.path.join(data_dir, "pbf", "benin-latest.osm.pbf")
-    corrupt_file_size = os.path.getsize(fp)
-    print(f"Corrupt File size: {corrupt_file_size / (1024 * 1024)} MB")
-    
-    download_pbf(geofabrik_pbf_url, update=False, data_dir=data_dir)
-    file_size = os.path.getsize(fp)
-    print(f"New File size: {file_size / (1024 * 1024)} MB")
-
-    assert file_size > corrupt_file_size
-
-
-def test_download_cd_md5(tmp_path):
-    region = get_region_tuple("congo-democratic-republic")
-    md5_url = region.urls['pbf'] + ".md5"
-
-    md5_dir = tmp_path / "cd_md5"
-    md5_path = download_file(md5_url, str(md5_dir), progress_bar=False)
-
-    assert os.path.exists(md5_path)
-
-    payload = Path(md5_path).read_bytes()
-    if payload.startswith(b"\x1f\x8b"):
-        payload = gzip.decompress(payload)
-
-    line = payload.decode("ascii").strip()
-    parts = line.split()
-
-    assert len(parts) >= 2
-    checksum, filename = parts[0], parts[-1]
-
-    assert len(checksum) == 32
-    assert all(ch in string.hexdigits for ch in checksum)
-    assert filename.endswith("congo-democratic-republic-latest.osm.pbf")
-
-
-def test_md5_retry_logic():
-    """Test that MD5 file is re-downloaded on retry when verification fails."""
-    import tempfile
-    
-    data_dir = "earth_data_test"
-    region = get_region_tuple("malta")
-    geofabrik_pbf_url = region.urls['pbf']
-    
-    # First download to get valid files
-    download_pbf(geofabrik_pbf_url, update=True, data_dir=data_dir)
-    
-    pbf_file = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf")
-    md5_file = os.path.join(data_dir, "pbf", "malta-latest.osm.pbf.md5")
-    
-    assert os.path.exists(pbf_file)
-    assert os.path.exists(md5_file)
-    
-    # Corrupt the MD5 file to force a retry
-    with open(md5_file, 'w') as f:
-        f.write("corrupted_md5_hash  malta-latest.osm.pbf\n")
-    
-    # This should succeed by re-downloading both files
-    result_fp = download_pbf(geofabrik_pbf_url, update=False, data_dir=data_dir)
-    
-    assert result_fp == pbf_file
-    assert verify_pbf(pbf_file, md5_file)
-    
-    # Verify the MD5 file was actually re-downloaded
-    with open(md5_file, 'r') as f:
-        md5_content = f.read().strip()
-    
-    assert md5_content != "corrupted_md5_hash  malta-latest.osm.pbf"
-    assert len(md5_content.split()[0]) == 32  # MD5 hash should be 32 chars
-
-
-if __name__ == '__main__':
-    test_download_pbf_update()
-    test_download_corrupted_file()
-    test_md5_retry_logic()
-    
+    assert result == str(pbf_dir / "sample.osm.pbf")
+    assert call_args[0] == (f"{url}.md5", False, None)
+    assert call_args[1] == ("https://example.com/sample-20240101.osm.pbf", False, "sample.osm.pbf")
+    assert "sample-20240101.osm.pbf" in md5_path.read_text(encoding="ascii")

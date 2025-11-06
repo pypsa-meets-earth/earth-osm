@@ -17,15 +17,12 @@ from earth_osm.tagdata import get_feature_list
 from earth_osm.extract import filter_pbf
 from earth_osm.gfk_download import download_pbf
 from earth_osm.osmpbf import Node, Relation, Way
-from earth_osm import logger as base_logger
-
 logger = logging.getLogger("eo.filter")
 logger.setLevel(logging.WARNING)
 
 
 def feature_filter(primary_data, filter_tuple=('power', 'line')):
-
-    if set(primary_data.keys()) != set(['Node', 'Way', 'Relation']):
+    if set(primary_data.keys()) != {'Node', 'Way', 'Relation'}:
         logger.error('malformed primary_data')
 
     feature_data = {'Node': {}, 'Way': {}, 'Relation': {}}

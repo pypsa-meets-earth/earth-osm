@@ -16,109 +16,163 @@ import pandas as pd
 # suppress pandas warning about fragmented dataframes
 # TODO: do not suppress warnings
 import warnings
+
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
-from earth_osm.overpass import get_overpass_data
+from earth_osm.backends import fetch_region_backend
 from earth_osm.tagdata import get_feature_list
-from earth_osm.filter import get_filtered_data
-from earth_osm.gfk_data import get_region_tuple, get_region_tuple_historical, view_regions
-from earth_osm.utils import lonlat_lookup, way_or_area
+from earth_osm.regions import (
+    expand_region_to_iso_children,
+    get_region_tuple,
+    get_region_tuple_historical,
+    view_regions,
+)
 from earth_osm.export import EarthOSMWriter
-from earth_osm import logger as base_logger
+from earth_osm.stream import stream_region_features_multi
 
 logger = logging.getLogger("eo.eo")
 logger.setLevel(logging.INFO)
 
-def process_region(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True, data_source='geofabrik'):
-    """
-    Process Country
 
-    Args:
-        region: Region object
-        primary_name: Primary Feature Name
-        feature_name: Feature Name
-        mp: Multiprocessing object
-        update: Update flag
-
-    Returns:
-        None
-    """
-
-    if data_source == 'geofabrik':
-        primary_dict, feature_dict = get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=progress_bar)
-    elif data_source == 'overpass':
-        primary_dict, feature_dict = get_overpass_data(region, primary_name, feature_name, data_dir)
-
-    primary_data = primary_dict['Data']
-    feature_data = feature_dict['Data']
-
-    df_node = pd.json_normalize(feature_data["Node"].values())
-    df_way = pd.json_normalize(feature_data["Way"].values())
-
-    if df_way.empty:
-        logger.debug(f"df_way is empty for {region.short}, {primary_name}, {feature_name}")
-        # for df_way, check if way or area
-    else:
-        type_col = way_or_area(df_way)
-        df_way.insert(1, "Type", type_col)
-        logger.debug(df_way['Type'].value_counts(dropna=False))
-
-        # Drop rows with None in Type
-        logger.debug(f"Dropping {df_way['Type'].isna().sum()} rows with None in Type")
-        df_way.dropna(subset=["Type"], inplace=True)
-
-        # convert refs to lonlat
-        lonlat_column = lonlat_lookup(df_way, primary_data)
-        df_way.insert(1, "lonlat", lonlat_column)
-
-    # check if df_node is empty
-    if df_node.empty:
-        logger.debug(f"df_node is empty for {region.short}, {primary_name}, {feature_name}")
-    else:
-        # df node has lonlat as [lon, lat] it should be [(lon, lat)]
-        df_node["lonlat"] = df_node["lonlat"].apply(lambda x: [tuple(x)])
-        
-        # set type to node
-        df_node["Type"] = "node"
-    
-    # concat ways and nodes
-    df_feature = pd.concat([df_way, df_node], ignore_index=True)
-
-    # remove columns that are all nan
+def _rows_to_dataframe(row_iter):
+    rows = list(row_iter)
+    df_feature = pd.DataFrame(rows)
     df_feature.dropna(axis=1, how="all", inplace=True)
-
-    if df_feature.empty:
-        logger.debug(f"df_feature is empty for {region.short}, {primary_name}, {feature_name}")
-    else:
-        df_feature.insert(3, 'Region', region.short)
-
-    # dev logger warning
-    if 'other_tags' in df_feature.columns:
-        logger.warning(f"other_tags in extracted data from osm, change of other_tags to eo_tags is necessary, please open issue on github")
-        
     return df_feature
+
+
+def _fetch_overpass_region(
+    region,
+    primary_name,
+    feature_name,
+    *,
+    mp,
+    update,
+    data_dir,
+    progress_bar,
+    cache_primary,
+):
+    expanded_regions = expand_region_to_iso_children(region, require_iso=True)
+    child_regions = [child for child in expanded_regions if child.id != region.id]
+
+    if child_regions:
+        frames = []
+        for child_region in child_regions:
+            result_kind, payload = fetch_region_backend(
+                child_region,
+                primary_name,
+                feature_name,
+                data_source="overpass",
+                use_stream=False,
+                mp=mp,
+                update=update,
+                data_dir=data_dir,
+                progress_bar=progress_bar,
+                cache_primary=cache_primary,
+            )
+            frame = payload if result_kind == "dataframe" else _rows_to_dataframe(payload)
+            if isinstance(frame, pd.DataFrame) and not frame.empty:
+                frames.append(frame)
+
+        if not frames:
+            return pd.DataFrame()
+
+        return pd.concat(frames, ignore_index=True)
+
+    result_kind, payload = fetch_region_backend(
+        region,
+        primary_name,
+        feature_name,
+        data_source="overpass",
+        use_stream=False,
+        mp=mp,
+        update=update,
+        data_dir=data_dir,
+        progress_bar=progress_bar,
+        cache_primary=cache_primary,
+    )
+    return payload if result_kind == "dataframe" else _rows_to_dataframe(payload)
+
+
+def process_region(
+    region,
+    primary_name,
+    feature_name,
+    mp,
+    update,
+    data_dir,
+    progress_bar=True,
+    data_source="geofabrik",
+    stream=False,
+    cache_primary=False,
+):
+    """Process a single region for a feature.
+
+    When ``stream`` is ``True`` and the geofabrik backend is used the function
+    returns an iterator of flattened feature dictionaries. Otherwise it returns
+    a :class:`pandas.DataFrame` to preserve the historic API.
+    """
+
+    if data_source == "overpass":
+        if stream:
+            raise ValueError("Streaming export is not supported for the Overpass backend.")
+        return _fetch_overpass_region(
+            region,
+            primary_name,
+            feature_name,
+            mp=mp,
+            update=update,
+            data_dir=data_dir,
+            progress_bar=progress_bar,
+            cache_primary=cache_primary,
+        )
+
+    use_stream = stream and data_source == "geofabrik"
+    result_kind, payload = fetch_region_backend(
+        region,
+        primary_name,
+        feature_name,
+        data_source=data_source,
+        use_stream=use_stream,
+        mp=mp,
+        update=update,
+        data_dir=data_dir,
+        progress_bar=progress_bar,
+        cache_primary=cache_primary,
+    )
+
+    if stream:
+        if result_kind != "stream":
+            raise RuntimeError("Requested streaming backend but received a dataframe payload")
+        return payload
+
+    if result_kind == "dataframe":
+        return payload
+
+    return _rows_to_dataframe(payload)
+
 
 def get_osm_data(
         region_str,
         primary_name,
         feature_name,
         data_dir=None,
-        cached = True, 
+        cached=True,
         progress_bar=True,
         target_date: Optional[datetime] = None,
-        data_source='geofabrik'):
+        data_source="geofabrik",
+):
 
-    
     if target_date:
         region_tuple = get_region_tuple_historical(region_str, target_date)
     else:
         region_tuple = get_region_tuple(region_str)
-        
+
     mp = True
     update = not cached
 
-    data_dir=os.path.join(os.getcwd(), 'earth_data') if data_dir is None else data_dir
-    
+    data_dir = os.path.join(os.getcwd(), "earth_data") if data_dir is None else data_dir
+
     df = process_region(
         region_tuple,
         primary_name,
@@ -127,11 +181,10 @@ def get_osm_data(
         update,
         data_dir,
         progress_bar=progress_bar,
-        data_source=data_source
+        data_source=data_source,
     )
 
     return df
-    
 
 # TODO: Plan
 # Use an intermediary super efficient file format such as parquet
@@ -146,14 +199,16 @@ def save_osm_data(
     region_list,
     primary_name,
     feature_list=None,
-    out_format="csv", # TODO: rename out_format -> format
-    out_aggregate=True, # TODO: rename out_aggregate -> aggregate
-    out_dir=os.path.join(os.getcwd(), 'earth_data'),
-    data_source = 'geofabrik', # 'overpass'
-    data_dir=os.path.join(os.getcwd(), 'earth_data'),
+    out_format="csv",  # TODO: rename out_format -> format
+    out_aggregate=True,  # TODO: rename out_aggregate -> aggregate
+    out_dir=os.path.join(os.getcwd(), "earth_data"),
+    data_source="geofabrik",  # 'overpass'
+    data_dir=os.path.join(os.getcwd(), "earth_data"),
     update=False,
-    mp=True, # TODO: remove mp arg,
+    mp=True,  # TODO: remove mp arg,
     progress_bar=True,
+    stream_backend=True,
+    cache_primary=False,
     target_date: Optional[datetime] = None,
 ):
     """
@@ -164,6 +219,9 @@ def save_osm_data(
         feature_list: list of features to get data for
         update: update data
         mp: use multiprocessing
+        stream_backend: when ``True`` (default) use the streaming pipeline for
+            GeoFabrik sources; set to ``False`` to revert to the legacy
+            in-memory pipeline (primarily for benchmarking)
         target_date: optional target date for historical data
     returns:
         dict of dataframes
@@ -177,67 +235,126 @@ def save_osm_data(
 
     if feature_list is None:
         feature_list = get_feature_list(primary_name)
-    elif feature_list == ['ALL']:
+    elif feature_list == ["ALL"]:
         # Account for wild card
-        feature_list = [f'ALL_{primary_name}']
+        feature_list = [f"ALL_{primary_name}"]
 
-    if out_aggregate == 'region' or out_aggregate is True:
-        # for each feature, aggregate all regions
-        for feature_name in feature_list:
-            with EarthOSMWriter(
-                region_short_list, primary_name, [feature_name], out_dir, out_format
-            ) as writer:
-                for region in region_tuple_list:
-                    df_feature = process_region(
-                        region,
-                        primary_name,
-                        feature_name,
-                        mp,
-                        update,
-                        data_dir,
-                        progress_bar=progress_bar,
-                        data_source=data_source,
-                    )
-                    writer(df_feature)
-                    # output_creation(df_feature, primary_name, [feature_name], region_short_list, data_dir, out_format)
+    multi_feature_streaming = (
+        data_source == "geofabrik"
+        and stream_backend
+        and not cache_primary
+        and feature_list
+        and len(feature_list) > 1
+    )
 
-    elif out_aggregate == "feature":
-        # for each region, aggreagate all features
-        for region in region_tuple_list:
-            with EarthOSMWriter(
-                [region.short], primary_name, feature_list, out_dir, out_format
-            ) as writer:
-                for feature_name in feature_list:
-                    df_feature = process_region(
-                        region,
-                        primary_name,
-                        feature_name,
-                        mp,
-                        update,
-                        data_dir,
-                        progress_bar=progress_bar,
-                        data_source=data_source,
-                    )
-                    writer(df_feature)
+    def iter_feature_rows(region_obj, feature_name_obj):
+        if data_source == "geofabrik" and stream_backend:
+            return process_region(
+                region_obj,
+                primary_name,
+                feature_name_obj,
+                mp,
+                update,
+                data_dir,
+                progress_bar=progress_bar,
+                data_source=data_source,
+                stream=True,
+                cache_primary=cache_primary,
+            )
 
-    elif out_aggregate is False:
-        # no aggregation, one file per region per feature
-        for region in region_tuple_list:
+        df_feature = process_region(
+            region_obj,
+            primary_name,
+            feature_name_obj,
+            mp,
+            update,
+            data_dir,
+            progress_bar=progress_bar,
+            data_source=data_source,
+            stream=False,
+            cache_primary=cache_primary,
+        )
+        return df_feature.to_dict("records")
+
+    with EarthOSMWriter(primary_name, out_dir, out_format) as writer:
+        if out_aggregate == "region" or out_aggregate is True:
             for feature_name in feature_list:
-                df_feature = process_region(
-                    region,
-                    primary_name,
-                    feature_name,
-                    mp,
-                    update,
-                    data_dir,
-                    progress_bar=progress_bar,
-                    data_source=data_source,
-                )
-                with EarthOSMWriter(
-                    [region.short], primary_name, [feature_name], out_dir, out_format
-                ) as writer:
-                    writer(df_feature)
+                writer.prepare_target(region_short_list, [feature_name])
+
+            if multi_feature_streaming:
+                for region in region_tuple_list:
+                    for matched_feature, row in stream_region_features_multi(
+                        region,
+                        primary_name,
+                        feature_list,
+                        data_dir,
+                        update=update,
+                        progress_bar=progress_bar,
+                        multiprocess=mp,
+                        data_source=data_source,
+                    ):
+                        writer.write(region_short_list, [matched_feature], [row])
+            else:
+                for feature_name in feature_list:
+                    for region in region_tuple_list:
+                        writer.write(
+                            region_short_list,
+                            [feature_name],
+                            iter_feature_rows(region, feature_name),
+                        )
+
+        elif out_aggregate == "feature":
+            for region in region_tuple_list:
+                writer.prepare_target([region.short], feature_list)
+
+            if multi_feature_streaming:
+                for region in region_tuple_list:
+                    for _, row in stream_region_features_multi(
+                        region,
+                        primary_name,
+                        feature_list,
+                        data_dir,
+                        update=update,
+                        progress_bar=progress_bar,
+                        multiprocess=mp,
+                        data_source=data_source,
+                    ):
+                        writer.write([region.short], feature_list, [row])
+            else:
+                for region in region_tuple_list:
+                    for feature_name in feature_list:
+                        writer.write(
+                            [region.short],
+                            feature_list,
+                            iter_feature_rows(region, feature_name),
+                        )
+
+        elif out_aggregate is False:
+            for region_label in region_list:
+                for feature_name in feature_list:
+                    writer.prepare_target([region_label], [feature_name])
+
+            if multi_feature_streaming:
+                for region, region_label in zip(region_tuple_list, region_list):
+                    for matched_feature, row in stream_region_features_multi(
+                        region,
+                        primary_name,
+                        feature_list,
+                        data_dir,
+                        update=update,
+                        progress_bar=progress_bar,
+                        multiprocess=mp,
+                        data_source=data_source,
+                    ):
+                        writer.write([region_label], [matched_feature], [row])
+            else:
+                for region, region_label in zip(region_tuple_list, region_list):
+                    for feature_name in feature_list:
+                        writer.write(
+                            [region_label],
+                            [feature_name],
+                            iter_feature_rows(region, feature_name),
+                        )
 
     # combinations = ((region, feature_name) for region in region_tuple_list for feature_name in feature_list)
 

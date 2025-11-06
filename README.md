@@ -33,10 +33,10 @@ earth-osm downloads, filters, cleans and exports infrastructure data from OpenSt
 - 🐍 Provides a Python API
 - 🖥️ Supports multiprocessing for faster extraction
 - 📊 Outputs data in .csv and .geojson formats
-- 🌍 Supports global data extraction
+- 🌍 Supports planetary data extraction
 - 🖱️ Easy-to-use CLI interface
-
 - 🌐 Dual data sources: GeoFabrik (default) and live Overpass API
+- 
 ## 🚀 Getting Started
 
 ### Installation
@@ -76,6 +76,15 @@ df_substations = pd.read_csv('./earth_data/out/BJ_raw_substations.csv')
 gdf_substations = gpd.read_file('./earth_data/out/BJ_raw_substations.geojson')
 ```
 
+### Optional: Speed up downloads with aria2c
+
+Install [`aria2c`](https://aria2.github.io/) (for example `brew install aria2`, `sudo apt-get install aria2`, or `choco install aria2`) and set `EO_PARALLEL_DOWNLOADS` greater than 1; `earth-osm` will then use multiple connections for `.osm.pbf` downloads and otherwise falls back automatically.
+
+```bash
+export EO_PARALLEL_DOWNLOADS=8    # fish: set -x EO_PARALLEL_DOWNLOADS 8
+earth_osm extract power --regions germany --features line
+```
+
 ## 🛠️ CLI Reference
 
 ### Extract Command
@@ -108,6 +117,16 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 | `--agg_feature` | Aggregate outputs by feature | False |
 | `--agg_region` | Aggregate outputs by region | False |
 | `--source` | Data source: geofabrik (default) or overpass | geofabrik |
+
+> ℹ️ When using the Overpass backend, wildcard feature selections such as `ALL_power` are not supported. Specify concrete feature values instead, or switch to the Geofabrik source for wildcard exports.
+
+### Planet-wide extractions
+
+Use the special `earth` region to export the full OpenStreetMap planet snapshot.
+
+```bash
+earth_osm extract power --regions earth --features line 
+```
 
 ## 🐍 Python API
 

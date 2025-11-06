@@ -11,6 +11,7 @@ from earth_osm.gfk_data import (
     get_region_tuple,
     get_all_valid_list
 )
+from earth_osm.planet import PLANET_PBF_URL, PLANET_REGION_ID, PLANET_REGION_SHORT_CODE
 
 
 def test_view():
@@ -26,16 +27,27 @@ def test_regions():
         ["id", "name", "parent", "short_code", "urls"]
     )
 
+    earth_region = get_region_dict("earth")
+    assert earth_region["id"] == PLANET_REGION_ID
+    assert earth_region["short_code"] == PLANET_REGION_SHORT_CODE
+    assert earth_region["urls"]["pbf"] == PLANET_PBF_URL
+
     # print(get_id_by_code('DE')) #Supresses KeyError
     assert get_id_by_code("DE") == "germany"
 
+    assert get_id_by_code(PLANET_REGION_SHORT_CODE) == PLANET_REGION_ID
+    assert get_id_by_code("earth") == PLANET_REGION_ID
+
     # print(get_code_by_id('germany')) #Supresses KeyError
     assert get_code_by_id("germany") == "DE"
+    assert get_code_by_id(PLANET_REGION_ID) == PLANET_REGION_SHORT_CODE
 
     # print(get_id_by_str('germany')) #Raises KeyError
     assert get_id_by_str("germany") == "germany"
     assert get_id_by_str("DE") == "germany"
     assert get_id_by_str("DE") == "germany"
+    assert get_id_by_str("earth") == PLANET_REGION_ID
+    assert get_id_by_str(PLANET_REGION_SHORT_CODE) == PLANET_REGION_ID
 
 
 def test_get_id_by_str_keyerror():
@@ -47,6 +59,15 @@ def test_region_tuple():
     print(get_region_tuple("germany"))
     print(get_region_tuple("germany").short)
     print(get_all_valid_list())
+
+    planet = get_region_tuple("earth")
+    assert planet.id == PLANET_REGION_ID
+    assert planet.short == PLANET_REGION_SHORT_CODE
+    assert planet.urls["pbf"] == PLANET_PBF_URL
+
+    valid = get_all_valid_list()
+    assert PLANET_REGION_SHORT_CODE in valid
+    assert PLANET_REGION_ID in valid
 
 def test_others():
     for o in ["gcc-states", "SN-GM"]:
