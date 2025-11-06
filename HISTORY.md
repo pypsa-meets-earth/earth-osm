@@ -4,6 +4,8 @@ Changelog
 
 (unreleased)
 ------------
+- Chore: allow non-interactive release prompts. [Matin Mahmood]
+- Release: version  🚀 [Matin Mahmood]
 - Feat: enable streaming backend and planetary exports. [Matin Mahmood]
 - Merge branch 'main' of https://github.com/pypsa-meets-earth/earth-osm
   # Please enter a commit message to explain why this merge is
