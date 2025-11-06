@@ -1,12 +1,145 @@
 Changelog
 =========
 
-2.3.post1 (2024-12-22)
+
+(unreleased)
 ------------
-- Release: version 2.3.post1 🚀 [Davide Fioriti]
+- Feat: enable streaming backend and planetary exports. [Matin Mahmood]
+- Merge branch 'main' of https://github.com/pypsa-meets-earth/earth-osm
+  # Please enter a commit message to explain why this merge is
+  necessary, # especially if it merges an updated upstream into a topic
+  branch. # # Lines starting with '#' will be ignored, and an empty
+  message aborts # the commit. [Matin Mahmood]
+- Feat: add historical data download support (#63) [Emmanuel Bolarinwa,
+  Matin Mahmood]
+
+  * feat: add historical data download support
+
+  * Remove HISTORICAL_FEATURE_SUMMARY.md
+
+  This internal summary file was not intended for the public repository.
+  Keep the feature implementation clean and focused.
+
+  * Revert formatting-only changes while preserving historical data functionality
+
+  - Revert import reordering to original structure
+  - Revert string quote changes (double -> single quotes)
+  - Revert function parameter formatting to single-line style
+  - Revert spacing and code formatting changes
+  - Keep all functional changes for historical data support intact
+
+  * Complete remaining formatting reverts
+
+  - Remove extra blank lines
+  - Fix remaining double quote to single quote changes
+  - Revert function signature formatting to single-line
+  - Remove extra spacing inconsistencies
+  - Ensure all formatting matches original style
+
+  * Make README historical data section more concise
+
+  - Simplify key features bullet point
+  - Remove verbose explanations and excessive examples
+  - Integrate historical data example into existing Python API section
+  - Match the concise style of the rest of the README
+  - Remove redundant feature descriptions and API listings
+
+  * Fix pre_filter key type mismatch causing KeyError for Node class
+
+  * Improve historical error handling with FileNotFoundError
+
+  ---------
+- Remove redundant test cases and add test for wildcard disallowance in
+  Overpass queries. [Matin Mahmood]
+- Refactor Overpass query output and improve error handling for
+  unsupported features. [Matin Mahmood]
+- Refactor download_file to use chunked writing and improve download
+  reliability. [Matin Mahmood]
+- Add test for downloading and verifying CD MD5 files with gzip support.
+  [Matin Mahmood]
+- Enhance PBF verification to handle gzipped MD5 files and improve
+  download file decoding. [Matin Mahmood]
+- Fix MD5 file retry logic to prevent file verification failures (#72)
+  [Copilot, mnm-matin, mnm-matin <45293386+mnm-
+  matin@users.noreply.github.com>  * Fix MD5 file retry logic in
+  download_pbf function  Co-authored-by: mnm-matin <45293386+mnm-
+  matin@users.noreply.github.com>  ---------  Co-authored-by: copilot-
+  swe-agent[bot] <198982749+Copilot@users.noreply.github.com>]
+
+  * Initial plan
+
+  * Initial analysis of file verification issue
+- Fix Namibia 'NA' ISO code recognition issue (#70) [Copilot, mnm-matin,
+  mnm-matin <45293386+mnm-matin@users.noreply.github.com>  ---------
+  Co-authored-by: copilot-swe-agent[bot]
+  <198982749+Copilot@users.noreply.github.com>]
+
+  * Initial plan
+
+  * Fix Namibia 'NA' ISO code recognition issue
+- Speed: improve ci performance (#74) [Matin Mahmood]
+- Implement Overpass API integration for OSM data extraction with
+  comprehensive test suite (#69) [Copilot, copilot-swe-agent[bot], mnm-
+  matin]
+
+  * Initial plan
+
+  * Complete Overpass API implementation for OSM data extraction
+
+  Co-authored-by: mnm-matin <45293386+mnm-matin@users.noreply.github.com>
+
+  * Add comprehensive test suite for Overpass API functionality
+
+  Co-authored-by: mnm-matin <45293386+mnm-matin@users.noreply.github.com>
+
+  * Enhance README and code to support dual data sources: GeoFabrik and Overpass API
+
+  - Updated README.md to include information about dual data sources.
+  - Modified eo.py to streamline Overpass data fetching.
+  - Refactored overpass.py for improved query handling and added request settings.
+  - Added integration tests in test_overpass.py to compare results from GeoFabrik and Overpass API.
+  - Updated pyproject.toml to include integration test markers.
+
+  ---------
+- Fix/osmium test length mismatch (#65) [Emmanuel Bolarinwa]
+
+  * fix: fix osmium test length mismatch issue
+
+  * Apply minor formatting fixes to test_osmium.py
+
+  - Add blank line after imports for PEP8 compliance
+  - Fix missing newline at end of file
+- Drop setup_commands. [Davide Fioriti]
+- Fix documentation links to point to GitHub instead of local files
+  (#66) [Emmanuel Bolarinwa]
+
+  When rendered in the documentation site, relative links to CONTRIBUTING.md,
+  LICENSE, and regions.md were resolving to the docs site domain instead of
+  the GitHub repository. This change converts them to absolute GitHub URLs.
+
+  Fixed links:
+  - regions.md -> GitHub blob URL for regions_table.md
+  - CONTRIBUTING.md -> GitHub blob URL for CONTRIBUTING.md
+  - LICENSE -> GitHub blob URL for LICENSE
+  - Updated both direct links and reference-style links at bottom
+
+  This ensures the documentation site properly links back to the source
+  repository files instead of broken local paths.
+- Add git push to release procedure. [Davide Fioriti]
+- Release: version 2.3.post1. [Davide Fioriti]
 - Drop unused pyproject dependencies (#58) [Davide Fioriti]
 - Update pyproject and add CI test to pip installation (#57) [Davide
   Fioriti]
+
+  * Update pyproject
+
+  * Add last line pyproject
+
+  * Add pip and package test in release.yml
+
+  * Revise install and test in release.yml
+
+  * Add checkout and python installation
 - Update pyproject. [Davide Fioriti]
 
 
@@ -19,6 +152,30 @@ Changelog
 - Release: version 2.3. [Davide Fioriti]
 - Revise Makefile doc env. [Davide Fioriti]
 - Add setuptools to install dependency (#56) [Davide Fioriti]
+
+  * Add setuptools to install dependency
+
+  * Update min python version
+
+  * Add pyproject and revise setup
+
+  * drop url pyproject
+
+  * restore test env
+
+  * fix pyproject
+
+  * Revise toml
+
+  * Revise order of rules
+
+  * Removing older requirements file
+
+  * Drop duplicated github release
+
+  * Implement dynamic versioning pyproject
+
+  * Revise path of VERSION file
 - Add mock overpass file. [Matin Mahmood]
 - Remove deprecated config file. [Matin Mahmood]
 - Fix region_tuple. [Matin Mahmood]
