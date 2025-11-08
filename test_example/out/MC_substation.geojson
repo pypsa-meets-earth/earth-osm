@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "MC_substation",
+"features": [
+{ "type": "Feature", "properties": { "id": 686864062, "Type": "area", "Region": "MC", "refs": [ 6438487363, 6438487364, 6438487368, 6438487367, 6438487365, 6438487366, 6438487363 ], "tags.building": "service", "tags.building:levels": 1.0, "tags.mapillary": 288202313023694, "tags.power": "substation", "tags.roof:shape": "flat", "tags.source": "survey 2019;BDOrtho IGN 2019", "tags.ref": null, "tags.substation": null, "other_tags": null }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 7.414801599999979, 43.731243099999773 ], [ 7.414832399999979, 43.73121789999977 ], [ 7.414846099999981, 43.731226599999772 ], [ 7.41487159999998, 43.731242899999771 ], [ 7.414879, 43.731247599999769 ], [ 7.41484809999998, 43.731272799999772 ], [ 7.414801599999979, 43.731243099999773 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 6459866604, "Type": "node", "Region": "MC", "refs": null, "tags.building": null, "tags.building:levels": null, "tags.mapillary": 157304999600418, "tags.power": "substation", "tags.roof:shape": null, "tags.source": null, "tags.ref": "P208", "tags.substation": "minor_distribution", "other_tags": null }, "geometry": { "type": "Point", "coordinates": [ 7.414885199999985, 43.73303329999991 ] } }
+]
+}

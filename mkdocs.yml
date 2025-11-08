@@ -1,7 +1,7 @@
 site_name: EarthOSM
 repo_url: https://github.com/pypsa-meets-earth/earth-osm
 repo_name: earth-osm
-site_description: OpenStreetMap data extraction
+site_description: Extract large-scale OpenStreetMap infrastructure data with Python
 site_author: PyPSA meets Earth
 copyright:
   '<span>
@@ -13,16 +13,30 @@ copyright:
   </span>'
 
 plugins:
-  - search
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - awesome-pages
   - mkdocstrings:
       default_handler: python
+      handlers:
+        python:
+          paths: [earth_osm]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_object_full_path: false
+            merge_init_into_class: true
 
 nav:
-  - Getting Started: index.md
+  - Home: index.md
+  - User Guide:
+    - Getting Started: user-guide/getting-started.md
+    - Basic Usage: user-guide/basic-usage.md
+    - Advanced Examples: user-guide/advanced-examples.md
+    - Visualization: user-guide/visualization.md
   - Supported Regions: regions.md
   - API Reference: api-docs/README.md
-  # - User Guide: user-guide.md
   # - About: about.md
 
 markdown_extensions:
@@ -30,10 +44,27 @@ markdown_extensions:
   - footnotes
   - attr_list
   - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.magiclink
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
-  - pymdownx.superfences
-  - pymdownx.magiclink
 
 theme:
   name: material
@@ -45,21 +76,52 @@ theme:
     text: Roboto
     code: Roboto Mono
   palette:
-    - scheme: slate
-      primary: black
-      accent: white
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.top
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
     - search.suggest
     - search.highlight
+    - search.share
+    - header.autohide
+    - content.code.copy
+    - content.code.annotate
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/pypsa-meets-earth/earth-osm
-    - icon: fontawesome/brands/linkedin
-      link: https://www.linkedin.com/in/matin-mahmood
+      name: GitHub Repository
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/earth-osm/
+      name: PyPI Package
     - icon: fontawesome/brands/discord
       link: https://discord.gg/reAx9Ed8Xq
+      name: Join our Discord
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/matin-mahmood
+      name: Connect on LinkedIn
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
   generator: false
+  version:
+    provider: mike

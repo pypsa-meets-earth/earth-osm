@@ -112,13 +112,27 @@ api-docs:		## Generate the API documentation.
 			earth_osm; \
 	fi
 
+.PHONY: docs-examples
+docs-examples:		## Generate documentation examples with visualizations.
+	@echo "generating documentation examples..."
+	@$(ENV_PREFIX)pip install .[docs] matplotlib plotly seaborn
+	@$(ENV_PREFIX)python scripts/generate_docs_examples.py --max-regions 3 --clean
+
 .PHONY: docs
 docs: api-docs		## Build the documentation.
 	@echo "building documentation ..."
 	@$(ENV_PREFIX)mkdocs build
 	URL="site/index.html"; xdg-open $$URL || sensible-browser $$URL || x-www-browser $$URL || gnome-open $$URL
 
+.PHONY: docs-serve
+docs-serve:		## Serve the documentation locally for development.
+	@echo "serving documentation on http://127.0.0.1:8000 ..."
+	@$(ENV_PREFIX)mkdocs serve
+
+.PHONY: docs-full
+docs-full: api-docs docs-examples docs		## Generate complete documentation with examples.
+
 .PHONY: docs-gh-deploy
-docs-gh-deploy: api-docs		## Serve the documentation.
+docs-gh-deploy: api-docs		## Deploy documentation to GitHub Pages.
 	@echo "deploying documentation on github ..."
 	@$(ENV_PREFIX)mkdocs gh-deploy --force
