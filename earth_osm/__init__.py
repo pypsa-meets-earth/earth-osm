@@ -1,5 +1,8 @@
 import logging
 import os
+from .eo import save_osm_data
+
+__all__ = ["save_osm_data"]
 
 logging.basicConfig(level=logging.INFO)  # Basic configuration
 logger = logging.getLogger('eo')
