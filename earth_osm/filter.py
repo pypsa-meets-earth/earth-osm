@@ -62,11 +62,23 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
     logger.info('Load OSM data from ' + PBF_inputfile+'\n')
 
     feature_list = get_feature_list(primary_name)
-    pre_filter = {
-        Node: {primary_name: feature_list},
-        Way: {primary_name: feature_list},
-        Relation: {primary_name: feature_list},
-    }
+    
+    # MODIFIED: Add lifecycle prefixes
+    lifecycle_prefixes = [
+        primary_name,                    # e.g., "power"
+        f"construction:{primary_name}",  # e.g., "construction:power"
+        f"proposed:{primary_name}",      # e.g., "proposed:power"
+        f"planned:{primary_name}",       # e.g., "planned:power"
+        f"disused:{primary_name}",       # e.g., "disused:power"
+        f"abandoned:{primary_name}",     # e.g., "abandoned:power"
+    ]
+    
+    # Build pre_filter with all lifecycle prefixes
+    pre_filter = {}
+    for element_type in [Node, Way, Relation]:
+        pre_filter[element_type] = {}
+        for prefix in lifecycle_prefixes:
+            pre_filter[element_type][prefix] = feature_list
 
     primary_data = filter_pbf(PBF_inputfile, pre_filter, multiprocess)
 
@@ -89,7 +101,6 @@ def run_primary_filter(PBF_inputfile, primary_file, primary_name, multiprocess):
         )
 
     return primary_dict
-
 
 def get_filtered_data(region, primary_name, feature_name, mp, update, data_dir, progress_bar=True):
     geofabrik_pbf_url = region.urls['pbf']

@@ -105,6 +105,7 @@ def process_region(
     data_source="geofabrik",
     stream=False,
     cache_primary=False,
+    allowed_statuses=None,  # NEW PARAMETER
 ):
     """Process a single region for a feature.
 
@@ -128,18 +129,21 @@ def process_region(
         )
 
     use_stream = stream and data_source == "geofabrik"
+
     result_kind, payload = fetch_region_backend(
-        region,
-        primary_name,
-        feature_name,
-        data_source=data_source,
-        use_stream=use_stream,
-        mp=mp,
-        update=update,
-        data_dir=data_dir,
-        progress_bar=progress_bar,
-        cache_primary=cache_primary,
+    region,
+    primary_name,
+    feature_name,
+    data_source=data_source,
+    use_stream=use_stream,
+    mp=mp,
+    update=update,
+    data_dir=data_dir,
+    progress_bar=progress_bar,
+    cache_primary=cache_primary,
+    allowed_statuses=allowed_statuses,  # PASS THROUGH
     )
+    
 
     if stream:
         if result_kind != "stream":
@@ -199,17 +203,18 @@ def save_osm_data(
     region_list,
     primary_name,
     feature_list=None,
-    out_format="csv",  # TODO: rename out_format -> format
-    out_aggregate=True,  # TODO: rename out_aggregate -> aggregate
+    out_format="csv",
+    out_aggregate=True,
     out_dir=os.path.join(os.getcwd(), "earth_data"),
-    data_source="geofabrik",  # 'overpass'
+    data_source="geofabrik",
     data_dir=os.path.join(os.getcwd(), "earth_data"),
     update=False,
-    mp=True,  # TODO: remove mp arg,
+    mp=True,
     progress_bar=True,
     stream_backend=True,
     cache_primary=False,
     target_date: Optional[datetime] = None,
+    allowed_statuses=None,  # NEW PARAMETER
 ):
     """
     Get OSM Data for a list of regions and features
@@ -263,17 +268,19 @@ def save_osm_data(
             )
 
         df_feature = process_region(
-            region_obj,
-            primary_name,
-            feature_name_obj,
-            mp,
-            update,
-            data_dir,
-            progress_bar=progress_bar,
-            data_source=data_source,
-            stream=False,
-            cache_primary=cache_primary,
-        )
+                        region_obj,
+                        primary_name,
+                        feature_name_obj,
+                        mp,
+                        update,
+                        data_dir,
+                        progress_bar=progress_bar,
+                        data_source=data_source,
+                        stream=False,
+                        cache_primary=cache_primary,
+                        allowed_statuses=allowed_statuses,  # PASS THROUGH
+                    )
+        
         return df_feature.to_dict("records")
 
     with EarthOSMWriter(primary_name, out_dir, out_format) as writer:
