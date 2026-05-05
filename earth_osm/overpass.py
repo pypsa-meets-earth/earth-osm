@@ -25,7 +25,7 @@ REQUEST_HEADERS = {
     "User-Agent": "earth-osm/overpass (+https://github.com/pypsa-meets-earth/earth-osm)",
 }
 
-def build_overpass_query(country_code, primary_name, feature_name):
+def build_overpass_query(country_code, primary_name, feature_name, query_timeout: Optional[int] = None):
     """
     Build an Overpass query for a specific feature in a country.
     Also fetches all related nodes for ways and relations.
@@ -34,10 +34,12 @@ def build_overpass_query(country_code, primary_name, feature_name):
         country_code: ISO country code (e.g., 'BJ' for Benin)
         primary_name: Primary feature name (e.g., 'power')
         feature_name: Specific feature name (e.g., 'substation', 'line', 'generator')
+        query_timeout: Overpass query timeout in seconds (defaults to QUERY_TIMEOUT)
 
     Returns:
         str: Overpass query string
     """
+    timeout = query_timeout if query_timeout is not None else QUERY_TIMEOUT
     # Define area query for the country
     area_query = f'area["ISO3166-1"="{country_code}"]'
     match_all = feature_name.startswith('ALL_')
@@ -50,7 +52,7 @@ def build_overpass_query(country_code, primary_name, feature_name):
     # Construct the full Overpass query with recursion to get referenced nodes
     return dedent(
         f"""
-        [out:json][timeout:{QUERY_TIMEOUT}];
+        [out:json][timeout:{timeout}];
         {area_query}->.searchArea;
         (
             {element_query}(area.searchArea);
@@ -75,21 +77,25 @@ _SESSION.mount("http://", _ADAPTER)
 _SESSION.mount("https://", _ADAPTER)
 
 
-def fetch_overpass_data(query):
+def fetch_overpass_data(query, endpoint: Optional[str] = None, request_timeout: Optional[int] = None):
     """
     Fetch data from the Overpass API.
 
     Args:
         query: Overpass query string
+        endpoint: Overpass API URL (defaults to OVERPASS_ENDPOINT)
+        request_timeout: HTTP request timeout in seconds (defaults to REQUEST_TIMEOUT)
 
     Returns:
         dict: Response from Overpass API
     """
+    url = endpoint if endpoint is not None else OVERPASS_ENDPOINT
+    timeout = request_timeout if request_timeout is not None else REQUEST_TIMEOUT
     logger.debug("Fetching data from Overpass API")
     response = _SESSION.post(
-        OVERPASS_ENDPOINT,
+        url,
         data=query,
-        timeout=REQUEST_TIMEOUT,
+        timeout=timeout,
     )
     response.raise_for_status()
     data = response.json()
@@ -281,7 +287,16 @@ def rows_from_feature_dict(
         )
 
 
-def get_overpass_data(region, primary_name, feature_name, data_dir):
+def get_overpass_data(
+    region,
+    primary_name,
+    feature_name,
+    data_dir,
+    *,
+    endpoint: Optional[str] = None,
+    request_timeout: Optional[int] = None,
+    query_timeout: Optional[int] = None,
+):
     """
     Get OSM data from Overpass API for a specific region and feature.
 
@@ -290,6 +305,9 @@ def get_overpass_data(region, primary_name, feature_name, data_dir):
         primary_name: Primary feature name (e.g., 'power')
         feature_name: Specific feature name (e.g., 'substation')
         data_dir: Directory for data storage
+        endpoint: Overpass API URL (defaults to OVERPASS_ENDPOINT)
+        request_timeout: HTTP request timeout in seconds (defaults to REQUEST_TIMEOUT)
+        query_timeout: Overpass query timeout in seconds (defaults to QUERY_TIMEOUT)
 
     Returns:
         tuple: (primary_dict, feature_dict) in the format expected by process_region
@@ -307,10 +325,10 @@ def get_overpass_data(region, primary_name, feature_name, data_dir):
         feature_name,
     )
 
-    query = build_overpass_query(region.short, primary_name, feature_name)
+    query = build_overpass_query(region.short, primary_name, feature_name, query_timeout=query_timeout)
     logger.debug(f"Overpass query: {query}")
 
-    overpass_response = fetch_overpass_data(query)
+    overpass_response = fetch_overpass_data(query, endpoint=endpoint, request_timeout=request_timeout)
 
     primary_dict, feature_dict = transform_overpass_to_internal_format(
         overpass_response, primary_name, feature_name
@@ -328,6 +346,10 @@ def iter_overpass_rows(
     primary_name: str,
     feature_name: str,
     data_dir: str,
+    *,
+    endpoint: Optional[str] = None,
+    request_timeout: Optional[int] = None,
+    query_timeout: Optional[int] = None,
 ) -> Iterator[Dict[str, object]]:
     """Yield flattened feature dictionaries using the Overpass backend."""
 
@@ -336,6 +358,9 @@ def iter_overpass_rows(
         primary_name,
         feature_name,
         data_dir,
+        endpoint=endpoint,
+        request_timeout=request_timeout,
+        query_timeout=query_timeout,
     )
     yield from rows_from_feature_dict(feature_dict, region.short, primary_dict)
 

@@ -10,6 +10,25 @@ TEST_CASES = [
     pytest.param('benin', 'power', 'line', id='benin-power-line'),
 ]
 
+
+@pytest.mark.integration
+def test_overpass_custom_endpoint_and_kwargs(tmp_path):
+    df = get_osm_data(
+        'benin',
+        'power',
+        'substation',
+        data_dir=str(tmp_path),
+        cached=False,
+        progress_bar=False,
+        data_source='overpass',
+        endpoint="https://overpass.private.coffee/api/interpreter",
+        request_timeout=120,
+        query_timeout=60,
+    )
+    assert not df.empty
+    assert 'id' in df.columns
+
+
 def test_overpass_disallows_all_wildcard(tmp_path):
     with pytest.raises(ValueError, match="Overpass backend does not support wildcard"):
         get_osm_data(

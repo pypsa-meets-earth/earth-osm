@@ -51,6 +51,7 @@ def _fetch_overpass_region(
     data_dir,
     progress_bar,
     cache_primary,
+    **kwargs,
 ):
     expanded_regions = expand_region_to_iso_children(region, require_iso=True)
     child_regions = [child for child in expanded_regions if child.id != region.id]
@@ -69,6 +70,7 @@ def _fetch_overpass_region(
                 data_dir=data_dir,
                 progress_bar=progress_bar,
                 cache_primary=cache_primary,
+                **kwargs,
             )
             frame = payload if result_kind == "dataframe" else _rows_to_dataframe(payload)
             if isinstance(frame, pd.DataFrame) and not frame.empty:
@@ -90,6 +92,7 @@ def _fetch_overpass_region(
         data_dir=data_dir,
         progress_bar=progress_bar,
         cache_primary=cache_primary,
+        **kwargs,
     )
     return payload if result_kind == "dataframe" else _rows_to_dataframe(payload)
 
@@ -105,12 +108,16 @@ def process_region(
     data_source="geofabrik",
     stream=False,
     cache_primary=False,
+    **kwargs,
 ):
     """Process a single region for a feature.
 
     When ``stream`` is ``True`` and the geofabrik backend is used the function
     returns an iterator of flattened feature dictionaries. Otherwise it returns
     a :class:`pandas.DataFrame` to preserve the historic API.
+
+    Extra keyword arguments (``endpoint``, ``request_timeout``, ``query_timeout``)
+    are forwarded to the Overpass backend when ``data_source="overpass"``.
     """
 
     if data_source == "overpass":
@@ -125,6 +132,7 @@ def process_region(
             data_dir=data_dir,
             progress_bar=progress_bar,
             cache_primary=cache_primary,
+            **kwargs,
         )
 
     use_stream = stream and data_source == "geofabrik"
@@ -161,6 +169,7 @@ def get_osm_data(
         progress_bar=True,
         target_date: Optional[datetime] = None,
         data_source="geofabrik",
+        **kwargs,
 ):
 
     if target_date:
@@ -182,6 +191,7 @@ def get_osm_data(
         data_dir,
         progress_bar=progress_bar,
         data_source=data_source,
+        **kwargs,
     )
 
     return df
@@ -210,6 +220,7 @@ def save_osm_data(
     stream_backend=True,
     cache_primary=False,
     target_date: Optional[datetime] = None,
+    **kwargs,
 ):
     """
     Get OSM Data for a list of regions and features
@@ -260,6 +271,7 @@ def save_osm_data(
                 data_source=data_source,
                 stream=True,
                 cache_primary=cache_primary,
+                **kwargs,
             )
 
         df_feature = process_region(
@@ -273,6 +285,7 @@ def save_osm_data(
             data_source=data_source,
             stream=False,
             cache_primary=cache_primary,
+            **kwargs,
         )
         return df_feature.to_dict("records")
 
