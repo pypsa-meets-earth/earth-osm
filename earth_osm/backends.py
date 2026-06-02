@@ -115,9 +115,8 @@ def overpass_backend(
     feature_name: str,
     *,
     data_dir: str,
-    **kwargs,
 ) -> LegacyPayload:
-    rows = list(iter_overpass_rows(region, primary_name, feature_name, data_dir, **kwargs))
+    rows = list(iter_overpass_rows(region, primary_name, feature_name, data_dir))
     df_feature = pd.DataFrame(rows)
     df_feature.dropna(axis=1, how="all", inplace=True)
     return df_feature
@@ -135,7 +134,6 @@ def fetch_region_backend(
     data_dir: str,
     progress_bar: bool = True,
     cache_primary: bool = False,
-    **kwargs,
 ) -> BackendResult:
     """Select the appropriate backend and return a tagged payload.
 
@@ -179,7 +177,6 @@ def fetch_region_backend(
             primary_name,
             feature_name,
             data_dir=data_dir,
-            **kwargs,
         )
         return "dataframe", dataframe
 

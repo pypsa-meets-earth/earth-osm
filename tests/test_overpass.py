@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+import earth_osm.overpass as overpass_module
 from earth_osm.eo import get_osm_data
 from earth_osm.gfk_data import get_region_tuple
 
@@ -11,8 +12,40 @@ TEST_CASES = [
 ]
 
 
-@pytest.mark.integration
-def test_overpass_custom_endpoint_and_kwargs(tmp_path):
+def test_overpass_reads_endpoint_and_timeouts_from_env(monkeypatch, tmp_path):
+    captured_request = {}
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                'elements': [
+                    {
+                        'type': 'node',
+                        'id': 1,
+                        'lat': 6.3677,
+                        'lon': 2.4253,
+                        'tags': {'power': 'substation'},
+                    }
+                ]
+            }
+
+    def fake_post(url, data, timeout):
+        captured_request['url'] = url
+        captured_request['data'] = data
+        captured_request['timeout'] = timeout
+        return FakeResponse()
+
+    monkeypatch.setenv(
+        'EO_OVERPASS_ENDPOINT',
+        'https://overpass.private.coffee/api/interpreter',
+    )
+    monkeypatch.setenv('EO_OVERPASS_REQUEST_TIMEOUT', '120')
+    monkeypatch.setenv('EO_OVERPASS_QUERY_TIMEOUT', '60')
+    monkeypatch.setattr(overpass_module._SESSION, 'post', fake_post)
+
     df = get_osm_data(
         'benin',
         'power',
@@ -21,12 +54,32 @@ def test_overpass_custom_endpoint_and_kwargs(tmp_path):
         cached=False,
         progress_bar=False,
         data_source='overpass',
-        endpoint="https://overpass.private.coffee/api/interpreter",
-        request_timeout=120,
-        query_timeout=60,
     )
+
+    assert captured_request['url'] == 'https://overpass.private.coffee/api/interpreter'
+    assert captured_request['timeout'] == 120
+    assert '[timeout:60]' in captured_request['data']
     assert not df.empty
     assert 'id' in df.columns
+
+
+@pytest.mark.parametrize(
+    'env_name',
+    ['EO_OVERPASS_REQUEST_TIMEOUT', 'EO_OVERPASS_QUERY_TIMEOUT'],
+)
+@pytest.mark.parametrize('value', ['not-an-int', '0'])
+def test_overpass_timeout_env_values_must_be_positive_integers(
+    monkeypatch,
+    env_name,
+    value,
+):
+    monkeypatch.setenv(env_name, value)
+
+    with pytest.raises(ValueError, match=f'{env_name} must be a positive integer'):
+        if env_name == 'EO_OVERPASS_QUERY_TIMEOUT':
+            overpass_module.build_overpass_query('BJ', 'power', 'substation')
+        else:
+            overpass_module.fetch_overpass_data('query')
 
 
 def test_overpass_disallows_all_wildcard(tmp_path):

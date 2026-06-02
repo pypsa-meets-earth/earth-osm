@@ -120,6 +120,14 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 
 > ℹ️ When using the Overpass backend, wildcard feature selections such as `ALL_power` are not supported. Specify concrete feature values instead, or switch to the Geofabrik source for wildcard exports.
 
+Overpass request settings can be overridden with environment variables:
+
+| Environment variable | Description | Default |
+|----------------------|-------------|---------|
+| `EO_OVERPASS_ENDPOINT` | Overpass API interpreter endpoint | `https://overpass-api.de/api/interpreter` |
+| `EO_OVERPASS_REQUEST_TIMEOUT` | HTTP request timeout in seconds | `600` |
+| `EO_OVERPASS_QUERY_TIMEOUT` | Overpass query timeout in seconds | `300` |
+
 ### Planet-wide extractions
 
 Use the special `earth` region to export the full OpenStreetMap planet snapshot.
