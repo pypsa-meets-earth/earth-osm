@@ -8,6 +8,7 @@ This module provides functions to fetch OSM data from the Overpass API.
 
 import json
 import logging
+import os
 from datetime import datetime
 from textwrap import dedent
 from typing import Dict, Iterator, List, Optional, Sequence
@@ -21,9 +22,49 @@ logger = logging.getLogger("eo.overpass")
 OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter"
 REQUEST_TIMEOUT = 600
 QUERY_TIMEOUT = 300
+OVERPASS_ENDPOINT_ENV = "EO_OVERPASS_ENDPOINT"
+REQUEST_TIMEOUT_ENV = "EO_OVERPASS_REQUEST_TIMEOUT"
+QUERY_TIMEOUT_ENV = "EO_OVERPASS_QUERY_TIMEOUT"
 REQUEST_HEADERS = {
     "User-Agent": "earth-osm/overpass (+https://github.com/pypsa-meets-earth/earth-osm)",
 }
+
+
+def _read_positive_int_env(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    try:
+        parsed = int(value)
+    except ValueError:
+        raise ValueError(f"{name} must be a positive integer, got {value!r}") from None
+
+    if parsed <= 0:
+        raise ValueError(f"{name} must be a positive integer, got {value!r}")
+
+    return parsed
+
+
+def _read_overpass_endpoint() -> str:
+    value = os.getenv(OVERPASS_ENDPOINT_ENV)
+    if value is None:
+        return OVERPASS_ENDPOINT
+
+    endpoint = value.strip()
+    if not endpoint:
+        raise ValueError(f"{OVERPASS_ENDPOINT_ENV} must be a non-empty URL")
+
+    return endpoint
+
+
+def _read_request_timeout() -> int:
+    return _read_positive_int_env(REQUEST_TIMEOUT_ENV, REQUEST_TIMEOUT)
+
+
+def _read_query_timeout() -> int:
+    return _read_positive_int_env(QUERY_TIMEOUT_ENV, QUERY_TIMEOUT)
+
 
 def build_overpass_query(country_code, primary_name, feature_name):
     """
@@ -38,6 +79,7 @@ def build_overpass_query(country_code, primary_name, feature_name):
     Returns:
         str: Overpass query string
     """
+    timeout = _read_query_timeout()
     # Define area query for the country
     area_query = f'area["ISO3166-1"="{country_code}"]'
     match_all = feature_name.startswith('ALL_')
@@ -50,7 +92,7 @@ def build_overpass_query(country_code, primary_name, feature_name):
     # Construct the full Overpass query with recursion to get referenced nodes
     return dedent(
         f"""
-        [out:json][timeout:{QUERY_TIMEOUT}];
+        [out:json][timeout:{timeout}];
         {area_query}->.searchArea;
         (
             {element_query}(area.searchArea);
@@ -85,11 +127,13 @@ def fetch_overpass_data(query):
     Returns:
         dict: Response from Overpass API
     """
+    url = _read_overpass_endpoint()
+    timeout = _read_request_timeout()
     logger.debug("Fetching data from Overpass API")
     response = _SESSION.post(
-        OVERPASS_ENDPOINT,
+        url,
         data=query,
-        timeout=REQUEST_TIMEOUT,
+        timeout=timeout,
     )
     response.raise_for_status()
     data = response.json()
@@ -281,7 +325,12 @@ def rows_from_feature_dict(
         )
 
 
-def get_overpass_data(region, primary_name, feature_name, data_dir):
+def get_overpass_data(
+    region,
+    primary_name,
+    feature_name,
+    data_dir,
+):
     """
     Get OSM data from Overpass API for a specific region and feature.
 

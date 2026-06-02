@@ -105,4 +105,4 @@ disallow_untyped_defs = true
 check_untyped_defs = true
 
 [tool.setuptools.dynamic]
-version = {attr = "earth_osm.__version__"}
+version = {file = "earth_osm/VERSION"}
