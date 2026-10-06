@@ -363,9 +363,12 @@ def get_historical_files_from_directory(
         List[Tuple[str, datetime]]: List of (filename, date) tuples for historical files
     """
     try:
-        response = requests.get(region_base_url, timeout=30)
+        # Geofabrik returns 308 redirect to .html page for continent directories.
+        # Fetch the region .html page directly to get the listing.
+        parent_dir = region_base_url.rstrip("/").rsplit("/", 1)[0] + "/"
+        html_url = parent_dir + region_id + ".html"
+        response = requests.get(html_url, timeout=30)
         response.raise_for_status()
-
         html_content = response.text
 
         # Find all .osm.pbf files for this region that match historical pattern
@@ -381,6 +384,8 @@ def get_historical_files_from_directory(
         # Sort by date (newest first)
         historical_files.sort(key=lambda x: x[1], reverse=True)
 
+        if not historical_files:
+            logger.warning(f"No historical files found for region {region_id}")
         return historical_files
 
     except requests.RequestException as e:
