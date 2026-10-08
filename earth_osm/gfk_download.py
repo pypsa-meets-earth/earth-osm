@@ -362,17 +362,14 @@ def get_historical_files_from_directory(
     Returns:
         List[Tuple[str, datetime]]: List of (filename, date) tuples for historical files
     """
+    html_url = urljoin(region_base_url.rstrip("/") + "/", f"{region_id}.html")
     try:
-        # Geofabrik returns 308 redirect to .html page for continent directories.
-        # Fetch the region .html page directly to get the listing.
-        parent_dir = region_base_url.rstrip("/").rsplit("/", 1)[0] + "/"
-        html_url = parent_dir + region_id + ".html"
         response = requests.get(html_url, timeout=30)
         response.raise_for_status()
         html_content = response.text
 
         # Find all .osm.pbf files for this region that match historical pattern
-        pattern = rf'href="({region_id}-\d{{6}}\.osm\.pbf)"'
+        pattern = rf'href="({re.escape(region_id)}-\d{{6}}\.osm\.pbf)"'
         matches = re.findall(pattern, html_content)
 
         historical_files = []
@@ -384,13 +381,11 @@ def get_historical_files_from_directory(
         # Sort by date (newest first)
         historical_files.sort(key=lambda x: x[1], reverse=True)
 
-        if not historical_files:
-            logger.warning(f"No historical files found for region {region_id}")
         return historical_files
 
     except requests.RequestException as e:
         logger.error(
-            f"Failed to fetch directory listing from {region_base_url}: {e}")
+            f"Failed to fetch directory listing from {html_url}: {e}")
         return []
 
 
