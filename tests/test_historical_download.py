@@ -189,7 +189,7 @@ def test_historical_functionality_basic():
         (datetime(2018, 1, 1), None),
     ],
 )
-def test_historical_archive_selection(historical_server, target_date, expected):
+def test_historical_archive_selection(target_date, expected):
     assert find_historical_file_by_date(
         "https://download.geofabrik.de/africa/", "benin", target_date
     ) == expected
