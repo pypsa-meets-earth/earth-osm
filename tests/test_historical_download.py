@@ -84,46 +84,46 @@ class TestHistoricalDownload:
     def test_find_historical_file_by_date(self):
         """Test finding closest historical file for a target date"""
         # This is an integration test
-            base_url = "https://download.geofabrik.de/africa/"
+        base_url = "https://download.geofabrik.de/africa/"
 
-            # Test finding file for a date that should exist (2020-01-01)
-            target_date = datetime(2020, 1, 1)
-            filename = find_historical_file_by_date(base_url, "benin", target_date)
+        # Test finding file for a date that should exist (2020-01-01)
+        target_date = datetime(2020, 1, 1)
+        filename = find_historical_file_by_date(base_url, "benin", target_date)
 
-            assert filename.startswith("benin-")
-            assert filename.endswith(".osm.pbf")
+        assert filename.startswith("benin-")
+        assert filename.endswith(".osm.pbf")
 
-            # Verify it's a reasonable match
-            file_date = parse_date_from_filename(filename)
-            assert file_date is not None
-            assert file_date <= target_date
+        # Verify it's a reasonable match
+        file_date = parse_date_from_filename(filename)
+        assert file_date is not None
+        assert file_date <= target_date
 
     def test_download_historical_pbf(self):
         """Test downloading historical PBF file (integration test)"""
-            base_url = "https://download.geofabrik.de/africa/"
-            target_date = datetime(2020, 1, 1)  # Should exist
-            data_dir = "earth_data_test_historical"
+        base_url = "https://download.geofabrik.de/africa/"
+        target_date = datetime(2020, 1, 1)  # Should exist
+        data_dir = "earth_data_test_historical"
 
-            # Try to download historical file
-            result = download_historical_pbf(
-                base_url,
-                "benin",
-                target_date,
-                update=True,
-                data_dir=data_dir,
-                progress_bar=False,
-            )
+        # Try to download historical file
+        result = download_historical_pbf(
+            base_url,
+            "benin",
+            target_date,
+            update=True,
+            data_dir=data_dir,
+            progress_bar=False,
+        )
 
-            assert os.path.exists(result)
-            assert result.endswith(".osm.pbf")
+        assert os.path.exists(result)
+        assert result.endswith(".osm.pbf")
 
-            # Clean up
-            if os.path.exists(result):
-                os.remove(result)
-            # Also clean up MD5 file if it exists
-            md5_file = result + ".md5"
-            if os.path.exists(md5_file):
-                os.remove(md5_file)
+        # Clean up
+        if os.path.exists(result):
+            os.remove(result)
+        # Also clean up MD5 file if it exists
+        md5_file = result + ".md5"
+        if os.path.exists(md5_file):
+            os.remove(md5_file)
 
     def test_get_osm_data_historical(self):
         """Test the main get_osm_data function with historical date"""
