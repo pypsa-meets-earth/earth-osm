@@ -181,6 +181,36 @@ def test_historical_functionality_basic():
     assert hasattr(region, "base_url")
 
 
+@pytest.mark.parametrize(
+    "target_date, expected",
+    [
+        (datetime(2020, 1, 1), "benin-200101.osm.pbf"),
+        (datetime(2020, 6, 1), "benin-200101.osm.pbf"),
+        (datetime(2018, 1, 1), None),
+    ],
+)
+def test_historical_archive_selection(historical_server, target_date, expected):
+    assert find_historical_file_by_date(
+        "https://download.geofabrik.de/africa/", "benin", target_date
+    ) == expected
+    assert historical_server == ["https://download.geofabrik.de/africa/benin.html"]
+
+
+def test_historical_save_osm_data(tmp_path):
+    from earth_osm import eo
+    eo.save_osm_data(
+        region_list=["benin"],
+        primary_name="power",
+        feature_list=["line"],
+        target_date=datetime(2020, 1, 1),
+        data_dir=str(tmp_path),
+        out_dir=str(tmp_path),
+        mp=False,
+        progress_bar=False,
+    )
+    assert (tmp_path / "pbf" / "benin-200101.osm.pbf").exists()
+
+
 if __name__ == "__main__":
     # Run basic tests that don't require internet
     test_historical_functionality_basic()
