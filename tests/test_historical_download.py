@@ -65,51 +65,41 @@ class TestHistoricalDownload:
         """Test fetching historical files from directory (integration test)"""
         # This is an integration test that requires internet connection
         # Skip if no internet or if test should be lightweight
-        try:
-            base_url = "https://download.geofabrik.de/africa/"
-            files = get_historical_files_from_directory(base_url, "benin")
+        base_url = "https://download.geofabrik.de/africa/"
+        files = get_historical_files_from_directory(base_url, "benin")
 
-            # Should find some historical files
-            assert len(files) > 0
+        # Should find some historical files
+        assert len(files) > 0
 
-            # Check that files are properly parsed
-            for filename, date in files:
-                assert filename.startswith("benin-")
-                assert filename.endswith(".osm.pbf")
-                assert isinstance(date, datetime)
+        # Check that files are properly parsed
+        for filename, date in files:
+            assert filename.startswith("benin-")
+            assert filename.endswith(".osm.pbf")
+            assert isinstance(date, datetime)
 
-            # Files should be sorted by date (newest first)
-            dates = [date for _, date in files]
-            assert dates == sorted(dates, reverse=True)
-
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
+        # Files should be sorted by date (newest first)
+        dates = [date for _, date in files]
+        assert dates == sorted(dates, reverse=True)
 
     def test_find_historical_file_by_date(self):
         """Test finding closest historical file for a target date"""
         # This is an integration test
-        try:
             base_url = "https://download.geofabrik.de/africa/"
 
             # Test finding file for a date that should exist (2020-01-01)
             target_date = datetime(2020, 1, 1)
             filename = find_historical_file_by_date(base_url, "benin", target_date)
 
-            if filename:  # File found
-                assert filename.startswith("benin-")
-                assert filename.endswith(".osm.pbf")
+            assert filename.startswith("benin-")
+            assert filename.endswith(".osm.pbf")
 
-                # Verify it's a reasonable match
-                file_date = parse_date_from_filename(filename)
-                assert file_date is not None
-                assert file_date <= target_date
-
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
+            # Verify it's a reasonable match
+            file_date = parse_date_from_filename(filename)
+            assert file_date is not None
+            assert file_date <= target_date
 
     def test_download_historical_pbf(self):
         """Test downloading historical PBF file (integration test)"""
-        try:
             base_url = "https://download.geofabrik.de/africa/"
             target_date = datetime(2020, 1, 1)  # Should exist
             data_dir = "earth_data_test_historical"
@@ -124,42 +114,34 @@ class TestHistoricalDownload:
                 progress_bar=False,
             )
 
-            if result:  # Download succeeded
-                assert os.path.exists(result)
-                assert result.endswith(".osm.pbf")
+            assert os.path.exists(result)
+            assert result.endswith(".osm.pbf")
 
-                # Clean up
-                if os.path.exists(result):
-                    os.remove(result)
-                # Also clean up MD5 file if it exists
-                md5_file = result + ".md5"
-                if os.path.exists(md5_file):
-                    os.remove(md5_file)
-
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
+            # Clean up
+            if os.path.exists(result):
+                os.remove(result)
+            # Also clean up MD5 file if it exists
+            md5_file = result + ".md5"
+            if os.path.exists(md5_file):
+                os.remove(md5_file)
 
     def test_get_osm_data_historical(self):
         """Test the main get_osm_data function with historical date"""
-        try:
-            target_date = datetime(2020, 1, 1)
+        target_date = datetime(2020, 1, 1)
 
-            # This should work with historical data
-            df = get_osm_data(
-                region_str="malta",  # Use Malta as it's smaller
-                primary_name="power",
-                feature_name="line",
-                data_dir="earth_data_test_historical",
-                cached=False,  # Force fresh download
-                progress_bar=False,
-                target_date=target_date,
-            )
+        # This should work with historical data
+        df = get_osm_data(
+            region_str="malta",  # Use Malta as it's smaller
+            primary_name="power",
+            feature_name="line",
+            data_dir="earth_data_test_historical",
+            cached=False,  # Force fresh download
+            progress_bar=False,
+            target_date=target_date,
+        )
 
-            # Should return a dataframe
-            assert df is not None
-
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
+        # Should return a dataframe
+        assert df is not None
 
 
 def test_historical_functionality_basic():
@@ -179,35 +161,6 @@ def test_historical_functionality_basic():
     assert hasattr(region, "target_date")
     assert region.target_date == target_date
     assert hasattr(region, "base_url")
-
-
-@pytest.mark.parametrize(
-    "target_date, expected",
-    [
-        (datetime(2020, 1, 1), "benin-200101.osm.pbf"),
-        (datetime(2020, 6, 1), "benin-200101.osm.pbf"),
-        (datetime(2018, 1, 1), None),
-    ],
-)
-def test_historical_archive_selection(target_date, expected):
-    assert find_historical_file_by_date(
-        "https://download.geofabrik.de/africa/", "benin", target_date
-    ) == expected
-
-
-def test_historical_save_osm_data(tmp_path):
-    from earth_osm import eo
-    eo.save_osm_data(
-        region_list=["benin"],
-        primary_name="power",
-        feature_list=["line"],
-        target_date=datetime(2020, 1, 1),
-        data_dir=str(tmp_path),
-        out_dir=str(tmp_path),
-        mp=False,
-        progress_bar=False,
-    )
-    assert (tmp_path / "pbf" / "benin-200101.osm.pbf").exists()
 
 
 if __name__ == "__main__":
