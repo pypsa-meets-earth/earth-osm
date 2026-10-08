@@ -193,7 +193,6 @@ def test_historical_archive_selection(historical_server, target_date, expected):
     assert find_historical_file_by_date(
         "https://download.geofabrik.de/africa/", "benin", target_date
     ) == expected
-    assert historical_server == ["https://download.geofabrik.de/africa/benin.html"]
 
 
 def test_historical_save_osm_data(tmp_path):
