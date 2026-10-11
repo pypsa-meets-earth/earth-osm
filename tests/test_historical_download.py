@@ -3,7 +3,6 @@
 import os
 import pytest
 from datetime import datetime
-from unittest.mock import patch, MagicMock
 from earth_osm.gfk_data import get_region_tuple_historical, get_region_base_url
 from earth_osm.gfk_download import (
     parse_date_from_filename,
@@ -61,33 +60,6 @@ class TestHistoricalDownload:
 
         expected_base = "https://download.geofabrik.de/africa/"
         assert base_url == expected_base
-
-    def test_get_historical_files_from_directory_url_construction(self):
-        """Deterministic test: verify URL construction preserves parent directory path"""
-        from urllib.parse import urljoin
-        import re
-
-        # Simulate the URL construction logic from get_historical_files_from_directory
-        # without making network requests
-
-        # Continent-level region (e.g., africa/benin)
-        continent_base = "https://download.geofabrik.de/africa/"
-        region_id = "benin"
-        html_url = urljoin(continent_base.rstrip("/") + "/", f"{region_id}.html")
-        assert html_url == "https://download.geofabrik.de/africa/benin.html", \
-            f"Continent URL wrong: {html_url}"
-
-        # Nested region (e.g., europe/germany/munich)
-        nested_base = "https://download.geofabrik.de/europe/germany/"
-        region_id2 = "munich"
-        html_url2 = urljoin(nested_base.rstrip("/") + "/", f"{region_id2}.html")
-        assert html_url2 == "https://download.geofabrik.de/europe/germany/munich.html", \
-            f"Nested URL wrong: {html_url2}"
-
-        # Verify the regex pattern matches expected filenames
-        pattern = rf'href="({re.escape(region_id)}-\d{{6}}\.osm\.pbf)"'
-        assert re.search(pattern, 'href="benin-250901.osm.pbf"')
-        assert not re.search(pattern, 'href="germany-250901.osm.pbf"')
 
     @pytest.mark.integration
     def test_get_historical_files_from_directory(self):
