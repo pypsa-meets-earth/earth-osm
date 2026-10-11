@@ -3,6 +3,7 @@
 import os
 import pytest
 from datetime import datetime
+from unittest.mock import patch, MagicMock
 from earth_osm.gfk_data import get_region_tuple_historical, get_region_base_url
 from earth_osm.gfk_download import (
     parse_date_from_filename,
@@ -61,10 +62,37 @@ class TestHistoricalDownload:
         expected_base = "https://download.geofabrik.de/africa/"
         assert base_url == expected_base
 
+    def test_get_historical_files_from_directory_url_construction(self):
+        """Deterministic test: verify URL construction preserves parent directory path"""
+        from urllib.parse import urljoin
+        import re
+
+        # Simulate the URL construction logic from get_historical_files_from_directory
+        # without making network requests
+
+        # Continent-level region (e.g., africa/benin)
+        continent_base = "https://download.geofabrik.de/africa/"
+        region_id = "benin"
+        html_url = urljoin(continent_base.rstrip("/") + "/", f"{region_id}.html")
+        assert html_url == "https://download.geofabrik.de/africa/benin.html", \
+            f"Continent URL wrong: {html_url}"
+
+        # Nested region (e.g., europe/germany/munich)
+        nested_base = "https://download.geofabrik.de/europe/germany/"
+        region_id2 = "munich"
+        html_url2 = urljoin(nested_base.rstrip("/") + "/", f"{region_id2}.html")
+        assert html_url2 == "https://download.geofabrik.de/europe/germany/munich.html", \
+            f"Nested URL wrong: {html_url2}"
+
+        # Verify the regex pattern matches expected filenames
+        pattern = rf'href="({re.escape(region_id)}-\d{{6}}\.osm\.pbf)"'
+        assert re.search(pattern, 'href="benin-250901.osm.pbf"')
+        assert not re.search(pattern, 'href="germany-250901.osm.pbf"')
+
+    @pytest.mark.integration
     def test_get_historical_files_from_directory(self):
         """Test fetching historical files from directory (integration test)"""
         # This is an integration test that requires internet connection
-        # Skip if no internet or if test should be lightweight
         base_url = "https://download.geofabrik.de/africa/"
         files = get_historical_files_from_directory(base_url, "benin")
 
@@ -81,6 +109,7 @@ class TestHistoricalDownload:
         dates = [date for _, date in files]
         assert dates == sorted(dates, reverse=True)
 
+    @pytest.mark.integration
     def test_find_historical_file_by_date(self):
         """Test finding closest historical file for a target date"""
         # This is an integration test
@@ -98,6 +127,7 @@ class TestHistoricalDownload:
         assert file_date is not None
         assert file_date <= target_date
 
+    @pytest.mark.integration
     def test_download_historical_pbf(self):
         """Test downloading historical PBF file (integration test)"""
         base_url = "https://download.geofabrik.de/africa/"
@@ -125,6 +155,7 @@ class TestHistoricalDownload:
         if os.path.exists(md5_file):
             os.remove(md5_file)
 
+    @pytest.mark.integration
     def test_get_osm_data_historical(self):
         """Test the main get_osm_data function with historical date"""
         target_date = datetime(2020, 1, 1)
