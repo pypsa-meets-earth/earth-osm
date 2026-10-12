@@ -61,6 +61,7 @@ class TestHistoricalDownload:
         expected_base = "https://download.geofabrik.de/africa/"
         assert base_url == expected_base
 
+    @pytest.mark.integration
     def test_get_historical_files_from_directory(self):
         """Test fetching historical files from directory (integration test)"""
         # This is an integration test that requires internet connection
@@ -80,6 +81,7 @@ class TestHistoricalDownload:
         dates = [date for _, date in files]
         assert dates == sorted(dates, reverse=True)
 
+    @pytest.mark.integration
     def test_find_historical_file_by_date(self):
         """Test finding closest historical file for a target date"""
         # This is an integration test
@@ -97,6 +99,7 @@ class TestHistoricalDownload:
         assert file_date is not None
         assert file_date <= target_date
 
+    @pytest.mark.integration
     def test_download_historical_pbf(self):
         """Test downloading historical PBF file (integration test)"""
         base_url = "https://download.geofabrik.de/africa/"
@@ -124,6 +127,7 @@ class TestHistoricalDownload:
         if os.path.exists(md5_file):
             os.remove(md5_file)
 
+    @pytest.mark.integration
     def test_get_osm_data_historical(self):
         """Test the main get_osm_data function with historical date"""
         target_date = datetime(2020, 1, 1)
