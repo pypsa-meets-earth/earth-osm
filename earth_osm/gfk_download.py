@@ -346,7 +346,8 @@ def format_date_for_filename(date: datetime, region_id: str) -> str:
     month = f"{date.month:02d}"
     day = f"{date.day:02d}"
 
-    return f"{region_id}-{year_short}{month}{day}"
+    region_name = os.path.basename(region_id)
+    return f"{region_name}-{year_short}{month}{day}"
 
 
 def get_historical_files_from_directory(
@@ -362,14 +363,15 @@ def get_historical_files_from_directory(
     Returns:
         List[Tuple[str, datetime]]: List of (filename, date) tuples for historical files
     """
+    region_name = os.path.basename(region_id)
+    html_url = urljoin(region_base_url.rstrip("/") + "/", f"{region_name}.html")
     try:
-        response = requests.get(region_base_url, timeout=30)
+        response = requests.get(html_url, timeout=30)
         response.raise_for_status()
-
         html_content = response.text
 
         # Find all .osm.pbf files for this region that match historical pattern
-        pattern = rf'href="({region_id}-\d{{6}}\.osm\.pbf)"'
+        pattern = rf'href="({re.escape(region_name)}-\d{{6}}\.osm\.pbf)"'
         matches = re.findall(pattern, html_content)
 
         historical_files = []
@@ -385,7 +387,7 @@ def get_historical_files_from_directory(
 
     except requests.RequestException as e:
         logger.error(
-            f"Failed to fetch directory listing from {region_base_url}: {e}")
+            f"Failed to fetch directory listing from {html_url}: {e}")
         return []
 
 
