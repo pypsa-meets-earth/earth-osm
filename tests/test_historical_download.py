@@ -147,6 +147,127 @@ class TestHistoricalDownload:
         assert df is not None
 
 
+class TestHistoricalUrlConstruction:
+    """Parametrized mocked tests for URL construction and filename parsing.
+
+    Covers: continent-level (benin), nested (europe/germany/bayern),
+    path-separator (us/california), with/without trailing slashes.
+    """
+
+    @pytest.fixture
+    def mock_requests_get(self, mocker):
+        """Fixture to mock requests.get"""
+        return mocker.patch("requests.get")
+
+    @pytest.mark.parametrize("region_base_url,region_id,expected_html_url,html_content,expected_filenames", [
+        # Continent-level region: benin
+        (
+            "https://download.geofabrik.de/africa/",
+            "benin",
+            "https://download.geofabrik.de/africa/benin.html",
+            '<a href="benin-250101.osm.pbf">benin-250101.osm.pbf</a>',
+            ["benin-250101.osm.pbf"],
+        ),
+        # Continent-level region without trailing slash
+        (
+            "https://download.geofabrik.de/africa",
+            "benin",
+            "https://download.geofabrik.de/africa/benin.html",
+            '<a href="benin-250101.osm.pbf">benin-250101.osm.pbf</a>',
+            ["benin-250101.osm.pbf"],
+        ),
+        # Nested region: europe/germany/bayern
+        (
+            "https://download.geofabrik.de/europe/germany/",
+            "europe/germany/bayern",
+            "https://download.geofabrik.de/europe/germany/bayern.html",
+            '<a href="bayern-250101.osm.pbf">bayern-250101.osm.pbf</a>',
+            ["bayern-250101.osm.pbf"],
+        ),
+        # Nested region without trailing slash
+        (
+            "https://download.geofabrik.de/europe/germany",
+            "europe/germany/bayern",
+            "https://download.geofabrik.de/europe/germany/bayern.html",
+            '<a href="bayern-250101.osm.pbf">bayern-250101.osm.pbf</a>',
+            ["bayern-250101.osm.pbf"],
+        ),
+        # Path-separator region: us/california (key test case from mnm-matin)
+        (
+            "https://download.geofabrik.de/north-america/us/",
+            "us/california",
+            "https://download.geofabrik.de/north-america/us/california.html",
+            '<a href="california-250101.osm.pbf">california-250101.osm.pbf</a>',
+            ["california-250101.osm.pbf"],
+        ),
+        # Path-separator region without trailing slash
+        (
+            "https://download.geofabrik.de/north-america/us",
+            "us/california",
+            "https://download.geofabrik.de/north-america/us/california.html",
+            '<a href="california-250101.osm.pbf">california-250101.osm.pbf</a>',
+            ["california-250101.osm.pbf"],
+        ),
+        # Multiple files case
+        (
+            "https://download.geofabrik.de/africa/",
+            "benin",
+            "https://download.geofabrik.de/africa/benin.html",
+            '<a href="benin-250101.osm.pbf">benin-250101.osm.pbf</a>\n'
+            '<a href="benin-240901.osm.pbf">benin-240901.osm.pbf</a>\n'
+            '<a href="benin-230801.osm.pbf">benin-230801.osm.pbf</a>',
+            ["benin-250101.osm.pbf", "benin-240901.osm.pbf", "benin-230801.osm.pbf"],
+        ),
+    ], ids=[
+        "benin-continent-slash",
+        "benin-continent-no-slash",
+        "bayern-nested-slash",
+        "bayern-nested-no-slash",
+        "us-california-slash",
+        "us-california-no-slash",
+        "benin-multiple-files",
+    ])
+    def test_url_construction_and_filename_parsing(
+        self, mocker, region_base_url, region_id, expected_html_url, html_content, expected_filenames
+    ):
+        """Test that HTML URL is constructed correctly and filenames are parsed."""
+        mock_response = mocker.MagicMock()
+        mock_response.text = html_content
+        mock_response.raise_for_status = mocker.MagicMock()
+        mocker.patch("requests.get", return_value=mock_response)
+
+        files = get_historical_files_from_directory(region_base_url, region_id)
+
+        # Verify the correct URL was called
+        requests.get.assert_called_once_with(expected_html_url, timeout=30)
+
+        # Verify filenames are extracted
+        actual_filenames = [f for f, _ in files]
+        assert actual_filenames == expected_filenames
+
+        # Verify dates are parsed correctly
+        for filename, date in files:
+            assert parse_date_from_filename(filename) is not None
+            assert isinstance(date, datetime)
+
+
+class TestFormatDateForFilenameBasename:
+    """Test that format_date_for_filename uses os.path.basename for region_id."""
+
+    @pytest.mark.parametrize("region_id,expected_prefix", [
+        ("benin", "benin"),
+        ("colombia", "colombia"),
+        ("europe/germany/bayern", "bayern"),
+        ("us/california", "california"),       # Key test: path separator → basename
+        ("north-america/us/virginia", "virginia"),
+    ])
+    def test_format_date_uses_basename(self, region_id, expected_prefix):
+        """format_date_for_filename should use os.path.basename(region_id)."""
+        date = datetime(2025, 9, 1)
+        result = format_date_for_filename(date, region_id)
+        assert result == f"{expected_prefix}-250901"
+
+
 def test_historical_functionality_basic():
     """Basic test that doesn't require internet connection"""
     # Test date parsing
