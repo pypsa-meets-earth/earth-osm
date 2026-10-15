@@ -77,7 +77,6 @@ def test_aggregate_deduplicates_osm_elements(monkeypatch, tmp_path):
         data_dir=str(tmp_path),
         mp=False,
         stream_backend=False,
-        deduplicate=True,
     )
 
     output_path = next((tmp_path / "out").glob("*.csv"))

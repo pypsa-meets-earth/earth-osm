@@ -60,6 +60,28 @@ def convert_pd_to_gdf(pd_df):
     return gdf
 
 
+def filter_duplicate_elements(
+    records: Iterable[Dict[str, Any]], seen_elements: Set[tuple]
+) -> Iterator[Dict[str, Any]]:
+    for record in records:
+        element_id = record.get("id")
+        element_type = record.get("Type")
+        if element_id is None or element_type is None:
+            yield record
+            continue
+        if isinstance(element_id, float) and math.isnan(element_id):
+            yield record
+            continue
+        if isinstance(element_type, float) and math.isnan(element_type):
+            yield record
+            continue
+
+        element_key = (element_type, element_id)
+        if element_key not in seen_elements:
+            seen_elements.add(element_key)
+            yield record
+
+
 
 class _ExportTarget:
 
@@ -70,7 +92,6 @@ class _ExportTarget:
         feature_list,
         data_dir,
         out_format,
-        deduplicate=False,
     ):
         self.region_list = region_list
         self.primary_name = primary_name
@@ -91,7 +112,6 @@ class _ExportTarget:
         self._non_null_counts: Dict[str, int] = {}
         self._total_rows = 0
         self._melt_threshold = 0.95
-        self._deduplicate = deduplicate
         self._seen_elements: Set[tuple] = set()
 
         logger.debug(
@@ -134,7 +154,8 @@ class _ExportTarget:
         return self.open()
 
     def __call__(self, rows):
-        for record in self._iter_records(rows):
+        records = filter_duplicate_elements(self._iter_records(rows), self._seen_elements)
+        for record in records:
             self._write_record(record)
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -194,15 +215,6 @@ class _ExportTarget:
     def _write_record(self, record: Dict[str, Any]) -> None:
         if self._temp_file is None:
             raise RuntimeError("Writer is not active")
-
-        if self._deduplicate:
-            element_id = record.get("id")
-            element_type = record.get("Type")
-            if not self._is_null(element_id) and not self._is_null(element_type):
-                element_key = (element_type, element_id)
-                if element_key in self._seen_elements:
-                    return
-                self._seen_elements.add(element_key)
 
         sanitized: Dict[str, Any] = {}
         for key, value in record.items():
@@ -354,7 +366,7 @@ class _ExportTarget:
 
 class EarthOSMWriter:
 
-    def __init__(self, primary_name: str, data_dir: str, out_format, deduplicate=False):
+    def __init__(self, primary_name: str, data_dir: str, out_format):
         formats = [out_format] if isinstance(out_format, str) else list(out_format)
         if not formats:
             raise ValueError("out_format must contain at least one value")
@@ -364,7 +376,6 @@ class EarthOSMWriter:
         self.primary_name = primary_name
         self.data_dir = data_dir
         self.out_format = formats
-        self.deduplicate = deduplicate
         self._targets: Dict[tuple, _ExportTarget] = {}
         self._closed = False
 
@@ -411,7 +422,6 @@ class EarthOSMWriter:
                 list(feature_list),
                 self.data_dir,
                 self.out_format,
-                deduplicate=self.deduplicate,
             )
             target.open()
             self._targets[slug_key] = target

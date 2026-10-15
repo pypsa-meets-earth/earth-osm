@@ -210,7 +210,6 @@ def save_osm_data(
     stream_backend=True,
     cache_primary=False,
     target_date: Optional[datetime] = None,
-    deduplicate=False,
 ):
     """
     Get OSM Data for a list of regions and features
@@ -224,7 +223,6 @@ def save_osm_data(
             GeoFabrik sources; set to ``False`` to revert to the legacy
             in-memory pipeline (primarily for benchmarking)
         target_date: optional target date for historical data
-        deduplicate: omit repeated OSM elements with the same type and ID
     returns:
         dict of dataframes
     """
@@ -278,9 +276,7 @@ def save_osm_data(
         )
         return df_feature.to_dict("records")
 
-    with EarthOSMWriter(
-        primary_name, out_dir, out_format, deduplicate=deduplicate
-    ) as writer:
+    with EarthOSMWriter(primary_name, out_dir, out_format) as writer:
         if out_aggregate == "region" or out_aggregate is True:
             for feature_name in feature_list:
                 writer.prepare_target(region_short_list, [feature_name])
