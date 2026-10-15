@@ -80,8 +80,8 @@ Get OSM Data for a list of regions and features
  - <b>`feature_list`</b>:  list of features to get data for 
  - <b>`update`</b>:  update data 
  - <b>`mp`</b>:  use multiprocessing 
+ - <b>`deduplicate`</b>:  omit repeated OSM elements with the same type and ID
 
 **returns:**
  dict of dataframes 
-
 

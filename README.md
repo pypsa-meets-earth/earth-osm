@@ -116,6 +116,7 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 | `--out_format` | Export format(s): csv and/or geojson | ['csv', 'geojson'] |
 | `--agg_feature` | Aggregate outputs by feature | False |
 | `--agg_region` | Aggregate outputs by region | False |
+| `--deduplicate` | Omit repeated OSM elements with the same type and ID in aggregated outputs | False |
 | `--source` | Data source: geofabrik (default) or overpass | geofabrik |
 
 > ℹ️ When using the Overpass backend, wildcard feature selections such as `ALL_power` are not supported. Specify concrete feature values instead, or switch to the Geofabrik source for wildcard exports.
@@ -151,7 +152,8 @@ eo.save_osm_data(
     mp=True,
     data_dir='./earth_data',
     out_format=['csv', 'geojson'],
-    out_aggregate=False,
+    out_aggregate=True,
+    deduplicate=True,
     data_source='geofabrik'  # or 'overpass'
 )
 ```

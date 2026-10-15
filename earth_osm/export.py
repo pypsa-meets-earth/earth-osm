@@ -63,7 +63,15 @@ def convert_pd_to_gdf(pd_df):
 
 class _ExportTarget:
 
-    def __init__(self, region_list, primary_name, feature_list, data_dir, out_format):
+    def __init__(
+        self,
+        region_list,
+        primary_name,
+        feature_list,
+        data_dir,
+        out_format,
+        deduplicate=False,
+    ):
         self.region_list = region_list
         self.primary_name = primary_name
         self.feature_list = feature_list
@@ -83,6 +91,8 @@ class _ExportTarget:
         self._non_null_counts: Dict[str, int] = {}
         self._total_rows = 0
         self._melt_threshold = 0.95
+        self._deduplicate = deduplicate
+        self._seen_elements: Set[tuple] = set()
 
         logger.debug(
             "File writer initialized with region_list: %s, primary_name: %s, feature_list: %s",
@@ -116,6 +126,7 @@ class _ExportTarget:
         self._seen_columns.clear()
         self._non_null_counts.clear()
         self._total_rows = 0
+        self._seen_elements.clear()
 
         return self
 
@@ -183,6 +194,15 @@ class _ExportTarget:
     def _write_record(self, record: Dict[str, Any]) -> None:
         if self._temp_file is None:
             raise RuntimeError("Writer is not active")
+
+        if self._deduplicate:
+            element_id = record.get("id")
+            element_type = record.get("Type")
+            if not self._is_null(element_id) and not self._is_null(element_type):
+                element_key = (element_type, element_id)
+                if element_key in self._seen_elements:
+                    return
+                self._seen_elements.add(element_key)
 
         sanitized: Dict[str, Any] = {}
         for key, value in record.items():
@@ -334,7 +354,7 @@ class _ExportTarget:
 
 class EarthOSMWriter:
 
-    def __init__(self, primary_name: str, data_dir: str, out_format):
+    def __init__(self, primary_name: str, data_dir: str, out_format, deduplicate=False):
         formats = [out_format] if isinstance(out_format, str) else list(out_format)
         if not formats:
             raise ValueError("out_format must contain at least one value")
@@ -344,6 +364,7 @@ class EarthOSMWriter:
         self.primary_name = primary_name
         self.data_dir = data_dir
         self.out_format = formats
+        self.deduplicate = deduplicate
         self._targets: Dict[tuple, _ExportTarget] = {}
         self._closed = False
 
@@ -390,8 +411,8 @@ class EarthOSMWriter:
                 list(feature_list),
                 self.data_dir,
                 self.out_format,
+                deduplicate=self.deduplicate,
             )
             target.open()
             self._targets[slug_key] = target
         return target
-

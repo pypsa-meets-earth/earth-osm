@@ -76,6 +76,11 @@ def setup_extract_parser(subparsers):
     extract_parser.add_argument('--source', type=str, choices=['geofabrik', 'overpass'], default='geofabrik', help='Data Source')
     extract_parser.add_argument('--legacy_pipeline', action='store_true', help='Use legacy in-memory pipeline instead of streaming (benchmark only)')
     extract_parser.add_argument('--cache_primary', action='store_true', help='Cache primary tag snapshot (disabled by default)')
+    extract_parser.add_argument(
+        '--deduplicate',
+        action='store_true',
+        help='Omit repeated OSM elements with the same type and ID in aggregated outputs',
+    )
     
     agg_group = extract_parser.add_mutually_exclusive_group()
     agg_group.add_argument('--agg_feature', action='store_true', help='Aggregate Outputs by feature')
@@ -146,7 +151,8 @@ def handle_extract(args):
         out_aggregate=out_aggregate,
         data_source=args.source,
         stream_backend=stream_backend,
-    cache_primary=args.cache_primary,
+        cache_primary=args.cache_primary,
+        deduplicate=args.deduplicate,
     )
 
     peak_after = _get_peak_rss()
