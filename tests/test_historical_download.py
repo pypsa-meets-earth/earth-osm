@@ -2,6 +2,7 @@
 
 import os
 import pytest
+from unittest.mock import Mock
 from datetime import datetime
 from earth_osm.gfk_data import get_region_tuple_historical, get_region_base_url
 from earth_osm.gfk_download import (
@@ -155,9 +156,15 @@ class TestHistoricalUrlConstruction:
     """
 
     @pytest.fixture
-    def mock_requests_get(self, mocker):
-        """Fixture to mock requests.get"""
-        return mocker.patch("requests.get")
+    def mock_requests_get(self, monkeypatch):
+        """Fixture to mock requests.get using monkeypatch"""
+        def _mock_get(*args, **kwargs):
+            mock_response = Mock()
+            mock_response.text = ""
+            mock_response.raise_for_status = Mock()
+            return mock_response
+        monkeypatch.setattr("earth_osm.gfk_download.requests.get", _mock_get)
+        return _mock_get
 
     @pytest.mark.parametrize("region_base_url,region_id,expected_html_url,html_content,expected_filenames", [
         # Continent-level region: benin
@@ -228,18 +235,19 @@ class TestHistoricalUrlConstruction:
         "benin-multiple-files",
     ])
     def test_url_construction_and_filename_parsing(
-        self, mocker, region_base_url, region_id, expected_html_url, html_content, expected_filenames
+        self, monkeypatch, region_base_url, region_id, expected_html_url, html_content, expected_filenames
     ):
         """Test that HTML URL is constructed correctly and filenames are parsed."""
-        mock_response = mocker.MagicMock()
+        mock_response = Mock()
         mock_response.text = html_content
-        mock_response.raise_for_status = mocker.MagicMock()
-        mocker.patch("requests.get", return_value=mock_response)
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("earth_osm.gfk_download.requests.get", mock_get)
 
         files = get_historical_files_from_directory(region_base_url, region_id)
 
         # Verify the correct URL was called
-        requests.get.assert_called_once_with(expected_html_url, timeout=30)
+        mock_get.assert_called_once_with(expected_html_url, timeout=30)
 
         # Verify filenames are extracted
         actual_filenames = [f for f, _ in files]
