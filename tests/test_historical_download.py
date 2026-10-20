@@ -2,6 +2,7 @@
 
 import os
 import pytest
+from unittest.mock import Mock
 from datetime import datetime
 from earth_osm.gfk_data import get_region_tuple_historical, get_region_base_url
 from earth_osm.gfk_download import (
@@ -61,105 +62,218 @@ class TestHistoricalDownload:
         expected_base = "https://download.geofabrik.de/africa/"
         assert base_url == expected_base
 
+    @pytest.mark.integration
     def test_get_historical_files_from_directory(self):
         """Test fetching historical files from directory (integration test)"""
         # This is an integration test that requires internet connection
-        # Skip if no internet or if test should be lightweight
-        try:
-            base_url = "https://download.geofabrik.de/africa/"
-            files = get_historical_files_from_directory(base_url, "benin")
+        base_url = "https://download.geofabrik.de/africa/"
+        files = get_historical_files_from_directory(base_url, "benin")
 
-            # Should find some historical files
-            assert len(files) > 0
+        # Should find some historical files
+        assert len(files) > 0
 
-            # Check that files are properly parsed
-            for filename, date in files:
-                assert filename.startswith("benin-")
-                assert filename.endswith(".osm.pbf")
-                assert isinstance(date, datetime)
+        # Check that files are properly parsed
+        for filename, date in files:
+            assert filename.startswith("benin-")
+            assert filename.endswith(".osm.pbf")
+            assert isinstance(date, datetime)
 
-            # Files should be sorted by date (newest first)
-            dates = [date for _, date in files]
-            assert dates == sorted(dates, reverse=True)
+        # Files should be sorted by date (newest first)
+        dates = [date for _, date in files]
+        assert dates == sorted(dates, reverse=True)
 
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
-
+    @pytest.mark.integration
     def test_find_historical_file_by_date(self):
         """Test finding closest historical file for a target date"""
         # This is an integration test
-        try:
-            base_url = "https://download.geofabrik.de/africa/"
+        base_url = "https://download.geofabrik.de/africa/"
 
-            # Test finding file for a date that should exist (2020-01-01)
-            target_date = datetime(2020, 1, 1)
-            filename = find_historical_file_by_date(base_url, "benin", target_date)
+        # Test finding file for a date that should exist (2020-01-01)
+        target_date = datetime(2020, 1, 1)
+        filename = find_historical_file_by_date(base_url, "benin", target_date)
 
-            if filename:  # File found
-                assert filename.startswith("benin-")
-                assert filename.endswith(".osm.pbf")
+        assert filename.startswith("benin-")
+        assert filename.endswith(".osm.pbf")
 
-                # Verify it's a reasonable match
-                file_date = parse_date_from_filename(filename)
-                assert file_date is not None
-                assert file_date <= target_date
+        # Verify it's a reasonable match
+        file_date = parse_date_from_filename(filename)
+        assert file_date is not None
+        assert file_date <= target_date
 
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
-
+    @pytest.mark.integration
     def test_download_historical_pbf(self):
         """Test downloading historical PBF file (integration test)"""
-        try:
-            base_url = "https://download.geofabrik.de/africa/"
-            target_date = datetime(2020, 1, 1)  # Should exist
-            data_dir = "earth_data_test_historical"
+        base_url = "https://download.geofabrik.de/africa/"
+        target_date = datetime(2020, 1, 1)  # Should exist
+        data_dir = "earth_data_test_historical"
 
-            # Try to download historical file
-            result = download_historical_pbf(
-                base_url,
-                "benin",
-                target_date,
-                update=True,
-                data_dir=data_dir,
-                progress_bar=False,
-            )
+        # Try to download historical file
+        result = download_historical_pbf(
+            base_url,
+            "benin",
+            target_date,
+            update=True,
+            data_dir=data_dir,
+            progress_bar=False,
+        )
 
-            if result:  # Download succeeded
-                assert os.path.exists(result)
-                assert result.endswith(".osm.pbf")
+        assert os.path.exists(result)
+        assert result.endswith(".osm.pbf")
 
-                # Clean up
-                if os.path.exists(result):
-                    os.remove(result)
-                # Also clean up MD5 file if it exists
-                md5_file = result + ".md5"
-                if os.path.exists(md5_file):
-                    os.remove(md5_file)
+        # Clean up
+        if os.path.exists(result):
+            os.remove(result)
+        # Also clean up MD5 file if it exists
+        md5_file = result + ".md5"
+        if os.path.exists(md5_file):
+            os.remove(md5_file)
 
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
-
+    @pytest.mark.integration
     def test_get_osm_data_historical(self):
         """Test the main get_osm_data function with historical date"""
-        try:
-            target_date = datetime(2020, 1, 1)
+        target_date = datetime(2020, 1, 1)
 
-            # This should work with historical data
-            df = get_osm_data(
-                region_str="malta",  # Use Malta as it's smaller
-                primary_name="power",
-                feature_name="line",
-                data_dir="earth_data_test_historical",
-                cached=False,  # Force fresh download
-                progress_bar=False,
-                target_date=target_date,
-            )
+        # This should work with historical data
+        df = get_osm_data(
+            region_str="malta",  # Use Malta as it's smaller
+            primary_name="power",
+            feature_name="line",
+            data_dir="earth_data_test_historical",
+            cached=False,  # Force fresh download
+            progress_bar=False,
+            target_date=target_date,
+        )
 
-            # Should return a dataframe
-            assert df is not None
+        # Should return a dataframe
+        assert df is not None
 
-        except Exception as e:
-            pytest.skip(f"Skipping integration test due to: {e}")
+
+class TestHistoricalUrlConstruction:
+    """Parametrized mocked tests for URL construction and filename parsing.
+
+    Covers: continent-level (benin), nested (europe/germany/bayern),
+    path-separator (us/california), with/without trailing slashes.
+    """
+
+    @pytest.fixture
+    def mock_requests_get(self, monkeypatch):
+        """Fixture to mock requests.get using monkeypatch"""
+        def _mock_get(*args, **kwargs):
+            mock_response = Mock()
+            mock_response.text = ""
+            mock_response.raise_for_status = Mock()
+            return mock_response
+        monkeypatch.setattr("earth_osm.gfk_download.requests.get", _mock_get)
+        return _mock_get
+
+    @pytest.mark.parametrize("region_base_url,region_id,expected_html_url,html_content,expected_filenames", [
+        # Continent-level region: benin
+        (
+            "https://download.geofabrik.de/africa/",
+            "benin",
+            "https://download.geofabrik.de/africa/benin.html",
+            '<a href="benin-250101.osm.pbf">benin-250101.osm.pbf</a>',
+            ["benin-250101.osm.pbf"],
+        ),
+        # Continent-level region without trailing slash
+        (
+            "https://download.geofabrik.de/africa",
+            "benin",
+            "https://download.geofabrik.de/africa/benin.html",
+            '<a href="benin-250101.osm.pbf">benin-250101.osm.pbf</a>',
+            ["benin-250101.osm.pbf"],
+        ),
+        # Nested region: europe/germany/bayern
+        (
+            "https://download.geofabrik.de/europe/germany/",
+            "europe/germany/bayern",
+            "https://download.geofabrik.de/europe/germany/bayern.html",
+            '<a href="bayern-250101.osm.pbf">bayern-250101.osm.pbf</a>',
+            ["bayern-250101.osm.pbf"],
+        ),
+        # Nested region without trailing slash
+        (
+            "https://download.geofabrik.de/europe/germany",
+            "europe/germany/bayern",
+            "https://download.geofabrik.de/europe/germany/bayern.html",
+            '<a href="bayern-250101.osm.pbf">bayern-250101.osm.pbf</a>',
+            ["bayern-250101.osm.pbf"],
+        ),
+        # Path-separator region: us/california (key test case from mnm-matin)
+        (
+            "https://download.geofabrik.de/north-america/us/",
+            "us/california",
+            "https://download.geofabrik.de/north-america/us/california.html",
+            '<a href="california-250101.osm.pbf">california-250101.osm.pbf</a>',
+            ["california-250101.osm.pbf"],
+        ),
+        # Path-separator region without trailing slash
+        (
+            "https://download.geofabrik.de/north-america/us",
+            "us/california",
+            "https://download.geofabrik.de/north-america/us/california.html",
+            '<a href="california-250101.osm.pbf">california-250101.osm.pbf</a>',
+            ["california-250101.osm.pbf"],
+        ),
+        # Multiple files case
+        (
+            "https://download.geofabrik.de/africa/",
+            "benin",
+            "https://download.geofabrik.de/africa/benin.html",
+            '<a href="benin-250101.osm.pbf">benin-250101.osm.pbf</a>\n'
+            '<a href="benin-240901.osm.pbf">benin-240901.osm.pbf</a>\n'
+            '<a href="benin-230801.osm.pbf">benin-230801.osm.pbf</a>',
+            ["benin-250101.osm.pbf", "benin-240901.osm.pbf", "benin-230801.osm.pbf"],
+        ),
+    ], ids=[
+        "benin-continent-slash",
+        "benin-continent-no-slash",
+        "bayern-nested-slash",
+        "bayern-nested-no-slash",
+        "us-california-slash",
+        "us-california-no-slash",
+        "benin-multiple-files",
+    ])
+    def test_url_construction_and_filename_parsing(
+        self, monkeypatch, region_base_url, region_id, expected_html_url, html_content, expected_filenames
+    ):
+        """Test that HTML URL is constructed correctly and filenames are parsed."""
+        mock_response = Mock()
+        mock_response.text = html_content
+        mock_response.raise_for_status = Mock()
+        mock_get = Mock(return_value=mock_response)
+        monkeypatch.setattr("earth_osm.gfk_download.requests.get", mock_get)
+
+        files = get_historical_files_from_directory(region_base_url, region_id)
+
+        # Verify the correct URL was called
+        mock_get.assert_called_once_with(expected_html_url, timeout=30)
+
+        # Verify filenames are extracted
+        actual_filenames = [f for f, _ in files]
+        assert actual_filenames == expected_filenames
+
+        # Verify dates are parsed correctly
+        for filename, date in files:
+            assert parse_date_from_filename(filename) is not None
+            assert isinstance(date, datetime)
+
+
+class TestFormatDateForFilenameBasename:
+    """Test that format_date_for_filename uses os.path.basename for region_id."""
+
+    @pytest.mark.parametrize("region_id,expected_prefix", [
+        ("benin", "benin"),
+        ("colombia", "colombia"),
+        ("europe/germany/bayern", "bayern"),
+        ("us/california", "california"),       # Key test: path separator → basename
+        ("north-america/us/virginia", "virginia"),
+    ])
+    def test_format_date_uses_basename(self, region_id, expected_prefix):
+        """format_date_for_filename should use os.path.basename(region_id)."""
+        date = datetime(2025, 9, 1)
+        result = format_date_for_filename(date, region_id)
+        assert result == f"{expected_prefix}-250901"
 
 
 def test_historical_functionality_basic():
