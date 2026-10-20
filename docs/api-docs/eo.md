@@ -83,5 +83,3 @@ Get OSM Data for a list of regions and features
 
 **returns:**
  dict of dataframes 
-
-

@@ -60,10 +60,39 @@ def convert_pd_to_gdf(pd_df):
     return gdf
 
 
+def filter_duplicate_elements(
+    records: Iterable[Dict[str, Any]], seen_elements: Set[tuple]
+) -> Iterator[Dict[str, Any]]:
+    for record in records:
+        element_id = record.get("id")
+        element_type = record.get("Type")
+        if element_id is None or element_type is None:
+            yield record
+            continue
+        if isinstance(element_id, float) and math.isnan(element_id):
+            yield record
+            continue
+        if isinstance(element_type, float) and math.isnan(element_type):
+            yield record
+            continue
+
+        element_key = (element_type, element_id)
+        if element_key not in seen_elements:
+            seen_elements.add(element_key)
+            yield record
+
+
 
 class _ExportTarget:
 
-    def __init__(self, region_list, primary_name, feature_list, data_dir, out_format):
+    def __init__(
+        self,
+        region_list,
+        primary_name,
+        feature_list,
+        data_dir,
+        out_format,
+    ):
         self.region_list = region_list
         self.primary_name = primary_name
         self.feature_list = feature_list
@@ -83,6 +112,7 @@ class _ExportTarget:
         self._non_null_counts: Dict[str, int] = {}
         self._total_rows = 0
         self._melt_threshold = 0.95
+        self._seen_elements: Set[tuple] = set()
 
         logger.debug(
             "File writer initialized with region_list: %s, primary_name: %s, feature_list: %s",
@@ -116,6 +146,7 @@ class _ExportTarget:
         self._seen_columns.clear()
         self._non_null_counts.clear()
         self._total_rows = 0
+        self._seen_elements.clear()
 
         return self
 
@@ -123,7 +154,8 @@ class _ExportTarget:
         return self.open()
 
     def __call__(self, rows):
-        for record in self._iter_records(rows):
+        records = filter_duplicate_elements(self._iter_records(rows), self._seen_elements)
+        for record in records:
             self._write_record(record)
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -394,4 +426,3 @@ class EarthOSMWriter:
             target.open()
             self._targets[slug_key] = target
         return target
-
