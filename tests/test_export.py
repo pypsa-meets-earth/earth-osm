@@ -2,6 +2,7 @@ import json
 import shutil
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from earth_osm import args as cli
@@ -68,6 +69,51 @@ def test_aggregate(shared_data_dir):
         out_aggregate=True,
     )
     assert True
+
+
+def test_aggregate_deduplicates_osm_elements(monkeypatch, tmp_path):
+    rows_by_region = {
+        "MT": [
+            {"id": 567955945, "Type": "way", "Region": "MT", "lonlat": [[1, 2], [3, 4]]},
+            {"id": 100, "Type": "way", "Region": "MT", "lonlat": [[2, 3], [4, 5]]},
+        ],
+        "IT": [
+            {
+                "id": 567955945,
+                "Type": "way",
+                "Region": "IT",
+                "lonlat": [[1.000001, 2], [3, 4]],
+            },
+            {"id": 100, "Type": "node", "Region": "IT", "lonlat": [[2, 3]]},
+        ],
+    }
+
+    def fake_process_region(region, *args, **kwargs):
+        return pd.DataFrame(rows_by_region[region.short])
+
+    monkeypatch.setattr("earth_osm.eo.process_region", fake_process_region)
+
+    save_osm_data(
+        region_list=["malta", "italy"],
+        primary_name="power",
+        feature_list=["line"],
+        out_format="csv",
+        out_aggregate=True,
+        out_dir=str(tmp_path),
+        data_dir=str(tmp_path),
+        mp=False,
+        stream_backend=False,
+    )
+
+    output_path = next((tmp_path / "out").glob("*.csv"))
+    result = pd.read_csv(output_path)
+    assert set(zip(result["Type"], result["id"])) == {
+        ("way", 567955945),
+        ("way", 100),
+        ("node", 100),
+    }
+    assert result.loc[result["id"] == 567955945, "Region"].tolist() == ["MT"]
+
 
 def test_small_count(shared_data_dir):
     save_osm_data(

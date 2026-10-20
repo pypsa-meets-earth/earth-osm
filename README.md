@@ -152,7 +152,7 @@ eo.save_osm_data(
     mp=True,
     data_dir='./earth_data',
     out_format=['csv', 'geojson'],
-    out_aggregate=False,
+    out_aggregate=True,
     data_source='geofabrik'  # or 'overpass'
 )
 ```
