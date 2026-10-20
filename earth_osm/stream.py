@@ -18,7 +18,7 @@ import os
 from dataclasses import dataclass
 from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Set, Union
 
-from earth_osm.extract import primary_entry_filter
+from earth_osm.extract import primary_entry_filter, resolve_worker_count
 from earth_osm.regions import download_region_pbf
 from earth_osm.osmpbf import Node, Relation, Way, fileformat_pb2, osmformat_pb2
 from earth_osm.osmpbf.file import iter_blocks, iter_primitive_block, read_blob
@@ -332,12 +332,12 @@ def _collect_targets_parallel(
     primary_name: str,
     feature_names: Sequence[str],
     block_descriptors: Sequence[tuple[int, bytes]],
+    worker_count: int,
 ) -> tuple[Dict[int, Node], List[Way], Set[int]]:
     total_blocks = len(block_descriptors)
     if total_blocks == 0:
         return {}, [], set()
 
-    worker_count = max(1, mp.cpu_count() - 1 or 1)
     feature_desc = _format_feature_descriptor(feature_names)
     logger.info(
         "Scanning %s for %s=%s candidates across %d blocks (workers=%d)",
@@ -403,13 +403,19 @@ def _collect_targets(
     primary_name: str,
     feature_selection: Union[str, Sequence[str]],
     *,
-    multiprocess: bool = False,
+    multiprocess: Union[bool, int] = False,
     block_descriptors: Optional[Sequence[tuple[int, bytes]]] = None,
 ) -> tuple[Dict[int, Node], List[Way], Set[int]]:
     feature_names = _normalize_feature_names(feature_selection)
     if multiprocess:
         descriptors = block_descriptors or _prepare_block_descriptors(filename)
-        return _collect_targets_parallel(filename, primary_name, feature_names, descriptors)
+        return _collect_targets_parallel(
+            filename,
+            primary_name,
+            feature_names,
+            descriptors,
+            worker_count=resolve_worker_count(multiprocess),
+        )
     return _collect_targets_sequential(filename, primary_name, feature_names)
 
 
@@ -457,6 +463,7 @@ def _collect_nodes_parallel(
     filename: str,
     required_node_ids: Set[int],
     block_descriptors: Sequence[tuple[int, bytes]],
+    worker_count: int,
 ) -> Dict[int, Node]:
     if not required_node_ids:
         return {}
@@ -465,7 +472,6 @@ def _collect_nodes_parallel(
     if total_blocks == 0:
         return {}
 
-    worker_count = max(1, mp.cpu_count() - 1 or 1)
     logger.info(
         "Capturing %d prerequisite nodes from %s using %d workers",
         len(required_node_ids),
@@ -523,12 +529,17 @@ def _collect_nodes(
     filename: str,
     required_node_ids: Set[int],
     *,
-    multiprocess: bool = False,
+    multiprocess: Union[bool, int] = False,
     block_descriptors: Optional[Sequence[tuple[int, bytes]]] = None,
 ) -> Dict[int, Node]:
     if multiprocess:
         descriptors = block_descriptors or _prepare_block_descriptors(filename)
-        return _collect_nodes_parallel(filename, required_node_ids, descriptors)
+        return _collect_nodes_parallel(
+            filename,
+            required_node_ids,
+            descriptors,
+            worker_count=resolve_worker_count(multiprocess),
+        )
     return _collect_nodes_sequential(filename, required_node_ids)
 
 
@@ -570,7 +581,7 @@ def stream_pbf_features(
     feature_name: str,
     region_code: str,
     *,
-    multiprocess: bool = False,
+    multiprocess: Union[bool, int] = False,
 ) -> Iterator[Dict[str, object]]:
     block_descriptors: Optional[Sequence[tuple[int, bytes]]] = None
     if multiprocess:
@@ -684,7 +695,7 @@ def stream_pbf_features_multi(
     feature_names: Sequence[str],
     region_code: str,
     *,
-    multiprocess: bool = False,
+    multiprocess: Union[bool, int] = False,
 ) -> Iterator[tuple[str, Dict[str, object]]]:
     normalized_features = _normalize_feature_names(feature_names)
     feature_label = _format_feature_descriptor(normalized_features)
@@ -829,7 +840,7 @@ def stream_region_features(
     data_dir: str,
     update: bool = False,
     progress_bar: bool = True,
-    multiprocess: bool = True,
+    multiprocess: Union[bool, int] = True,
     data_source: str = "geofabrik",
 ) -> Iterator[Dict[str, object]]:
     """Yield flattened feature dictionaries for a region.
@@ -842,8 +853,9 @@ def stream_region_features(
         data_dir: Directory that holds cached PBF archives.
         update: When ``True`` the PBF archive is refreshed before processing.
         progress_bar: Forwarded to the downloader.
-        multiprocess: Currently unused for streaming extraction. Included for
-            API compatibility with the legacy pipeline.
+        multiprocess: ``True`` to use all CPUs but one, ``False`` to
+            disable multiprocessing, or a positive integer to pin the
+            number of worker processes.
         data_source: Must be ``geofabrik``; other values are unsupported.
 
     Yields:
@@ -926,7 +938,7 @@ def _build_primary_cache(
     region_code: str,
     cache_path: str,
     *,
-    multiprocess: bool,
+    multiprocess: Union[bool, int],
 ) -> Iterator[Dict[str, object]]:
     temp_path = f"{cache_path}.tmp"
     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
@@ -972,7 +984,7 @@ def stream_cached_primary_features(
     region_code: str,
     cache_path: str,
     *,
-    multiprocess: bool = False,
+    multiprocess: Union[bool, int] = False,
     rebuild_cache: bool = False,
 ) -> Iterator[Dict[str, object]]:
     if rebuild_cache and os.path.exists(cache_path):
@@ -1014,7 +1026,7 @@ def stream_region_features_multi(
     data_dir: str,
     update: bool = False,
     progress_bar: bool = True,
-    multiprocess: bool = True,
+    multiprocess: Union[bool, int] = True,
     data_source: str = "geofabrik",
 ) -> Iterator[tuple[str, Dict[str, object]]]:
     """Yield feature-tagged rows for multiple features without primary caching."""
