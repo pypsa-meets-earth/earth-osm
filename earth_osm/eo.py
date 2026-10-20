@@ -9,7 +9,7 @@ This is the principal module of the earth_osm project.
 import logging
 import os
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 import pandas as pd
 

@@ -2,6 +2,9 @@ import json
 import shutil
 from pathlib import Path
 
+import pytest
+
+from earth_osm import args as cli
 from earth_osm.eo import save_osm_data
 from earth_osm.gfk_data import get_region_tuple
 from earth_osm.stream import stream_region_features
@@ -11,6 +14,30 @@ import earth_osm.stream as stream_module
 primary_name = "power"
 update = False
 mp = True
+
+
+@pytest.mark.parametrize(
+    "options, expected",
+    [([], True), (["--mp"], True), (["--no_mp"], False), (["--mp", "1"], 1), (["--mp", "2"], 2)],
+)
+def test_mp_cli_dispatch(monkeypatch, options, expected):
+    calls = []
+    monkeypatch.setattr(cli, "save_osm_data", lambda **kwargs: calls.append(kwargs))
+    args = cli.setup_parser().parse_args(
+        ["extract", "power", "--regions", "malta", "--features", "line", *options]
+    )
+    cli.handle_extract(args)
+    assert len(calls) == 1
+    assert calls[0]["mp"] == expected
+    assert type(calls[0]["mp"]) is type(expected)
+
+
+@pytest.mark.parametrize(
+    "options", [["--mp", "0"], ["--mp", "-1"], ["--mp", "1.5"], ["--mp", "--no_mp"]]
+)
+def test_mp_cli_invalid(options):
+    with pytest.raises(SystemExit):
+        cli.setup_parser().parse_args(["extract", "power", "--regions", "malta", *options])
 
 
 def test_no_aggregate(shared_data_dir):
@@ -151,5 +178,3 @@ def test_primary_cache_streaming(shared_data_dir, monkeypatch):
 # test aggregation by region (benin, germany)
 # test aggregation by feature (tower, line)
 # test no aggregation
- 
- 

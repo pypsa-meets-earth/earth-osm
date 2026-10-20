@@ -67,23 +67,14 @@ def _mp_processes(value: str) -> int:
 def _resolve_mp(args) -> Union[bool, int]:
     """Resolve the effective multiprocessing setting from parsed args.
 
-    ``--no_mp`` wins over ``--mp``; a bare ``--mp`` keeps the historic
-    auto behaviour (all CPUs but one) while "--mp N" pins the count.
+    The flags are mutually exclusive. A bare ``--mp`` keeps the historic
+    auto behaviour (all CPUs but one), while ``--mp N`` pins the count.
     """
     if args.no_mp:
         return False
     if args.mp is None:
         return True
     return args.mp
-
-
-def _format_mp_setting(mp) -> str:
-    """Human-readable label for a multiprocessing setting."""
-    if mp is False:
-        return "disabled"
-    if mp is True:
-        return "auto (all CPUs but one)"
-    return f"{mp} processes"
 
 
 def setup_parser() -> argparse.ArgumentParser:
@@ -167,12 +158,15 @@ def handle_extract(args):
     out_aggregate = 'feature' if args.agg_feature else 'region' if args.agg_region else False
     stream_backend = not args.legacy_pipeline
     mp = _resolve_mp(args)
+    mp_label = f'{mp} processes'
+    if isinstance(mp, bool):
+        mp_label = 'auto (all CPUs but one)' if mp else 'disabled'
 
     print('\n'.join([
         f'Primary Feature: {args.primary}',
         f'Sub Features: {" - ".join(feature_list)}',
         f'Regions: {" - ".join(args.regions)}',
-        f'Multiprocessing = {_format_mp_setting(mp)}',
+        f'Multiprocessing = {mp_label}',
         f'Update Data = {args.update}',
         f'Data Directory = {data_dir}',
         f'Output Directory = {out_dir}',
