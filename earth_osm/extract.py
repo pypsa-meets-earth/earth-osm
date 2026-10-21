@@ -71,6 +71,30 @@ def pool_file_query(filename, pool):
     return query_func
 
 
+def resolve_worker_count(multiprocess):
+    """Resolve the number of worker processes for a multiprocessing setting.
+
+    Args:
+        multiprocess: ``True`` to use all CPUs but one (historic default),
+            ``False`` to disable multiprocessing, or a positive integer
+            to pin the number of worker processes.
+
+    Returns:
+        Number of processes a multiprocessing.Pool should use.
+
+    Raises:
+        ValueError: If an integer below 1 is passed.
+    """
+    if multiprocess is True:
+        return max(1, mp.cpu_count() - 1 or 1)
+    if multiprocess is False or multiprocess is None:
+        return 1
+    worker_count = int(multiprocess)
+    if worker_count < 1:
+        raise ValueError(f"number of processes must be >= 1, got {worker_count}")
+    return worker_count
+
+
 def filter_pbf(filename, pre_filter, multiprocess=True):
     """
     Parallized pre-Filtering of OSM file by a pre_filter
@@ -81,12 +105,15 @@ def filter_pbf(filename, pre_filter, multiprocess=True):
                 Node: {primary_name: feature_list}, 
                 Way: {primary_name: feature_list},
                 Relation: {primary_name: feature_list}}
+        multiprocess: ``True`` to use all CPUs but one, ``False`` to run
+            single-process, or a positive integer to pin the number of
+            worker processes (see :func:`resolve_worker_count`)
 
     Returns:
         targetname: JSON-file
     """
 
-    with mp.Pool(processes=1 if not multiprocess else mp.cpu_count() - 1 or 1) as pool:
+    with mp.Pool(processes=resolve_worker_count(multiprocess)) as pool:
         file_query = pool_file_query(filename, pool)    
         primary_entries = list(file_query(primary_entry_filter, pre_filter)) #list of named  tuples eg. Node(id,tags, lonlat)
         

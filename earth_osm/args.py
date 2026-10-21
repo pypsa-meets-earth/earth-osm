@@ -12,7 +12,7 @@ import argparse
 import os
 import sys
 import resource
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from earth_osm.tagdata import get_feature_list, get_primary_list
 from earth_osm.eo import save_osm_data
@@ -47,6 +47,36 @@ class CustomHelpFormatter(argparse.HelpFormatter):
             parts = "\n".join(parts.split("\n")[1:])
         return parts
 
+
+def _mp_processes(value: str) -> int:
+    """argparse type for the optional process count of "--mp".
+    """
+    try:
+        processes = int(value)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError(
+            f"invalid number of processes: {value!r} (expected a positive integer)"
+        )
+    if processes < 1:
+        raise argparse.ArgumentTypeError(
+            f"number of processes must be >= 1, got {processes}"
+        )
+    return processes
+
+
+def _resolve_mp(args) -> Union[bool, int]:
+    """Resolve the effective multiprocessing setting from parsed args.
+
+    The flags are mutually exclusive. A bare ``--mp`` keeps the historic
+    auto behaviour (all CPUs but one), while ``--mp N`` pins the count.
+    """
+    if args.no_mp:
+        return False
+    if args.mp is None:
+        return True
+    return args.mp
+
+
 def setup_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description='Earth-OSM by PyPSA-meets-Earth',
@@ -69,7 +99,18 @@ def setup_extract_parser(subparsers):
     extract_parser.add_argument('--regions', nargs="+", type=str, required=True, help='Region Identifier(s)')
     extract_parser.add_argument('--features', nargs="*", type=str, help='Sub-Features')
     extract_parser.add_argument('--update', action='store_true', help='Update Data')
-    extract_parser.add_argument('--no_mp', action='store_true', help='Disable Multiprocessing')
+    mp_group = extract_parser.add_mutually_exclusive_group()
+    mp_group.add_argument(
+        '--mp',
+        dest='mp',
+        nargs='?',
+        const=True,
+        default=None,
+        type=_mp_processes,
+        metavar='N',
+        help='Enable multiprocessing, optionally limited to N processes (default: all CPUs but one)',
+    )
+    mp_group.add_argument('--no_mp', dest='no_mp', action='store_true', help='Disable Multiprocessing')
     extract_parser.add_argument('--data_dir', type=str, help='Earth Data Directory')
     extract_parser.add_argument('--out_dir', type=str, help='Earth Output Directory')
     extract_parser.add_argument('--out_format', nargs="*", type=str, choices=['csv', 'geojson'], default=['csv', 'geojson'], help='Export options')
@@ -115,12 +156,16 @@ def handle_extract(args):
 
     out_aggregate = 'feature' if args.agg_feature else 'region' if args.agg_region else False
     stream_backend = not args.legacy_pipeline
+    mp = _resolve_mp(args)
+    mp_label = f'{mp} processes'
+    if isinstance(mp, bool):
+        mp_label = 'auto (all CPUs but one)' if mp else 'disabled'
 
     print('\n'.join([
         f'Primary Feature: {args.primary}',
         f'Sub Features: {" - ".join(feature_list)}',
         f'Regions: {" - ".join(args.regions)}',
-        f'Multiprocessing = {not args.no_mp}',
+        f'Multiprocessing = {mp_label}',
         f'Update Data = {args.update}',
         f'Data Directory = {data_dir}',
         f'Output Directory = {out_dir}',
@@ -140,7 +185,7 @@ def handle_extract(args):
         data_dir=data_dir,
         out_dir=out_dir,
         update=args.update,
-        mp=not args.no_mp,
+        mp=mp,
         out_format=set(args.out_format),
         out_aggregate=out_aggregate,
         data_source=args.source,

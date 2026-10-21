@@ -110,6 +110,7 @@ earth_osm extract <primary> --regions <region1> <region2> ... [options]
 |----------|-------------|---------|
 | `--features` | Specify sub-features of the primary feature | All features |
 | `--update` | Update existing data | False |
+| `--mp [N]` | Enable multiprocessing, optionally capped at `N` processes | Auto (all CPUs but one) |
 | `--no_mp` | Disable multiprocessing | False (MP enabled) |
 | `--data_dir` | Path to data directory | './earth_data' |
 | `--out_dir` | Path to output directory | Same as data_dir |

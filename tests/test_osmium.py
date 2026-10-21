@@ -1,7 +1,57 @@
 import os
+import json
 import osmium
 import pandas as pd
+import pytest
+from earth_osm import extract, stream
 from earth_osm.eo import get_osm_data
+from earth_osm.osmpbf import Node, Relation, Way
+
+
+@pytest.mark.parametrize("setting, workers", [(True, 3), (False, 1), (1, 1), (2, 2)])
+def test_extraction_worker_limits(monkeypatch, tmp_path, setting, workers):
+    path = str(tmp_path / "tiny.osm.pbf")
+    with osmium.SimpleWriter(path) as writer:
+        writer.add_node(osmium.osm.mutable.Node(id=1, location=(1, 2)))
+        writer.add_node(osmium.osm.mutable.Node(id=2, location=(3, 4)))
+        for identifier, feature in [(10, "line"), (11, "cable")]:
+            writer.add_way(
+                osmium.osm.mutable.Way(id=identifier, nodes=[1, 2], tags={"power": feature})
+            )
+
+    counts = []
+    original_pool = extract.mp.Pool
+
+    def recording_pool(processes=None, **kwargs):
+        counts.append(processes)
+        return original_pool(processes=processes, **kwargs)
+
+    monkeypatch.setattr(extract.mp, "cpu_count", lambda: 4)
+    monkeypatch.setattr(extract.mp, "Pool", recording_pool)
+    for function, selection in [
+        (stream.stream_pbf_features, "line"),
+        (stream.stream_pbf_features_multi, ["line", "cable"]),
+    ]:
+        expected = list(function(path, "power", selection, "MT", multiprocess=False))
+        counts.clear()
+        actual = list(function(path, "power", selection, "MT", multiprocess=setting))
+        assert len(actual) == (1 if selection == "line" else 2)
+        assert sorted(json.dumps(row, sort_keys=True) for row in actual) == sorted(
+            json.dumps(row, sort_keys=True) for row in expected
+        )
+        assert counts == ([] if setting is False else [workers, workers])
+
+    prefilter = {kind: {"power": ["line"]} for kind in (Node, Way, Relation)}
+    expected = extract.filter_pbf(path, prefilter, multiprocess=False)
+    counts.clear()
+    assert extract.filter_pbf(path, prefilter, multiprocess=setting) == expected
+    assert counts == [workers]
+
+
+@pytest.mark.parametrize("setting", [0, -1])
+def test_invalid_worker_count(setting):
+    with pytest.raises(ValueError):
+        extract.resolve_worker_count(setting)
 
 
 class PowerLineHandler(osmium.SimpleHandler):

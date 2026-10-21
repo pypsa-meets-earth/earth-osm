@@ -218,7 +218,9 @@ def save_osm_data(
         primary_name: primary feature to get data for
         feature_list: list of features to get data for
         update: update data
-        mp: use multiprocessing
+        mp: use multiprocessing: ``True`` for all CPUs but one, ``False``
+            to disable, or a positive integer to pin the number of
+            processes
         stream_backend: when ``True`` (default) use the streaming pipeline for
             GeoFabrik sources; set to ``False`` to revert to the legacy
             in-memory pipeline (primarily for benchmarking)
